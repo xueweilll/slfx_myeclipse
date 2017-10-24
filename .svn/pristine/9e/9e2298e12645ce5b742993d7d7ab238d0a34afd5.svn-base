@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialResolveMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialResolve" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="ISID" property="isid" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="CONTENT" property="content" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+    <resultMap id="BaseResultMap1" type="com.benqzl.pojo.patrol.PatrolSpecialResolve" >
+    
+    
+    
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="ISID" property="isid" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="CONTENT" property="content" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+       <association property="createuser" javaType="com.benqzl.pojo.system.User">
+    <id property="id" column="USERID"/>
+    <result property="username" column="UNAME"/>
+    <association property="employee" javaType="com.benqzl.pojo.system.Employee">
+    <id property="id" column="ID"/>
+    <result property="name" column="ENAME"/>
+    </association>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, ISID, CREATER, CREATETIME, CONTENT, REMARK
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_SPECIAL_RESOLVE
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findegpatroldepartment" resultMap="BaseResultMap1" parameterType="java.util.Map">
+      select B.* from
+		(select A.*,ROWNUM RN from(
+		select
+		p.ID as ID, p.isid as ISID, 
+		p.CREATER as CREATER, 
+		p.CREATETIME as CREATETIME, 
+		p.CONTENT as CONTENT, 
+		p.REMARK as REMARK,
+		e.name as ENAME
+		from PL_SPECIAL_RESOLVE p
+		left join SYS_USER u on u.USERID=p.creater
+		left join sys_employee e on e.id=u.employeeid
+		left join sys_department d on d.id=e.departmentid
+		 left join 
+	    (select detail.did,detail.rid from pl_special_resolve_details detail
+	     left join sys_department d on d.id=detail.did) details on
+	    details.rid=p.id
+		where 1 = 1
+<!-- 		 <if test="createrid != null and createrid !='' and createrid !='0'.toString()" >
+		and s.createrid = #{createrid,jdbcType=VARCHAR}
+		</if>  -->
+		and u.userid=#{user,jdbcType=VARCHAR}
+		<if test="begintime != null and begintime!=''" >
+		and p.CREATETIME &gt;= #{begintime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and p.CREATETIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+		</if>
+	<!-- 	<if test="isid != null and stationid!=''" >
+		and p.isid = #{stationid,jdbcType=VARCHAR}
+		</if> -->
+		<!-- 取得分解单对应部门的isid -->
+		<if test="state =='0'.toString()">
+		and p.isid in(#{isid,jdbcType=VARCHAR})
+		</if>
+		<if test="state !='0'.toString() and state !=''">
+		and p.isid in(#{isid,jdbcType=VARCHAR})
+		</if>
+		order by p.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		where RN &gt; #{p1}
+  </select>
+  
+    <select id="findegpatroldepartmentcount" resultType="java.lang.Integer" parameterType="java.util.Map">
+      select count(*) from
+		(select A.*,ROWNUM RN from(
+		select
+		p.ID as ID, p.isid as ISID, 
+		p.CREATER as CREATER, 
+		p.CREATETIME as CREATETIME, 
+		p.CONTENT as CONTENT, 
+		p.REMARK as REMARK,
+		e.name as ENAME
+		from PL_SPECIAL_RESOLVE p
+		left join SYS_USER u on u.USERID=p.creater
+		left join sys_employee e on e.id=u.employeeid
+	    left join sys_department d on d.id=e.departmentid
+	    left join 
+	    (select detail.did,detail.rid from pl_special_resolve_details detail
+	     left join sys_department d on d.id=detail.did) details on
+	    details.rid=p.id
+		where 1 = 1
+<!-- 		 <if test="createrid != null and createrid !='' and createrid !='0'.toString()" >
+		and s.createrid = #{createrid,jdbcType=VARCHAR}
+		</if>  -->
+		and u.userid=#{user,jdbcType=VARCHAR}
+		<if test="begintime != null and begintime!=''" >
+		and p.CREATETIME &gt;= #{begintime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and p.CREATETIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+		</if>
+	<!-- 	<if test="isid != null and stationid!=''" >
+		and p.isid = #{stationid,jdbcType=VARCHAR}
+		</if> -->
+		<if test="state =='0'.toString()">
+		and p.isid in(#{isid,jdbcType=VARCHAR})
+		</if>
+		<if test="state !='0'.toString()">
+		and p.isid in(#{isid,jdbcType=VARCHAR})
+		</if>
+		order by p.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		where RN &gt; #{p1}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_SPECIAL_RESOLVE
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialResolve" >
+    insert into PL_SPECIAL_RESOLVE (ID, ISID, CREATER, 
+      CREATETIME, CONTENT, REMARK
+      )
+    values (#{id,jdbcType=VARCHAR}, #{isid,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{content,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialResolve" >
+    insert into PL_SPECIAL_RESOLVE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="isid != null" >
+        ISID,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="content != null" >
+        CONTENT,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="isid != null" >
+        #{isid,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialResolve" >
+    update PL_SPECIAL_RESOLVE
+    <set >
+      <if test="isid != null" >
+        ISID = #{isid,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="content != null" >
+        CONTENT = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialResolve" >
+    update PL_SPECIAL_RESOLVE
+    set ISID = #{isid,jdbcType=VARCHAR},
+      CREATER = #{creater,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      CONTENT = #{content,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="findstation" resultType="com.benqzl.pojo.system.Station">
+  	select * from sys_station where isdel='0'
+  </select>
+  
+  <select id="findegpatrolById" parameterType="String" resultType="com.benqzl.pojo.patrol.PatrolSpecialResolve">
+  	select * from PL_SPECIAL_RESOLVE
+  	where isid=#{isid}
+  </select>
+  <!-- 查询部门 -->
+  <resultMap type="com.benqzl.pojo.system.Department" id="DepartmentResultMap">
+  	<id column="id" property="id"/>
+  	<result column="pareid" property="pareid"/>
+  	<result column="name" property="name"/>
+  	<result column="telephone" property="telephone"/>
+  	<result column="remark" property="remark"/>
+  	<result column="createtime" property="createtime"/>
+  	<result column="edittime" property="edittime"/>
+  	<result column="isdel" property="isdel"/>
+  	<collection property="employeeList" ofType="com.benqzl.pojo.system.Employee">
+  		<id column="employeeid" property="id"/>
+  		<result column="departmentid" property="departmentid"/>
+		<result column="name" property="name"/>
+		<result column="birthday" property="birthday"/>
+		<result column="position" property="position"/>
+		<result column="telephone" property="telephone"/>
+		<result column="phone" property="phone"/>
+		<result column="sex" property="sex"/>
+		<result column="age" property="age"/>
+		<result column="createtime" property="createtime"/>
+		<result column="edittime" property="edittime"/>
+		<result column="isdel" property="isdel"/>
+		<result column="leve" property="leve"/>
+		<result column="sid" property="sid"/>
+  		<association property="user" javaType="com.benqzl.pojo.system.User">
+  			<id column="userid" property="userid"/>
+  			<result column="username" property="username"/>
+  			<result column="userpwd" property="userpwd"/>
+  			<result column="sex" property="sex"/>
+  			<result column="age" property="age"/>
+  			<result column="email" property="email"/>
+  			<result column="createtime" property="createtime"/>
+  			<result column="edittime" property="edittime"/>
+  			<result column="employeeid" property="employeeid"/>
+  		</association>
+  	</collection>
+  </resultMap>
+ <select id="selectDepartmentResultMap" resultMap="DepartmentResultMap" parameterType="java.util.Map">
+	  <!-- select * from sys_department d where 1=1 -->
+	  select * from SYS_DEPARTMENT where isdel = 0 and id in (
+       select distinct departmentid from sys_station group by departmentid
+		)
+	  <if test="rid !=null">
+	  	and id in(select did from pl_special_resolve_details where rid= #{rid})
+	  </if>
+	  
+ </select>
+ 
+ <delete id="deleteByIsid" parameterType="java.lang.String" >
+    delete from PL_SPECIAL_RESOLVE
+    where isid = #{isid,jdbcType=VARCHAR}
+  </delete>
+</mapper>

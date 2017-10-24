@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolPeopleMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolPeople">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+		<result column="OPERATER" property="operater" jdbcType="VARCHAR" />
+		<result column="OPERATETIME" property="operatetime" jdbcType="TIMESTAMP" />
+		<result column="TYPE" property="type" jdbcType="DECIMAL" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, STATE, PATROLID, OPERATER, OPERATETIME, TYPE
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_PATROL_PEOPLE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from PL_PATROL_PEOPLE
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolPeople">
+		insert into PL_PATROL_PEOPLE (ID, STATE, PATROLID,
+		OPERATER, OPERATETIME, TYPE
+		)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.state,jdbcType=DECIMAL},
+			#{item.patrolid,jdbcType=VARCHAR},
+			#{item.operater,jdbcType=VARCHAR}, #{item.operatetime,jdbcType=TIMESTAMP}, #{item.type,jdbcType=DECIMAL}
+			from dual)
+		</foreach>
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolPeople">
+		insert into PL_PATROL_PEOPLE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="patrolid != null">
+				PATROLID,
+			</if>
+			<if test="operater != null">
+				OPERATER,
+			</if>
+			<if test="operatetime != null">
+				OPERATETIME,
+			</if>
+			<if test="type != null">
+				TYPE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="patrolid != null">
+				#{patrolid,jdbcType=VARCHAR},
+			</if>
+			<if test="operater != null">
+				#{operater,jdbcType=VARCHAR},
+			</if>
+			<if test="operatetime != null">
+				#{operatetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolPeople">
+		update PL_PATROL_PEOPLE
+		<set>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="patrolid != null">
+				PATROLID = #{patrolid,jdbcType=VARCHAR},
+			</if>
+			<if test="operater != null">
+				OPERATER = #{operater,jdbcType=VARCHAR},
+			</if>
+			<if test="operatetime != null">
+				OPERATETIME = #{operatetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="type != null">
+				TYPE = #{type,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolPeople">
+		update PL_PATROL_PEOPLE
+		set STATE = #{state,jdbcType=DECIMAL},
+		PATROLID = #{patrolid,jdbcType=VARCHAR},
+		OPERATER = #{operater,jdbcType=VARCHAR},
+		OPERATETIME = #{operatetime,jdbcType=TIMESTAMP},
+		TYPE = #{type,jdbcType=DECIMAL}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

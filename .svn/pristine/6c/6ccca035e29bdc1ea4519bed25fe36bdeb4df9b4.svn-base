@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.SelfDispatchDepartmentMapper">
+	<resultMap id="BaseResultMap"
+		type="com.benqzl.pojo.dispatch.SelfDispatchDepartment">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="SDID" property="sdid" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="BaseResultMap1"
+		type="com.benqzl.pojo.dispatch.SelfDispatchDepartment">
+		<id column="sddid" property="id" jdbcType="VARCHAR" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<association property="department" javaType="com.benqzl.pojo.system.Department">
+			<id column="DEPARTMENTID" property="id" jdbcType="VARCHAR" />
+			<result column="NAME" property="name" jdbcType="VARCHAR" />
+		</association>
+		<association property="SendUser" javaType="com.benqzl.pojo.system.User">
+			<id column="SENDER" property="userid" />
+			<result column="sendUserName" property="username" jdbcType="VARCHAR" />
+		</association>
+		<association property="sd"
+			javaType="com.benqzl.pojo.dispatch.SelfDispatch">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="PROMOTER" property="promoter" jdbcType="VARCHAR" />
+			<result column="PROMOTETIME" property="promotetime" jdbcType="TIMESTAMP" />
+			<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+			<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+			<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+			<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+			<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+			<result column="COMPLETETIME" property="completetime" />
+			<result column="CODE" property="code" jdbcType="VARCHAR" />
+			<result column="ldapprovaltime" property="ldapprovaltime"
+				jdbcType="TIMESTAMP" />
+			<result column="departmentaudittime" property="departmentaudittime"
+				jdbcType="TIMESTAMP" />
+			<association property="user" javaType="com.benqzl.pojo.system.User">
+				<id column="PROMOTER" property="userid" />
+				<result column="PROMOTEUSERNAME" property="username"
+					jdbcType="VARCHAR" />
+			</association>
+			<!-- <association property="departmentid" javaType="com.benqzl.pojo.system.Department"> 
+				<id column="DEPARTMENTID" property="departmentid"/> <result column="DEPARTMENTID" 
+				property="departmentid" jdbcType="VARCHAR"/> </association> -->
+			<association property="CreateUser" javaType="com.benqzl.pojo.system.User">
+				<id column="CREATER" property="userid" />
+				<result column="createrName" property="username" jdbcType="VARCHAR" />
+			</association>
+		<!-- 	<association property="SendUser" javaType="com.benqzl.pojo.system.User">
+				<id column="SENDER" property="userid" />
+				<result column="sendUserName" property="username" jdbcType="VARCHAR" />
+			</association> -->
+			<association property="Auditor" javaType="com.benqzl.pojo.system.User">
+				<id column="DEPARTMENTAUDITOR" property="userid" />
+				<result column="auditName" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="LdApproval" javaType="com.benqzl.pojo.system.User">
+				<id column="ldapproval" property="userid" />
+				<result column="approvalName" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+				<id column="id" property="id" />
+				<result column="ENAME" property="name" />
+			</association>
+			<collection property="instructions"
+				ofType="com.benqzl.pojo.dispatch.SelfDispatchInstructions">
+				<id column="INSTRUCTIONS_ID" property="id" />
+				<result column="ID" property="sdid" jdbcType="VARCHAR" />
+				<result column="INSTRUCTION" property="instruction" jdbcType="DECIMAL" />
+				<result column="GATEOPERATETIME" property="gateoperatetime"
+					jdbcType="TIMESTAMP" />
+				<result column="UNITOPERATETIME" property="unitoperatetime"
+					jdbcType="TIMESTAMP" />
+				<result column="ISTATE" property="state" jdbcType="DECIMAL" />
+			</collection>
+			<collection property="stations"
+				ofType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+				<id column="STATIONS_ID" property="id" />
+				<result column="ID" property="sdid" jdbcType="VARCHAR" />
+				<result column="SID" property="sid" jdbcType="VARCHAR" />
+				<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+				<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+				<result column="SSTATE" property="state" jdbcType="DECIMAL" />
+				<association property="station" javaType="com.benqzl.pojo.system.Station">
+					<result column="NAME" property="name" jdbcType="VARCHAR" />
+				</association>
+			</collection>
+		</association>
+	</resultMap>
+		<resultMap type="com.benqzl.pojo.dispatch.SelfDispatchDepartment"
+		id="BaseResultMap3">
+		<id column="DEPARTMENTID" property="id" jdbcType="VARCHAR" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="SDID" property="sdid" jdbcType="VARCHAR" />
+		<association javaType="com.benqzl.pojo.dispatch.SelfDispatch" property="sd">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="PROMOTER" property="promoter" jdbcType="VARCHAR" />
+			<result column="PROMOTETIME" property="promotetime" jdbcType="TIMESTAMP" />
+			<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+			<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+			<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+			<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+			<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+			<result column="COMPLETETIME" property="completetime" />
+			<result column="CODE" property="code" jdbcType="VARCHAR" />
+			<result column="ldapprovaltime" property="ldapprovaltime"
+				jdbcType="TIMESTAMP" />
+			<result column="departmentaudittime" property="departmentaudittime"
+				jdbcType="TIMESTAMP" />
+			<association property="user" javaType="com.benqzl.pojo.system.User">
+				<id column="PROMOTER" property="userid" />
+				<result column="PROMOTEUSERNAME" property="username"
+					jdbcType="VARCHAR" />
+			</association>
+			<association property="CreateUser" javaType="com.benqzl.pojo.system.User">
+				<id column="CREATER" property="userid" />
+				<result column="createrName" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="SendUser" javaType="com.benqzl.pojo.system.User">
+				<id column="SENDER" property="userid" />
+				<result column="sendUserName" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="Auditor" javaType="com.benqzl.pojo.system.User">
+				<id column="DEPARTMENTAUDITOR" property="userid" />
+				<result column="auditName" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="LdApproval" javaType="com.benqzl.pojo.system.User">
+				<id column="ldapproval" property="userid" />
+				<result column="approvalName" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+				<id column="id" property="id" />
+				<result column="ENAME" property="name" />
+			</association>
+			<collection property="instructions"
+				ofType="com.benqzl.pojo.dispatch.SelfDispatchInstructions">
+				<id column="INSTRUCTIONS_ID" property="id" />
+				<result column="ID" property="sdid" jdbcType="VARCHAR" />
+				<result column="INSTRUCTION" property="instruction" jdbcType="DECIMAL" />
+				<result column="GATEOPERATETIME" property="gateoperatetime"
+					jdbcType="TIMESTAMP" />
+				<result column="UNITOPERATETIME" property="unitoperatetime"
+					jdbcType="TIMESTAMP" />
+				<result column="ISTATE" property="state" jdbcType="DECIMAL" />
+			</collection>
+			<collection property="stations"
+				ofType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+				<id column="STATIONS_ID" property="id" />
+				<result column="ID" property="sdid" jdbcType="VARCHAR" />
+				<result column="SID" property="sid" jdbcType="VARCHAR" />
+				<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+				<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+				<result column="SSTATE" property="state" jdbcType="DECIMAL" />
+				<association property="station" javaType="com.benqzl.pojo.system.Station">
+					<result column="NAME" property="name" jdbcType="VARCHAR" />
+				</association>
+			</collection>
+		</association>		
+	</resultMap>
+	
+		<sql id="Base_Column_List3">
+		d.ID as ID, d.PROMOTER as PROMOTER, d.PROMOTETIME as
+		PROMOTETIME, d.SENDER
+		as SENDER, d.SENDTIME as SENDTIME, d.MEMO as
+		MEMO, d.CREATER as
+		CREATER, d.CREATETIME as CREATETIME, d.STATE as
+		STATE, d.COMPLETETIME
+		as COMPLETETIME,
+		d.CODE as CODE,s.SDID as SSDID,
+		s.SID as SID, s.RECEIPTER as RECEIPTER,
+		s.RECEIPTTIME as RECEIPTTIME,
+		s.STATE as STATE,t.name as NAME
+		,s.id as STATIONS_ID
+	</sql>
+	<sql id="Base_Column_List">
+		ID, DEPARTMENTID, SENDER, SENDTIME, STATE, SDID
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_SD_DEPARTMENT
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from DIS_SD_DEPARTMENT
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.dispatch.SelfDispatchDepartment">
+		insert into DIS_SD_DEPARTMENT (ID, DEPARTMENTID, SENDER,
+		SENDTIME, STATE, SDID)
+		values (#{id,jdbcType=VARCHAR}, #{departmentid,jdbcType=VARCHAR},
+		#{sender,jdbcType=VARCHAR},
+		#{sendtime,jdbcType=DATE}, #{state,jdbcType=DECIMAL}, #{sdid,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertDepartment" parameterType="com.benqzl.pojo.dispatch.SelfDispatchDepartment">
+		insert into dis_sd_department(id,departmentid,
+		state,sdid)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR},
+			#{item.departmentid,jdbcType=VARCHAR},
+			#{item.state,jdbcType=VARCHAR},#{item.sdid,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>
+
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.SelfDispatchDepartment">
+		insert into DIS_SD_DEPARTMENT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="departmentid != null">
+				DEPARTMENTID,
+			</if>
+			<if test="sender != null">
+				SENDER,
+			</if>
+			<if test="sendtime != null">
+				SENDTIME,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="sdid != null">
+				SDID,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="departmentid != null">
+				#{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="sender != null">
+				#{sender,jdbcType=VARCHAR},
+			</if>
+			<if test="sendtime != null">
+				#{sendtime,jdbcType=DATE},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="sdid != null">
+				#{sdid,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.SelfDispatchDepartment">
+		update DIS_SD_DEPARTMENT
+		<set>
+			<if test="departmentid != null">
+				DEPARTMENTID = #{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="sender != null">
+				SENDER = #{sender,jdbcType=VARCHAR},
+			</if>
+			<if test="sendtime != null">
+				SENDTIME = #{sendtime,jdbcType=DATE},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="sdid != null">
+				SDID = #{sdid,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.SelfDispatchDepartment">
+		update DIS_SD_DEPARTMENT
+		set DEPARTMENTID = #{departmentid,jdbcType=VARCHAR},
+		SENDER = #{sender,jdbcType=VARCHAR},
+		SENDTIME = #{sendtime,jdbcType=DATE},
+		STATE = #{state,jdbcType=DECIMAL},
+		SDID = #{sdid,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findByPage" resultMap="BaseResultMap1"
+		parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from( select
+		d.ID, d.PROMOTER,
+		d.PROMOTETIME, d.SENDER, d.SENDTIME, d.MEMO, d.CREATER,
+		d.CREATETIME,
+		d.STATE, d.COMPLETETIME,
+		d.CODE, d.departmentauditor,
+		d.departmentaudittime, d.ldapproval,d.ldapprovaltime,u.username as
+		PROMOTEUSERNAME
+		,uc.username as createrName,us.username as
+		sendUserName, ud.username as auditName, ul.username as approvalName,
+		depatment.departmentid as DEPARTMENTID,depatment.id as
+		sddid,sysdepartment.name
+		from
+		DIS_SELFDISPATCH d
+		left join (select
+		u.userid,e.name as username
+		from
+		sys_user u left join sys_employee e on
+		u.employeeid = e.id) u on
+		u.userid=d.Promoter
+		left join
+		(select
+		u.userid,e.name as username from
+		sys_user u left join sys_employee e on
+		u.employeeid = e.id) uc on
+		uc.userid= d.creater
+		left join (select
+		u.userid,e.name as username from
+		sys_user u left join sys_employee e on
+		u.employeeid = e.id) us on
+		us.userid
+		= d.SENDER
+		left join (select
+		u.userid, e.name as username
+		from sys_user u
+		left join sys_employee e
+		on
+		u.employeeid = e.id) ud
+		on ud.userid = d.departmentauditor
+		left join
+		(select u.userid, e.name as username
+		from sys_user u
+		left join
+		sys_employee e
+		on u.employeeid = e.id) ul
+		on ul.userid = d.ldapproval
+		left join dis_sd_department depatment on
+		depatment.sdid=d.id
+		left join
+		sys_department sysdepartment on
+		sysdepartment.id=depatment.departmentid
+		where d.state != 9 and d.state >= 4 and d.state != 5 
+		<if test="rpid != null">
+			<!-- and d.id in( <foreach collection="rpid" item="item" index="index" 
+				separator="union all"> (select #{item,jdbcType=VARCHAR} from dual) </foreach> 
+				) -->
+			and ${rpid}
+		</if>
+		<if test="code != null">
+			and d.code like '%${code}%'
+		</if>
+		<if test="promoter != null">
+			and u.username like '%${promoter}%'
+		</if>
+		<if test="begintime != null">
+			and d.promotetime &gt; to_date('${begintime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="endtime != null">
+			and d.promotetime &lt; to_date('${endtime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="state != null">
+			and d.state =#{state}
+		</if>
+		order by CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		)
+		where RN &gt;#{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		DIS_SELFDISPATCH d
+		left join dis_sd_department
+		depatment on
+		depatment.sdid=d.id
+		left join sys_department sysdepartment on
+		sysdepartment.id=depatment.departmentid
+		where d.state != 9 and d.state >= 4 and d.state != 5
+		<if test="rpid != null">
+			<!-- and d.id in( <foreach collection="rpid" item="item" index="index" 
+				separator="union all"> (select #{item,jdbcType=VARCHAR} from dual) </foreach> 
+				) -->
+			and ${rpid}
+		</if>
+		<if test="code != null">
+			and d.code like '%${code}%'
+		</if>
+		<if test="begintime != null">
+			and d.promotetime &gt; to_date('${begintime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="endtime != null">
+			and d.promotetime &lt; to_date('${endtime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="state != null">
+			and d.state =#{state}
+		</if>
+	</select>
+	<update id="updateById" parameterType="java.util.Map">
+		update dis_sd_department
+		<set>
+			state=1,
+			sender=#{sender,jdbcType=VARCHAR},
+			sendtime=sysdate
+		</set>
+		where SDID =#{sdid,jdbcType=VARCHAR}
+		and departmentid =
+		#{departmentid,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="findByPage1" resultMap="BaseResultMap3" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from( select
+		d.ID, d.PROMOTER,
+		d.PROMOTETIME, d.SENDER, d.SENDTIME, d.MEMO, d.CREATER,
+		d.CREATETIME,
+		d.STATE, d.COMPLETETIME,
+		d.CODE, d.departmentauditor,
+		d.departmentaudittime, d.ldapproval,d.ldapprovaltime,u.username as
+		PROMOTEUSERNAME
+		,uc.username as createrName,us.username as
+		sendUserName, ud.username as auditName, ul.username as approvalName,
+                       depatment.id as departmentid
+		from
+		DIS_SELFDISPATCH d
+		left join (select u.userid,e.name as username
+		from
+		sys_user u left join sys_employee e on u.employeeid = e.id) u on
+		u.userid=d.Promoter
+		left join
+		(select u.userid,e.name as username from
+		sys_user u left join sys_employee e on u.employeeid = e.id) uc on
+		uc.userid= d.creater
+		left join (select u.userid,e.name as username from
+		sys_user u left join sys_employee e on u.employeeid = e.id) us on
+		us.userid
+		= d.SENDER
+		left join (select u.userid, e.name as username
+		from sys_user u
+		left join sys_employee e
+		on u.employeeid = e.id) ud
+		on ud.userid = d.departmentauditor
+		left join (select u.userid, e.name as username
+		from sys_user u
+		left join sys_employee e
+		on u.employeeid = e.id) ul
+		on ul.userid = d.ldapproval
+		left join dis_sd_department depatment on
+		depatment.sdid=d.id
+		left join sys_department sysdepartment on
+		sysdepartment.id=depatment.departmentid
+		where d.state != 9 and d.state !=0
+		<if test="bm !=null">
+		 and d.state !=3
+		</if>		
+		<if test="rpid != null">
+			and d.id in(
+			<foreach collection="rpid" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+		</if>
+		<if test="code != null">
+			and d.code like '%${code}%'
+		</if>
+		<if test="promoter != null">
+			and u.username like '%${promoter}%'
+		</if>
+		<if test="begintime != null">
+			and d.promotetime &gt; to_date('${begintime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="endtime != null">
+			and d.promotetime &lt; to_date('${endtime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="state != null">
+			and d.state =#{state}
+		</if>
+		order by CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		)
+		where RN &gt;#{p1}
+	</select>
+</mapper>

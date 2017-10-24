@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.MenuMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Menu" >
+    <id column="MENUID" property="menuid" jdbcType="VARCHAR" />
+    <result column="MENUNAME" property="menuname" jdbcType="VARCHAR" />
+    <result column="MENUICON" property="menuicon" jdbcType="VARCHAR" />
+    <result column="MENUURL" property="menuurl" jdbcType="VARCHAR" />
+    <result column="PAREID" property="pareid" jdbcType="VARCHAR" />
+    <result column="ISSHOW" property="isshow" jdbcType="DECIMAL" />
+    <result column="MENUORDER" property="menuorder" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    MENUID, MENUNAME, MENUICON, MENUURL, PAREID, ISSHOW, MENUORDER
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_MENU
+    where MENUID = #{menuid,jdbcType=VARCHAR}
+  </select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_MENU where ISSHOW=1 order by MENUORDER asc
+	</select> 
+	<select id="selectByPareId" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_MENU where ISSHOW=6 
+		and PAREID = #{Id,jdbcType=VARCHAR}
+		order by MENUORDER asc
+	</select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from SYS_MENU
+    where MENUID = #{menuid,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Menu" >
+    insert into SYS_MENU (MENUID, MENUNAME, MENUICON, 
+      MENUURL, PAREID, ISSHOW, 
+      MENUORDER)
+    values (#{menuid,jdbcType=VARCHAR}, #{menuname,jdbcType=VARCHAR}, #{menuicon,jdbcType=VARCHAR}, 
+      #{menuurl,jdbcType=VARCHAR}, #{pareid,jdbcType=VARCHAR}, #{isshow,jdbcType=DECIMAL}, 
+      #{menuorder,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Menu" >
+    insert into SYS_MENU
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="menuid != null" >
+        MENUID,
+      </if>
+      <if test="menuname != null" >
+        MENUNAME,
+      </if>
+      <if test="menuicon != null" >
+        MENUICON,
+      </if>
+      <if test="menuurl != null" >
+        MENUURL,
+      </if>
+      <if test="pareid != null" >
+        PAREID,
+      </if>
+      <if test="isshow != null" >
+        ISSHOW,
+      </if>
+      <if test="menuorder != null" >
+        MENUORDER,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="menuid != null" >
+        #{menuid,jdbcType=VARCHAR},
+      </if>
+      <if test="menuname != null" >
+        #{menuname,jdbcType=VARCHAR},
+      </if>
+      <if test="menuicon != null" >
+        #{menuicon,jdbcType=VARCHAR},
+      </if>
+      <if test="menuurl != null" >
+        #{menuurl,jdbcType=VARCHAR},
+      </if>
+      <if test="pareid != null" >
+        #{pareid,jdbcType=VARCHAR},
+      </if>
+      <if test="isshow != null" >
+        #{isshow,jdbcType=DECIMAL},
+      </if>
+      <if test="menuorder != null" >
+        #{menuorder,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Menu" >
+    update SYS_MENU
+    <set >
+      <if test="menuname != null" >
+        MENUNAME = #{menuname,jdbcType=VARCHAR},
+      </if>
+      <if test="menuicon != null" >
+        MENUICON = #{menuicon,jdbcType=VARCHAR},
+      </if>
+      <if test="menuurl != null" >
+        MENUURL = #{menuurl,jdbcType=VARCHAR},
+      </if>
+      <if test="pareid != null" >
+        PAREID = #{pareid,jdbcType=VARCHAR},
+      </if>
+      <if test="isshow != null" >
+        ISSHOW = #{isshow,jdbcType=DECIMAL},
+      </if>
+      <if test="menuorder != null" >
+        MENUORDER = #{menuorder,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where MENUID = #{menuid,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Menu" >
+    update SYS_MENU
+    set MENUNAME = #{menuname,jdbcType=VARCHAR},
+      MENUICON = #{menuicon,jdbcType=VARCHAR},
+      MENUURL = #{menuurl,jdbcType=VARCHAR},
+      PAREID = #{pareid,jdbcType=VARCHAR},
+      ISSHOW = #{isshow,jdbcType=DECIMAL},
+      MENUORDER = #{menuorder,jdbcType=DECIMAL}
+    where MENUID = #{menuid,jdbcType=VARCHAR}
+  </update>
+</mapper>

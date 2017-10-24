@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialFolwMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialFolw" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="ISID" property="isid" jdbcType="VARCHAR" />
+    <result column="QF" property="qf" jdbcType="DECIMAL" />
+    <result column="FJ" property="fj" jdbcType="DECIMAL" />
+    <result column="ZX" property="zx" jdbcType="DECIMAL" />
+    <result column="SS" property="ss" jdbcType="DECIMAL" />
+    <result column="HZ" property="hz" jdbcType="DECIMAL" />
+    <result column="SB" property="sb" jdbcType="DECIMAL" />
+    <result column="SY" property="sy" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, ISID, QF, FJ, ZX, SS, HZ, SB, SY
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_SPECIAL_FLOW
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+ 
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_SPECIAL_FLOW
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+ 
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialFolw" >
+    insert into PL_SPECIAL_FLOW (ID, ISID, QF, 
+      FJ, ZX, SS, HZ, 
+      SB, SY)
+    values (#{id,jdbcType=VARCHAR}, #{isid,jdbcType=VARCHAR}, #{qf,jdbcType=DECIMAL}, 
+      #{fj,jdbcType=DECIMAL}, #{zx,jdbcType=DECIMAL}, #{ss,jdbcType=DECIMAL}, #{hz,jdbcType=DECIMAL}, 
+      #{sb,jdbcType=DECIMAL}, #{sy,jdbcType=DECIMAL})
+  </insert>
+ 
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialFolw" >
+    insert into PL_SPECIAL_FLOW
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="isid != null" >
+        ISID,
+      </if>
+      <if test="qf != null" >
+        QF,
+      </if>
+      <if test="fj != null" >
+        FJ,
+      </if>
+      <if test="zx != null" >
+        ZX,
+      </if>
+      <if test="ss != null" >
+        SS,
+      </if>
+      <if test="hz != null" >
+        HZ,
+      </if>
+      <if test="sb != null" >
+        SB,
+      </if>
+      <if test="sy != null" >
+        SY,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="isid != null" >
+        #{isid,jdbcType=VARCHAR},
+      </if>
+      <if test="qf != null" >
+        #{qf,jdbcType=DECIMAL},
+      </if>
+      <if test="fj != null" >
+        #{fj,jdbcType=DECIMAL},
+      </if>
+      <if test="zx != null" >
+        #{zx,jdbcType=DECIMAL},
+      </if>
+      <if test="ss != null" >
+        #{ss,jdbcType=DECIMAL},
+      </if>
+      <if test="hz != null" >
+        #{hz,jdbcType=DECIMAL},
+      </if>
+      <if test="sb != null" >
+        #{sb,jdbcType=DECIMAL},
+      </if>
+      <if test="sy != null" >
+        #{sy,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+ 
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialFolw" >
+    update PL_SPECIAL_FLOW
+    <set >
+      <if test="isid != null" >
+        ISID = #{isid,jdbcType=VARCHAR},
+      </if>
+      <if test="qf != null" >
+        QF = #{qf,jdbcType=DECIMAL},
+      </if>
+      <if test="fj != null" >
+        FJ = #{fj,jdbcType=DECIMAL},
+      </if>
+      <if test="zx != null" >
+        ZX = #{zx,jdbcType=DECIMAL},
+      </if>
+      <if test="ss != null" >
+        SS = #{ss,jdbcType=DECIMAL},
+      </if>
+      <if test="hz != null" >
+        HZ = #{hz,jdbcType=DECIMAL},
+      </if>
+      <if test="sb != null" >
+        SB = #{sb,jdbcType=DECIMAL},
+      </if>
+      <if test="sy != null" >
+        SY = #{sy,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialFolw" >
+    update PL_SPECIAL_FLOW
+    set ISID = #{isid,jdbcType=VARCHAR},
+      QF = #{qf,jdbcType=DECIMAL},
+      FJ = #{fj,jdbcType=DECIMAL},
+      ZX = #{zx,jdbcType=DECIMAL},
+      SS = #{ss,jdbcType=DECIMAL},
+      HZ = #{hz,jdbcType=DECIMAL},
+      SB = #{sb,jdbcType=DECIMAL},
+      SY = #{sy,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="updateFlow" parameterType="com.benqzl.pojo.patrol.PatrolSpecialFolw" >
+    update PL_SPECIAL_FLOW
+      set qf=1 
+    where isid= #{isid,jdbcType=VARCHAR}
+  </update>
+  
+  <delete id="deleteflow" parameterType="com.benqzl.pojo.patrol.PatrolSpecialFolw" >
+    delete PL_SPECIAL_FLOW
+    where isid= #{isid,jdbcType=VARCHAR}
+  </delete>
+  
+  <update id="updateByIsId" parameterType="java.util.Map" >
+    update PL_SPECIAL_FLOW
+    set
+      QF = #{qf,jdbcType=DECIMAL},
+      FJ = #{fj,jdbcType=DECIMAL},
+      ZX = #{zx,jdbcType=DECIMAL},
+      SS = #{ss,jdbcType=DECIMAL},
+      HZ = #{hz,jdbcType=DECIMAL},
+      SB = #{sb,jdbcType=DECIMAL},
+      SY = #{sy,jdbcType=DECIMAL}
+    where ISID = #{isid,jdbcType=VARCHAR}
+  </update>
+  <select id="findDetailsByRid" resultType="java.lang.String" parameterType="java.lang.String">
+  	select did from pl_special_resolve_details
+    where rid=#{rid}
+  </select> 
+</mapper>

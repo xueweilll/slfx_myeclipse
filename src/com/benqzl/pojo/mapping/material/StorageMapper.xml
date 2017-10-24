@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.material.StorageMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.material.Storage" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="MATERIALID" property="materialid" jdbcType="VARCHAR" />
+    <result column="INSTORAGE" property="instorage" jdbcType="DECIMAL" />
+    <result column="OUTSTORAGE" property="outstorage" jdbcType="DECIMAL" />
+    <result column="CHECKOUTSTORAGE" property="checkoutstorage" jdbcType="DECIMAL" />
+    <result column="SCRAPSTORAGE" property="scrapstorage" jdbcType="DECIMAL" />
+    <result column="STORAGE" property="storage" jdbcType="DECIMAL" />
+    <result column="BRETURN" property="breturn" jdbcType="VARCHAR"/>
+    <association property="material" javaType="com.benqzl.pojo.system.Material">
+    <id property="id" column="MATERIAL"/>
+    <result property="name" column="MNAME"/>
+    <result property="type" column="MTYPE"/>
+    <association property="size" javaType="com.benqzl.pojo.system.Size">
+    <id property="id" column="SIZEID"/>
+    <result property="name" column="SNAME"/>
+    </association>
+    <association property="prickle" javaType="com.benqzl.pojo.system.Prickle">
+    <id property="id" column="PRICKLEID"/>
+    <result property="name" column="PNAME"/>
+    </association>
+    </association>
+  </resultMap>
+  <resultMap id="BaseResultMap1" type="com.benqzl.pojo.material.Storage" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="MATERIALID" property="materialid" jdbcType="VARCHAR" />
+    <result column="INSTORAGE" property="instorage" jdbcType="DECIMAL" />
+    <result column="OUTSTORAGE" property="outstorage" jdbcType="DECIMAL" />
+    <result column="CHECKOUTSTORAGE" property="checkoutstorage" jdbcType="DECIMAL" />
+    <result column="SCRAPSTORAGE" property="scrapstorage" jdbcType="DECIMAL" />
+    <result column="STORAGE" property="storage" jdbcType="DECIMAL" />
+    <collection property="manages" ofType="com.benqzl.pojo.material.MaterialManage">
+		<id column="MID" property="id" jdbcType="VARCHAR" />
+	    <result column="MCREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+	    <result column="MEDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+	    <result column="MSOURCE" property="source" jdbcType="VARCHAR" />
+	    <result column="MMEMO" property="memo" jdbcType="VARCHAR" />
+	    <result column="MSTORAGEID" property="storageid" jdbcType="VARCHAR" />
+	    <result column="MOLDSTORAGE" property="oldstorage" jdbcType="DECIMAL" />
+	    <result column="MNEWSTORAGE" property="newstorage" jdbcType="DECIMAL" />
+	    <result column="MTYPE" property="type" jdbcType="DECIMAL" />
+	    <result column="MTYPEDATE" property="typedate" jdbcType="DECIMAL" />
+	</collection>
+  </resultMap>
+  <sql id="Base_Column_List" >
+     ID, CREATETIME, EDITTIME, MATERIALID, INSTORAGE, OUTSTORAGE, CHECKOUTSTORAGE, SCRAPSTORAGE, 
+    STORAGE
+  </sql>
+   <sql id="Base_Column_List1" >
+    m.id as ID, m.createtime as CREATETIME, m.edittime as EDITTIME, m.materialid as MATERIALID, m.instorage-decode(abs(mm.newstorage - mm.oldstorage),'',0,abs(mm.newstorage - mm.oldstorage)) as INSTORAGE, m.outstorage as OUTSTORAGE, 
+    m.checkoutstorage as CHECKOUTSTORAGE, m.scrapstorage as SCRAPSTORAGE, 
+    m.storage as STORAGE,sz.name as SNAME,sp.name as PNAME,sm.name as MNAME,sm.type as MTYPE,
+    decode(abs(mm.newstorage - mm.oldstorage),'',0,abs(mm.newstorage - mm.oldstorage)) as BRETURN
+  </sql>
+  <sql id="Base_Column_List_Material" >
+    s.ID as ID, s.CREATETIME as CREATETIME, s.EDITTIME as EDITTIME, s.MATERIALID as MATERIALID,
+    s.INSTORAGE as INSTORAGE, s.OUTSTORAGE as OUTSTORAGE, s.CHECKOUTSTORAGE as CHECKOUTSTORAGE,
+    s.SCRAPSTORAGE as SCRAPSTORAGE, s.STORAGE as STORAGE,
+    m.ID as MID , m.CREATETIME as MCREATETIME, m.EDITTIME as MEDITTIME, m.SOURCE as MSOURCE, m.MEMO as MMEMO,
+    m.STORAGEID as MSTORAGEID, m.OLDSTORAGE as MOLDSTORAGE, m.NEWSTORAGE as MNEWSTORAGE, m.TYPE as MTYPE, 
+    m.TYPEDATE as MTYPEDATE
+  </sql>
+   <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from ma_storage m  
+        left join sys_material  sm on sm.id=m.materialid
+        left join sys_size sz on sm.sizeid=sz.id
+        left join sys_prickle sp on sm.prickleid=sp.id
+        left join  (select storageid,newstorage,oldstorage from ma_materialmanage mm
+                  where  mm.type = 0
+                   and mm.typedate = 2)mm
+                    on mm.storageid = m.id
+                    where 1=1
+			<if test="starttime != null">
+				and m.CreateTime &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and m.CreateTime &lt;= #{endtime}
+			</if>
+			<if test="type != null">
+				and sm.type =#{type} 
+			</if>
+			<if test="name != null">
+				and sm.name like '%${name}%'
+			</if>
+		order by m.CreateTime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from ma_storage m 
+                  left join sys_material sm
+    on sm.id = m.materialid
+                    where 1=1
+   
+			<if test="starttime != null">
+				and m.CreateTime &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and m.CreateTime &lt;= #{endtime}
+			</if>
+			<if test="type != null">
+				and sm.type =#{type} 
+			</if>
+       		<if test="name != null">
+				and sm.name like '%${name}%'
+			</if>
+	</select>
+  <select id="selectAll" resultMap="BaseResultMap1"  parameterType="java.util.Map">
+    select 
+    <include refid="Base_Column_List_Material" />
+    from MA_MATERIALMANAGE M join MA_STORAGE s on s.id=m.StorageID
+    where m.CreateTime &gt;=#{firstDate,jdbcType=DATE} and m.CreateTime &lt;=#{lastDate,jdbcType=DATE}
+  </select>
+  
+  <select id="selectStorageById" resultMap="BaseResultMap" parameterType="java.util.List" >
+    select 
+    <include refid="Base_Column_List" />
+    from MA_STORAGE
+    where materialId in 
+	(<foreach collection="list" item="item" index="index" separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+	</foreach>)
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from MA_STORAGE
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.util.List" >
+    delete from MA_STORAGE
+    where ID in
+    (<foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item,jdbcType=DECIMAL}  from dual) 
+     </foreach> ) 
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into MA_STORAGE (ID, CREATETIME, EDITTIME, 
+      MATERIALID, INSTORAGE, OUTSTORAGE, 
+      CHECKOUTSTORAGE, SCRAPSTORAGE, STORAGE
+      )
+      <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.createtime,jdbcType=TIMESTAMP}, #{item.edittime,jdbcType=TIMESTAMP}, 
+      #{item.materialid,jdbcType=VARCHAR}, #{item.instorage,jdbcType=DECIMAL}, #{item.outstorage,jdbcType=DECIMAL}, 
+      #{item.checkoutstorage,jdbcType=DECIMAL}, #{item.scrapstorage,jdbcType=DECIMAL}, #{item.storage,jdbcType=DECIMAL}  from dual)
+      </foreach> 
+  </insert>
+</mapper>

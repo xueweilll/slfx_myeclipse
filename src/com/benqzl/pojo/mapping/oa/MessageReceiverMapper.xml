@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.MessageReceiverMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.MessageReceiver" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="RECEIVERID" property="receiverid" jdbcType="VARCHAR" />
+    <result column="RECEIPTDATE" property="receiptdate" jdbcType="TIMESTAMP" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <association property="message" javaType="com.benqzl.pojo.oa.Message">
+    	 <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+    	 <result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+    	 <association property="user" javaType="com.benqzl.pojo.system.User">
+    	 	<result column="UNAME" property="username" jdbcType="VARCHAR" />
+    	 </association>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    r.ID as ID,  r.RECEIVERID as RECEIVERID, r.RECEIPTDATE as RECEIPTDATE , r.STATE as STATE,
+    m.CONTENTS as CONTENTS,u.username as UNAME ,m.sendtime as SENDTIME
+  </sql>
+  
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from OA_MESSAGE_RECEIVER r join oa_message m on r.messageid=m.id join sys_user u on r.ReceiverId=u.userid
+		<where> 
+		 <if test="receiver != null" >
+			r.receiverid=#{receiver,jdbcType=VARCHAR}
+		</if>
+		<if test="ispc != null" >
+			and	m.IsPc=#{ispc,jdbcType=VARCHAR}
+		</if> 
+		<if test="isphone != null" >
+			and m.IsPhoneMess=#{isphone,jdbcType=VARCHAR}
+		</if>
+		<if test="starttime != null" >
+			and m.sendtime &gt;=#{starttime}
+		</if>
+		<if test="endtime != null" >
+			and m.sendtime &lt;= #{endtime}
+		</if>
+			and r.state !=3
+      	</where>
+		 order by r.state,m.sendtime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+  <select id="pageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select
+		count(*) as num
+		from OA_MESSAGE_RECEIVER r join oa_message m on r.messageid=m.id join sys_user u on r.ReceiverId=u.userid
+		<where>
+		<if test="receiver != null" >
+			r.receiverid=#{receiver,jdbcType=VARCHAR}
+		</if>
+		<if test="ispc != null" >
+			and m.IsPc=#{ispc,jdbcType=VARCHAR}
+		</if> 
+		<if test="isphone != null" >
+			and m.IsPhoneMess=#{isphone,jdbcType=VARCHAR}
+		</if>  
+		<if test="starttime != null" >
+			and m.sendtime &gt;=#{starttime}
+		</if>
+		<if test="endtime != null" >
+			and m.sendtime &lt;= #{endtime}
+		</if>
+		and r.state !=3
+      	</where>
+	</select>
+  
+  <select id="selectContents" resultType="java.lang.String" parameterType="java.lang.String" >
+    select 
+    contents
+    from OA_MESSAGE
+    where ID =(select MessageId from OA_MESSAGE_RECEIVER where id=#{id,jdbcType=VARCHAR} ) 
+  </select>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into OA_MESSAGE_RECEIVER (ID, MESSAGEID, RECEIVERID, 
+      RECEIPTDATE, STATE) 
+    <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.message.id,jdbcType=VARCHAR}, #{item.receiverid,jdbcType=VARCHAR}, 
+      #{item.receiptdate,jdbcType=DATE}, #{item.state,jdbcType=DECIMAL}  from dual) 
+    </foreach>
+  </insert>
+  <update id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update  OA_MESSAGE_RECEIVER set state=3
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateState" parameterType="java.lang.String" >
+    update  OA_MESSAGE_RECEIVER set state=2  ,ReceiptDate=sysdate
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

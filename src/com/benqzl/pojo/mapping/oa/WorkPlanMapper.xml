@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.WorkPlanMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.WorkPlan" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="DATE" />
+    <result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="TITLE" property="title" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="BEIGINTIME" property="beigintime" jdbcType="TIMESTAMP" />
+    <result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="REMINDTIME" property="remindtime" jdbcType="TIMESTAMP" />
+    <result column="ISPC" property="ispc" jdbcType="DECIMAL" />
+    <result column="ISPHONEMESS" property="isphonemess" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, CREATETIME, CREATERID, STATE, EDITTIME, TITLE, REMARK, BEIGINTIME, ENDTIME, REMINDTIME, 
+    ISPC, ISPHONEMESS
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from OA_WORKPLAN
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from OA_WORKPLAN
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.oa.WorkPlan" >
+    insert into OA_WORKPLAN (ID, CREATETIME, CREATERID, 
+      STATE, EDITTIME, TITLE, 
+      REMARK, BEIGINTIME, ENDTIME, 
+      REMINDTIME, ISPC, ISPHONEMESS
+      )
+    values (#{id,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{createrid,jdbcType=VARCHAR}, 
+      #{state,jdbcType=DECIMAL}, #{edittime,jdbcType=TIMESTAMP}, #{title,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR}, #{beigintime,jdbcType=TIMESTAMP}, #{endtime,jdbcType=TIMESTAMP}, 
+      #{remindtime,jdbcType=TIMESTAMP}, #{ispc,jdbcType=DECIMAL}, #{isphonemess,jdbcType=DECIMAL}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.oa.WorkPlan" >
+    insert into OA_WORKPLAN
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="createrid != null" >
+        CREATERID,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="title != null" >
+        TITLE,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+      <if test="beigintime != null" >
+        BEIGINTIME,
+      </if>
+      <if test="endtime != null" >
+        ENDTIME,
+      </if>
+      <if test="remindtime != null" >
+        REMINDTIME,
+      </if>
+      <if test="ispc != null" >
+        ISPC,
+      </if>
+      <if test="isphonemess != null" >
+        ISPHONEMESS,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createrid != null" >
+        #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="beigintime != null" >
+        #{beigintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remindtime != null" >
+        #{remindtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ispc != null" >
+        #{ispc,jdbcType=DECIMAL},
+      </if>
+      <if test="isphonemess != null" >
+        #{isphonemess,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.oa.WorkPlan" >
+    update OA_WORKPLAN
+    <set >
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createrid != null" >
+        CREATERID = #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="title != null" >
+        TITLE = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="beigintime != null" >
+        BEIGINTIME = #{beigintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        ENDTIME = #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remindtime != null" >
+        REMINDTIME = #{remindtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ispc != null" >
+        ISPC = #{ispc,jdbcType=DECIMAL},
+      </if>
+      <if test="isphonemess != null" >
+        ISPHONEMESS = #{isphonemess,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.oa.WorkPlan" >
+    update OA_WORKPLAN
+    set CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      CREATERID = #{createrid,jdbcType=VARCHAR},
+      STATE = #{state,jdbcType=DECIMAL},
+      EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      TITLE = #{title,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      BEIGINTIME = #{beigintime,jdbcType=TIMESTAMP},
+      ENDTIME = #{endtime,jdbcType=TIMESTAMP},
+      REMINDTIME = #{remindtime,jdbcType=TIMESTAMP},
+      ISPC = #{ispc,jdbcType=DECIMAL},
+      ISPHONEMESS = #{isphonemess,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByMonth" resultMap="BaseResultMap"  parameterType="java.util.Map">
+  	select * from oa_workplan where state !=9 
+  	<if test="createID != null" >
+	      and  CREATERID = #{createID} 
+	    </if>
+  	 
+  	 and BEIGINTIME between to_date(#{lastdate},'yyyy-mm-dd') and to_date(#{nextdate},'yyyy-mm-dd') 
+  </select>
+  <update id="deleteState"  parameterType="java.lang.String">
+  	update oa_workplan set STATE = 9 where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select *
+		from oa_workplan where state != 9
+		<if test="title != null" >
+	      and title like '%${title}%' 
+	    </if>
+	    <if test="remark != null" >
+	      and remark like '%${remark}%' 
+	    </if>
+	    <if test="beigintime != null">
+	      and beigintime &gt;= to_date(#{beigintime},'yyyy-MM-dd HH24:mi:ss') 
+	    </if>
+	    <if test="endtime != null">
+	      and endtime &lt;= to_date(#{endtime},'yyyy-MM-dd HH24:mi:ss') 
+	    </if>	    
+		order by beigintime ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select
+		count(*) as num
+		from
+		oa_workplan where  state != 9
+		<if test="title != null" >
+	      and title like '%${title}%' 
+	    </if>
+	    <if test="remark != null" >
+	      and remark like '%${remark}%' 
+	    </if>
+	    <if test="beigintime != null">
+	      and beigintime &gt;= to_date(#{beigintime},'yyyy-MM-dd HH24:mi:ss') 
+	    </if>
+	    <if test="endtime != null">
+	      and endtime &lt;= to_date(#{endtime},'yyyy-MM-dd HH24:mi:ss') 
+	    </if>	    
+	</select>
+</mapper>

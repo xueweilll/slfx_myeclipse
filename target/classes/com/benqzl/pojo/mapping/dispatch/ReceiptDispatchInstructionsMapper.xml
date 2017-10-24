@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchInstructionsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.ReceiptDispatchInstructions" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="RPID" property="rpid" jdbcType="VARCHAR" />
+    <result column="INSTRUCTION" property="instruction" jdbcType="DECIMAL" />
+    <result column="GATEOPERATETIME" property="gateoperatetime" jdbcType="TIMESTAMP" />
+    <result column="UNITOPERATETIME" property="unitoperatetime" jdbcType="TIMESTAMP" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, RPID, INSTRUCTION, GATEOPERATETIME, UNITOPERATETIME, STATE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_INSTRUCTIONS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findInstructions" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_INSTRUCTIONS
+    where RPID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findReceiptInstructions" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_INSTRUCTIONS
+    where RPID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from DIS_RD_INSTRUCTIONS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteAreaInstruction" parameterType="java.lang.String">
+    delete from DIS_RD_INSTRUCTIONS
+    where RPID=#{reid,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByRPID" parameterType="java.lang.String" >
+    delete from DIS_RD_INSTRUCTIONS
+    where RPID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into DIS_RD_INSTRUCTIONS (ID, RPID, INSTRUCTION, 
+      GATEOPERATETIME, UNITOPERATETIME, STATE
+      )
+      <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.rpid,jdbcType=VARCHAR}, #{item.instruction,jdbcType=DECIMAL}, 
+      #{item.gateoperatetime,jdbcType=TIMESTAMP}, #{item.unitoperatetime,jdbcType=TIMESTAMP}, #{item.state,jdbcType=DECIMAL}  from dual) 
+    </foreach>
+  </insert>
+  <insert id="insertInstructions">
+    insert into DIS_RD_INSTRUCTIONS(ID, RPID, INSTRUCTION, 
+      GATEOPERATETIME, UNITOPERATETIME, STATE)
+       <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.rpid,jdbcType=VARCHAR}, #{item.instruction,jdbcType=DECIMAL}, 
+      #{item.gateoperatetime,jdbcType=TIMESTAMP}, #{item.unitoperatetime,jdbcType=TIMESTAMP}, 0  from dual) 
+    </foreach>
+  </insert>
+  <select id="selectByRDID" resultMap="BaseResultMap" parameterType="java.lang.String" >
+  	select * from DIS_RD_INSTRUCTIONS where RPID=#{id}
+  </select>
+  <select id="selectInstructionsByRPID" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_INSTRUCTIONS
+    where RPID = #{rpid,jdbcType=VARCHAR}
+  </select>
+</mapper>

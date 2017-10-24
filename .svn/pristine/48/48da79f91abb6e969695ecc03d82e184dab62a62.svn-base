@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.FilesMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.Files">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="FOLERID" property="folerid" jdbcType="VARCHAR" />
+		<result column="UPLOADROUTE" property="uploadroute" jdbcType="VARCHAR" />
+		<result column="SAVEROUTE" property="saveroute" jdbcType="VARCHAR" />
+		<result column="UPLOADER" property="uploader" jdbcType="VARCHAR" />
+		<result column="UPLOADTIME" property="uploadtime" jdbcType="TIMESTAMP" />
+		<association property="foler" javaType="com.benqzl.pojo.oa.Foler">
+			<id column="FOLDER_ID" property="id" />
+			<result column="FOLDERNAME" property="name" jdbcType="VARCHAR" />
+			<result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+			<result column="PARENTID" property="parentid" jdbcType="VARCHAR" />
+		</association>
+
+	</resultMap>
+
+	<resultMap type="com.benqzl.pojo.oa.Files" id="BaseResultMap1">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="FOLERID" property="folerid" jdbcType="VARCHAR" />
+		<result column="UPLOADROUTE" property="uploadroute" jdbcType="VARCHAR" />
+		<result column="SAVEROUTE" property="saveroute" jdbcType="VARCHAR" />
+		<result column="UPLOADER" property="uploader" jdbcType="VARCHAR" />
+		<result column="UPLOADTIME" property="uploadtime" jdbcType="TIMESTAMP" />
+		<association property="user" javaType="com.benqzl.pojo.system.User">
+			<id property="userid" column="UPLOADER" />
+			<result property="username" column="USERNAME" />
+		</association>
+		<association property="foler" javaType="com.benqzl.pojo.oa.Foler">
+			<id property="id" column="FOLERID" />
+			<result property="name" column="FOLERNAME" />
+		</association>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID, NAME, FOLERID, UPLOADROUTE, SAVEROUTE, UPLOADER,
+		UPLOADTIME
+	</sql>
+
+	<sql id="Base_Column_List1">
+		u.USERID as ID, u.USERNAME as USERNAME, d.name as DNAME
+	</sql>
+
+	<sql id="Foler_And_Files_List">
+		OA_FILES.ID,OA_FILES.NAME
+		,OA_FILES.FOLERID,OA_FILES.UPLOADROUTE,OA_FILES.SAVEROUTE,OA_FILES.UPLOADER,
+		OA_FILES.UPLOADTIME,
+		OA_FOLDER.ID as FOLDER_ID,OA_FOLDER.NAME as
+		FOLERNAME,OA_FOLDER.CREATERID,OA_FOLDER.PARENTID
+	</sql>
+	<!-- shimh start -->
+	<select id="selectFolerAndFiles" resultMap="BaseResultMap">
+		select
+		<include refid="Foler_And_Files_List"></include>
+		from OA_FILES,OA_FOLDER
+		where OA_FILES.FOLERID = OA_FOLDER.ID
+		order by
+		OA_FILES.UPLOADTIME
+	</select>
+
+	<!-- selectAll -->
+	<select id="selectAll" resultMap="BaseResultMap1">
+		select
+		<include refid="Base_Column_List"></include>
+		from OA_FILES
+		order by UPLOADTIME
+	</select>
+	<select id="findByPage" resultMap="BaseResultMap1"
+		parameterType="java.util.Map">
+		
+		<!-- select m.name,m.folerid from oa_files m right outer join oa_folder f on m.folerid = f.id where f.id = '1' or f.parentid = '1'; -->
+		
+		select B.*,S.USERNAME AS USERNAME,O.NAME AS FOLERNAME from
+		(select
+		A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from OA_FILES m
+		<where>
+			<!-- <if test="folerid != null">
+				m.FOLERID=#{folerid,jdbcType=VARCHAR}
+				or o.parentid=#{folerid,jdbcType=VARCHAR}
+			</if> -->
+			<if test="starttime != null">
+				and m.UPLOADTIME &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and m.UPLOADTIME &lt;= #{endtime}
+			</if>
+		</where>
+		) A
+		<!-- where A.FOLERID = #{id} and ROWNUM &lt;=#{p2}) -->
+		where ROWNUM &lt;=#{p2}) B
+		join sys_user s on B.uploader = s.userid
+		join oa_Folder o on B.folerid = o.id
+		<where>
+			<if test="folerid != null">
+				and B.FOLERID=#{folerid,jdbcType=VARCHAR} or o.parentid=#{folerid,jdbcType=VARCHAR}
+			</if>
+		</where>
+		and RN &gt;
+		#{p1}
+		order by B.uploadtime desc
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from OA_FILES m
+		<where>
+			<!-- m.IsDel=0 -->
+			<if test="folerid != null">
+				m.FOLERID=#{folerid,jdbcType=VARCHAR}
+			</if>
+			<if test="starttime != null">
+				and m.UPLOADTIME &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and m.UPLOADTIME &lt;= #{endtime}
+			</if>
+		</where>
+	</select>
+	<!-- shimh end -->
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap1"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from OA_FILES
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		OA_FILES
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.oa.Files">
+		insert into OA_FILES (ID,
+		NAME, FOLERID,
+		UPLOADROUTE, SAVEROUTE, UPLOADER,
+		UPLOADTIME)
+		values
+		(#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+		#{folerid,jdbcType=VARCHAR},
+		#{uploadroute,jdbcType=VARCHAR},
+		#{saveroute,jdbcType=VARCHAR}, #{uploader,jdbcType=VARCHAR},
+		#{uploadtime,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.oa.Files">
+		insert into OA_FILES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="folerid != null">
+				FOLERID,
+			</if>
+			<if test="uploadroute != null">
+				UPLOADROUTE,
+			</if>
+			<if test="saveroute != null">
+				SAVEROUTE,
+			</if>
+			<if test="uploader != null">
+				UPLOADER,
+			</if>
+			<if test="uploadtime != null">
+				UPLOADTIME,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="folerid != null">
+				#{folerid,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadroute != null">
+				#{uploadroute,jdbcType=VARCHAR},
+			</if>
+			<if test="saveroute != null">
+				#{saveroute,jdbcType=VARCHAR},
+			</if>
+			<if test="uploader != null">
+				#{uploader,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadtime != null">
+				#{uploadtime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.oa.Files">
+		update OA_FILES
+		<set>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="folerid != null">
+				FOLERID = #{folerid,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadroute != null">
+				UPLOADROUTE = #{uploadroute,jdbcType=VARCHAR},
+			</if>
+			<if test="saveroute != null">
+				SAVEROUTE = #{saveroute,jdbcType=VARCHAR},
+			</if>
+			<if test="uploader != null">
+				UPLOADER = #{uploader,jdbcType=VARCHAR},
+			</if>
+			<if test="uploadtime != null">
+				UPLOADTIME = #{uploadtime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.oa.Files">
+		update OA_FILES
+		set NAME = #{name,jdbcType=VARCHAR},
+		FOLERID =
+		#{folerid,jdbcType=VARCHAR},
+		UPLOADROUTE =
+		#{uploadroute,jdbcType=VARCHAR},
+		SAVEROUTE =
+		#{saveroute,jdbcType=VARCHAR},
+		UPLOADER = #{uploader,jdbcType=VARCHAR},
+		UPLOADTIME = #{uploadtime,jdbcType=TIMESTAMP}
+		where ID =
+		#{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

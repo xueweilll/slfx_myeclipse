@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.CameraMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Camera" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="URL" property="url" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+     <result column="CHANNEL" property="channel" jdbcType="VARCHAR" />
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+    	<id property="id" column="SID"/>
+    	<result property="name" column="STATION_NAME"/>
+    </association>
+  </resultMap>
+  <resultMap id="StationMap" type="com.benqzl.pojo.system.Station" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="LAT" property="lat" jdbcType="VARCHAR" />
+    <result column="LON" property="lon" jdbcType="TIMESTAMP" />
+    <result column="LEVELS" property="levels" jdbcType="TIMESTAMP" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+    <result column="REMARK" property="remark" jdbcType="DECIMAL" />   
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, SID, CODE, NAME, URL, CREATETIME, EDITTIME, ISDEL, CHANNEL
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select a.*,b.name as station_name from sys_camera a,sys_station b where a.sid =b.id
+    and a.ID = #{id,jdbcType=VARCHAR} 
+  </select>
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+  		select * from (select s.*,rownum rn from 
+  		(select a.*,b.name as station_name from sys_camera a,sys_station b where a.sid =b.id and a.isdel='0' 
+  		 
+  		<if test="sid !=null">
+  			and a.sid='${sid}'
+  		</if>
+  		<if test="name !=null">
+  			and a.name like '%${name}%'
+  		</if>
+  		order by b.levels, a.code 
+  		) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}  		
+  </select>
+  <select id="selectStation" resultMap="StationMap">
+  		select * from sys_station where isdel='0' 
+  </select>
+  <select id="pageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+  		select count(*) from sys_camera where isdel='0' 
+  		<if test="sid !=null">
+  			and sid='${sid}'
+  		</if>
+  		<if test="name !=null">
+  			and name like '%${name}%' 
+  		</if>
+  </select>
+    <select id="selectcount" resultType="java.lang.Integer">
+  		select count(*) from sys_camera where isdel='0' 
+
+  </select>
+  <select id="selectCode" parameterType="java.util.Map" resultType="java.lang.String">
+  		select count(*) from sys_camera where isdel='0' and code='${code}' and sid=#{sid}
+  		<if test="id !=null">
+  			and id !='${id}'
+  		</if>
+  </select>
+  <select id="cameraOnlyOne" parameterType="java.util.Map" resultType="java.lang.String">
+  		select count(*) from sys_camera where isdel='0' and name='${camera}'and sid=#{sid}
+  		<if test="id != null">
+  			and id !='${id}'
+  		</if>
+  </select>
+  <select id="selectByFk" parameterType="java.lang.String" resultMap="BaseResultMap">
+  	select * from sys_camera where isdel='0' and SID=#{sid}
+  </select>
+   <select id="selectByFkCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+  	select * from sys_camera c left join sys_station s on c.sid= s.id where c.isdel='0' and s.code =#{code}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update SYS_CAMERA set isdel='1'
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+    <delete id="deleteBySid" parameterType="java.lang.String" >
+    update SYS_CAMERA set isdel='1'
+    where SID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Camera" >
+    insert into SYS_CAMERA (ID, SID, CODE, 
+      NAME, URL, CREATETIME, 
+      EDITTIME, ISDEL, CHANNEL)
+    values (#{id,jdbcType=VARCHAR}, #{sid,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{edittime,jdbcType=TIMESTAMP}, #{isdel,jdbcType=DECIMAL}, #{channel,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Camera" >
+    insert into SYS_CAMERA
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="sid != null" >
+        SID,
+      </if>
+      <if test="code != null" >
+        CODE,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="url != null" >
+        URL,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="isdel != null" >
+        ISDEL,
+      </if>
+       <if test="channel != null" >
+        CHANNEL,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isdel != null" >
+        #{isdel,jdbcType=DECIMAL},
+      </if>
+      <if test="channel != null" >
+        #{channel,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Camera" >
+    update SYS_CAMERA
+    <set >
+      <if test="sid != null" >
+        SID = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        CODE = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        URL = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isdel != null" >
+        ISDEL = #{isdel,jdbcType=DECIMAL},
+      </if>
+      <if test="channel != null" >
+        CHANNEL = #{channel,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Camera" >
+    update SYS_CAMERA
+    set SID = #{sid,jdbcType=VARCHAR},
+      CODE = #{code,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      URL = #{url,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      ISDEL = #{isdel,jdbcType=DECIMAL},
+      CHANNEL = #{channel,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

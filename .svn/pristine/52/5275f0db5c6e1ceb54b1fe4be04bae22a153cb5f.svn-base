@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchExecutePeopleMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.ReceiptDispatchExecutePeople" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="EXECTEID" property="execteid" jdbcType="VARCHAR" />
+    <result column="PEOPLETYPE" property="peopletype" jdbcType="DECIMAL" />
+    <result column="USERID" property="userid" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, EXECTEID, PEOPLETYPE, USERID
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_EXECUTE_PEOPLE
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from DIS_RD_EXECUTE_PEOPLE
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecutePeople" >
+    insert into DIS_RD_EXECUTE_PEOPLE (ID, EXECTEID, PEOPLETYPE, 
+      USERID)
+      <foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.execteid,jdbcType=VARCHAR}, #{item.peopletype,jdbcType=DECIMAL}, 
+      #{item.userid,jdbcType=VARCHAR}
+			from dual)
+		</foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecutePeople" >
+    insert into DIS_RD_EXECUTE_PEOPLE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="execteid != null" >
+        EXECTEID,
+      </if>
+      <if test="peopletype != null" >
+        PEOPLETYPE,
+      </if>
+      <if test="userid != null" >
+        USERID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="execteid != null" >
+        #{execteid,jdbcType=VARCHAR},
+      </if>
+      <if test="peopletype != null" >
+        #{peopletype,jdbcType=DECIMAL},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecutePeople" >
+    update DIS_RD_EXECUTE_PEOPLE
+    <set >
+      <if test="execteid != null" >
+        EXECTEID = #{execteid,jdbcType=VARCHAR},
+      </if>
+      <if test="peopletype != null" >
+        PEOPLETYPE = #{peopletype,jdbcType=DECIMAL},
+      </if>
+      <if test="userid != null" >
+        USERID = #{userid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecutePeople" >
+    update DIS_RD_EXECUTE_PEOPLE
+    set EXECTEID = #{execteid,jdbcType=VARCHAR},
+      PEOPLETYPE = #{peopletype,jdbcType=DECIMAL},
+      USERID = #{userid,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  <select id="selectExecutePeopleByExecuteId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_EXECUTE_PEOPLE
+    where EXECTEID = #{executeid,jdbcType=VARCHAR}
+  </select>
+</mapper>

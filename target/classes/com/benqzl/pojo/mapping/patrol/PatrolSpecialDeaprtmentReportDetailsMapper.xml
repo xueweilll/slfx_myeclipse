@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialDeaprtmentReportDetailsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReportDetails" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="REPORTID" property="reportid" jdbcType="VARCHAR" />
+    <result column="IMPLEMENTID" property="implementid" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, REPORTID, IMPLEMENTID
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_SPECIAL_DR_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_SPECIAL_DR_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReportDetails" >
+    insert into PL_SPECIAL_DR_DETAILS (ID, REPORTID, IMPLEMENTID
+      )
+      
+      <foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.reportid,jdbcType=VARCHAR},
+			#{item.implementid,jdbcType=VARCHAR} 
+			from dual)
+		</foreach>
+     
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReportDetails" >
+    insert into PL_SPECIAL_DR_DETAILS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="reportid != null" >
+        REPORTID,
+      </if>
+      <if test="implementid != null" >
+        IMPLEMENTID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="reportid != null" >
+        #{reportid,jdbcType=VARCHAR},
+      </if>
+      <if test="implementid != null" >
+        #{implementid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReportDetails" >
+    update PL_SPECIAL_DR_DETAILS
+    <set >
+      <if test="reportid != null" >
+        REPORTID = #{reportid,jdbcType=VARCHAR},
+      </if>
+      <if test="implementid != null" >
+        IMPLEMENTID = #{implementid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReportDetails" >
+    update PL_SPECIAL_DR_DETAILS
+    set REPORTID = #{reportid,jdbcType=VARCHAR},
+      IMPLEMENTID = #{implementid,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

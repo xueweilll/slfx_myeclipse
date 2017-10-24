@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.MessageCenterMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.MessageCenter" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="TID" property="tid" jdbcType="VARCHAR" />
+    <result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+    <association property="sendUser" javaType="com.benqzl.pojo.system.User">
+    	 <id column="sid" property="userid" jdbcType="VARCHAR" />
+    	  <result column="sname" property="username" jdbcType="VARCHAR" />
+    </association>
+    <association property="receiverUser" javaType="com.benqzl.pojo.system.User">
+    	 <id column="rid" property="userid" jdbcType="VARCHAR" />
+    	  <result column="rname" property="username" jdbcType="VARCHAR" />
+    </association>
+    <association property="menu" javaType="com.benqzl.pojo.system.Menu">
+    	<id column="MENUID" property="menuid" jdbcType="VARCHAR" />
+	    <result column="MENUNAME" property="menuname" jdbcType="VARCHAR" />
+	    <result column="MENUICON" property="menuicon" jdbcType="VARCHAR" />
+	    <result column="MENUURL" property="menuurl" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    m.ID as id, m.TID as tid, SENDTIME as sendtime , s.userid as sid,s.name as sname,
+    r.userid as rid,r.username as rname,sm.MENUID,sm.MENUNAME,sm.MENUICON,sm.MENUURL
+  </sql>
+  <select id="findByMessageCenter" resultMap="BaseResultMap" parameterType="java.util.Map">
+  	select 
+	    <include refid="Base_Column_List" />
+	    from SYS_MESSAGE_CENTER m join  (select userid,name from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) s on m.Suid=s.userid join  SYS_USER r on m.Ruid=r.userid
+	    join sys_menu sm on m.MenuId=sm.MENUID
+	     where m.tid=#{tid,jdbcType=VARCHAR} and m.menuid=#{menuid,jdbcType=VARCHAR}
+  </select>
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select * from
+		(select A.*,ROWNUM RN from(
+		select 
+	    <include refid="Base_Column_List" />
+	    from SYS_MESSAGE_CENTER m left join (select userid,name from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) s on m.Suid=s.userid join  SYS_USER r on m.Ruid=r.userid
+	    join sys_menu sm on m.MenuId=sm.MENUID
+	    where m.Ruid = #{id,jdbcType=VARCHAR}
+	    order by m.SENDTIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+  </select>
+  
+  <select id="pageCount" resultType="java.lang.Integer" parameterType="java.lang.String">
+		select
+		count(*) as num
+		from SYS_MESSAGE_CENTER m
+		where m.Ruid = #{id,jdbcType=VARCHAR}
+	</select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from SYS_MESSAGE_CENTER
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByTip" parameterType="java.lang.String" >
+    delete from SYS_MESSAGE_CENTER
+    where tid = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteAll" parameterType="java.lang.String" >
+    delete from SYS_MESSAGE_CENTER
+    where ruid = #{id,jdbcType=VARCHAR}
+  </delete>
+   <delete id="deleteByIdList" parameterType="java.util.List" >
+    delete from SYS_MESSAGE_CENTER
+    where id in (<foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item,jdbcType=VARCHAR} from dual) 
+    </foreach>)
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into SYS_MESSAGE_CENTER (ID, SUID, RUID, 
+      MENUID, TID, SENDTIME)
+    <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.sendUser.userid,jdbcType=VARCHAR}, #{item.receiverUser.userid,jdbcType=VARCHAR}, 
+      #{item.menu.menuid,jdbcType=VARCHAR}, #{item.tid,jdbcType=DECIMAL},#{item.sendtime,jdbcType=TIMESTAMP}  from dual) 
+    </foreach>
+  </insert>
+</mapper>

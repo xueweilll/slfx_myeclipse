@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolPlanDetailsMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolPlanDetails">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PATROLPLANID" property="patrolplanid" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+		<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<resultMap id="BaseResultMapList" type="com.benqzl.pojo.patrol.PatrolPlanDetails">
+		<id column="DID" property="id" jdbcType="VARCHAR" />
+		<result column="PATROLPLANID" property="patrolplanid" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="DSTATE" property="state" jdbcType="DECIMAL" />
+		<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+		<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+		<association property="receiptuser" javaType="com.benqzl.pojo.system.User">
+			<id column="RECEIPTER" property="userid" />
+			<result column="RECEIPTNAME" property="username"/>
+		</association>
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id" />
+			<result column="STATIONNAME" property="name"/>
+		</association>
+		<association property="patrolplan" javaType="com.benqzl.pojo.patrol.PatrolPlan">
+			<id column="ID" property="id" />
+			<result column="CODE" property="code" jdbcType="VARCHAR" />
+			<result column="EXCEPTTIME" property="excepttime" jdbcType="TIMESTAMP" />
+			<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+			<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+			<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+			<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+			<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+			<association property="createruser" javaType="com.benqzl.pojo.system.User">
+				<id column="CREATER" property="userid" />
+				<result column="CREATERNAME" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="senderuser" javaType="com.benqzl.pojo.system.User">
+				<id column="SENDER" property="userid" />
+				<result column="SENDERNAME" property="username" jdbcType="VARCHAR" />
+			</association>
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, PATROLPLANID, SID, STATE, RECEIPTER, RECEIPTTIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_PATROLPLAN_DETAILS
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		PL_PATROLPLAN_DETAILS
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolPlanDetails">
+		insert into
+		PL_PATROLPLAN_DETAILS (ID, PATROLPLANID, SID,
+		STATE, RECEIPTER,
+		RECEIPTTIME
+		)
+		values (#{id,jdbcType=VARCHAR},
+		#{patrolplanid,jdbcType=VARCHAR},
+		#{sid,jdbcType=VARCHAR},
+		#{state,jdbcType=DECIMAL}, #{receipter,jdbcType=VARCHAR},
+		#{receipttime,jdbcType=TIMESTAMP}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolPlanDetails">
+		insert into PL_PATROLPLAN_DETAILS
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="patrolplanid != null">
+				PATROLPLANID,
+			</if>
+			<if test="sid != null">
+				SID,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="receipter != null">
+				RECEIPTER,
+			</if>
+			<if test="receipttime != null">
+				RECEIPTTIME,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="patrolplanid != null">
+				#{patrolplanid,jdbcType=VARCHAR},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="receipter != null">
+				#{receipter,jdbcType=VARCHAR},
+			</if>
+			<if test="receipttime != null">
+				#{receipttime,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolPlanDetails">
+		update PL_PATROLPLAN_DETAILS
+		<set>
+			<if test="patrolplanid != null">
+				PATROLPLANID = #{patrolplanid,jdbcType=VARCHAR},
+			</if>
+			<if test="sid != null">
+				SID = #{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="receipter != null">
+				RECEIPTER = #{receipter,jdbcType=VARCHAR},
+			</if>
+			<if test="receipttime != null">
+				RECEIPTTIME = #{receipttime,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolPlanDetails">
+		update
+		PL_PATROLPLAN_DETAILS
+		set PATROLPLANID =
+		#{patrolplanid,jdbcType=VARCHAR},
+		SID = #{sid,jdbcType=VARCHAR},
+		STATE =
+		#{state,jdbcType=DECIMAL},
+		RECEIPTER = #{receipter,jdbcType=VARCHAR},
+		RECEIPTTIME = #{receipttime,jdbcType=TIMESTAMP}
+		where ID =
+		#{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateStateByPk" parameterType="java.util.Map">
+		update PL_PATROLPLAN_DETAILS set STATE =#{state,jdbcType=DECIMAL},
+		RECEIPTER = #{receipter,jdbcType=VARCHAR},
+		RECEIPTTIME = #{receipttime,jdbcType=TIMESTAMP}
+		where ID =#{id,jdbcType=VARCHAR}		
+	</update>
+	<delete id="deletePatrolPlanDetailsByPatrolPlanID"
+		parameterType="java.lang.String">
+		delete pl_patrolplan_details where
+		patrolplanid=#{patrolplanid}
+	</delete>
+	<select id="selectPatrolPlanDetailsByPatrolPlanId" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM PL_PATROLPLAN_DETAILS
+		WHERE PATROLPLANID =
+		#{patrolPlanId,jdbcType=VARCHAR}
+	</select>
+	<select id="selectPatrolPlanDetailsByPatrolPlanId2" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM PL_PATROLPLAN_DETAILS
+		WHERE STATE ='0'
+		AND PATROLPLANID =
+		#{patrolPlanId,jdbcType=VARCHAR}
+	</select>
+
+	<resultMap id="employee" type="com.benqzl.pojo.system.Employee">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<!--<result column="DEPARTMENTID" jdbcType="VARCHAR" property="departmentid" 
+			/> -->
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+		<result column="BIRTHDAY" property="birthday" />
+		<result column="POSITION" jdbcType="VARCHAR" property="position" />
+		<result column="TELEPHONE" jdbcType="VARCHAR" property="telephone" />
+		<result column="PHONE" jdbcType="VARCHAR" property="phone" />
+		<result column="SEX" jdbcType="DECIMAL" property="sex" />
+		<result column="AGE" jdbcType="DECIMAL" property="age" />
+		<result column="CREATETIME" property="createtime" />
+		<result column="EDITTIME" property="edittime" />
+		<result column="LEVE" property="leve" />
+		<result column="ISDEL" jdbcType="DECIMAL" property="isdel" />
+		<result column="SID" jdbcType="VARCHAR" property="sid" />
+	</resultMap>
+	<select id="selectUserSidByUserId" resultMap="employee"
+		parameterType="java.lang.String">
+		SELECT E.* FROM SYS_EMPLOYEE E
+		LEFT JOIN SYS_USER U
+		ON
+		E.ID =
+		U.EMPLOYEEID
+		WHERE
+		<!-- U.ISDEL !='0' AND -->
+		U.USERID = #{USERID}
+	</select>
+
+	<select id="selectPatrolPlanDetailsByPatrolPlanIdAndSid"
+		resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT * FROM
+		PL_PATROLPLAN_DETAILS PPD
+		WHERE PPD.PATROLPLANID = #{patrolPlanID}
+		AND
+		PPD.SID = #{userSid}
+	</select>
+	<select id="findPRList" parameterType="java.util.Map" resultMap="BaseResultMapList">
+		select * from
+		(SELECT A.*,ROWNUM
+		RN FROM(
+		select pp.*, ppd.id as DID,
+		ppd.sid, ppd.receipter, ppd.receipttime ,  ppd.state as dstate,u2.name as
+		CREATERNAME,u1.name as SENDERNAME,
+		u3.name as RECEIPTNAME,s.name as stationname from
+		pl_patrolplan pp left join pl_patrolplan_details
+		ppd on pp.id =
+		ppd.patrolplanid
+		left join (select sys_user.userid,
+		sys_employee.name
+		from sys_user left join sys_employee on
+		sys_user.employeeid =
+		sys_employee.id) u1
+		on pp.sender = u1.userid left
+		join (select
+		sys_user.userid, sys_employee.name from sys_user left
+		join sys_employee
+		on sys_user.employeeid = sys_employee.id) u2 on
+		u2.userid = pp.creater
+		left join (select sys_user.userid,
+		sys_employee.name
+		from sys_user left
+		join sys_employee on
+		sys_user.employeeid = sys_employee.id) u3 on
+		u3.userid = ppd.receipter  left join sys_station s on s.id = ppd.sid
+		<where>
+			pp.state > 0
+			<if test="sender != null"> and u2.name like '%${sender}%'</if>
+			<if test="stationid != null"> and ppd.sid = #{stationid}</if>
+			<if test="begintime != null"> and pp.EXCEPTTIME &gt;= #{begintime}</if>
+			<if test="endtime != null"> and pp.EXCEPTTIME &lt;= #{endtime}</if>
+			<if test="rpid != null"> and ${rpid}</if>
+		</where>
+		order by pp.createtime desc
+		) A
+		where ROWNUM &lt;=#{p2}) where RN &gt; #{p1}
+	</select>
+	<select id="findPRCount" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+		select Count(*) from pl_patrolplan pp left join
+		pl_patrolplan_details ppd on pp.id = ppd.patrolplanid
+		left join (select
+		sys_user.userid, sys_employee.name from sys_user left join
+		sys_employee on sys_user.employeeid = sys_employee.id) u1
+		on pp.sender
+		= u1.userid left join (select sys_user.userid, sys_employee.name from
+		sys_user left join sys_employee
+		on sys_user.employeeid =
+		sys_employee.id) u2 on u2.userid = pp.creater left join (select
+		sys_user.userid, sys_employee.name
+		from sys_user left join sys_employee
+		on sys_user.employeeid = sys_employee.id) u3 on u3.userid =
+		ppd.receipter
+		<where>
+			pp.state > 0
+			<if test="sender != null"> and u2.name like '%${sender}%'</if>
+			<if test="stationid != null"> and ppd.sid = #{stationid}</if>
+			<if test="begintime != null"> and pp.EXCEPTTIME &gt;= #{begintime}</if>
+			<if test="endtime != null"> and pp.EXCEPTTIME &lt;= #{endtime}</if>
+			<if test="rpid != null"> and ${rpid}</if>
+		</where>
+	</select>
+	
+	
+	<select id="selectIScomplete"  parameterType="java.lang.String" resultType="java.lang.Integer">
+		select (t1.c1-t2.c2) as c from (
+		select count(*) as c1 from pl_patrolplan_details where patrolplanid
+		=#{id}) t1,(
+		select count(*) as c2 from pl_patrol p inner join pl_patrolplan_details ppd
+		on p.patrolplandetailsid =ppd.id where ppd.patrolplanid =#{id}) t2
+	</select>
+</mapper>

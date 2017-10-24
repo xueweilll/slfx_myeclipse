@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="autonomouslyDispatch" name="autonomouslyDispatch" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <userTask id="leadertask" name="单位/分管领导签发" activiti:formKey="a1e83789-5f25-49e1-ae2d-1b904024e0e7">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.benqzl.core.activiti.DispatchListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="leadertask"></sequenceFlow>
+    <endEvent id="districtEnd" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.benqzl.core.activiti.CompleteDispatchListener"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
+    <userTask id="autoOrder" name="工程科具体分解" activiti:formKey="de80cacf-926d-4ff7-a20f-dfcbb832cd17">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.benqzl.core.activiti.DispatchListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow15" sourceRef="leadertask" targetRef="autoOrder"></sequenceFlow>
+    <sequenceFlow id="flow16" sourceRef="autoOrder" targetRef="districtEnd"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_autonomouslyDispatch">
+    <bpmndi:BPMNPlane bpmnElement="autonomouslyDispatch" id="BPMNPlane_autonomouslyDispatch">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="20.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="leadertask" id="BPMNShape_leadertask">
+        <omgdc:Bounds height="55.0" width="105.0" x="85.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="districtEnd" id="BPMNShape_districtEnd">
+        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="320.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="autoOrder" id="BPMNShape_autoOrder">
+        <omgdc:Bounds height="55.0" width="105.0" x="85.0" y="209.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="137.0" y="55.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="100.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
+        <omgdi:waypoint x="137.0" y="155.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="209.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="137.0" y="264.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="320.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

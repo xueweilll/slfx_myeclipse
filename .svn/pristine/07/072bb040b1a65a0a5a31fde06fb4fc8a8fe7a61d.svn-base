@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.water.StPumprMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.water.StPumpr" >
+    <id column="F_ID" property="fId" jdbcType="VARCHAR" />
+    <result column="STCD" property="stcd" jdbcType="VARCHAR" />
+    <result column="TM" property="tm" jdbcType="TIMESTAMP" />
+    <result column="PPUPZ" property="ppupz" jdbcType="DECIMAL" />
+    <result column="PPDWZ" property="ppdwz" jdbcType="DECIMAL" />
+    <result column="OMCN" property="omcn" jdbcType="DECIMAL" />
+    <result column="OMPWR" property="ompwr" jdbcType="DECIMAL" />
+    <result column="PMPQ" property="pmpq" jdbcType="DECIMAL" />
+    <result column="PPUPWPTN" property="ppupwptn" jdbcType="VARCHAR" />
+    <result column="PPDWWPTN" property="ppdwwptn" jdbcType="VARCHAR" />
+    <result column="PDCHCD" property="pdchcd" jdbcType="VARCHAR" />
+    <result column="SNAME" property="sname" jdbcType="VARCHAR"/>
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+      <id property="id" column="SID"/>
+      <result property="name" column="SNAME"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    F_ID, STCD, TM, PPUPZ, PPDWZ, OMCN, OMPWR, PMPQ, PPUPWPTN, PPDWWPTN, PDCHCD
+  </sql>
+  <sql id="Base_Column_List2" >
+    r.f_id as F_ID, r.stcd as STCD, 
+    r.tm as TM, r.ppupz as PPUPZ, r.ppdwz as PPDWZ, 
+    r.omcn as OMCN, r.ompwr as OMPWR, r.pmpq as PMPQ, 
+    r.ppupwptn as PPUPWPTN, r.ppdwwptn as PPDWWPTN, r.pdchcd as PDCHCD,
+    s.name as SNAME
+  </sql>
+   <sql id="Base_Column_List1" >
+   m.f_id as F_ID, m.stcd as STCD, m.tm as TM, m.ppupz as PPUPZ, m.ppdwz as PPDWZ, 
+   m.omcn as OMCN, m.ompwr as OMPWR,m.pmpq as PMPQ, 
+   m.ppupwptn as PPUPWPTN, m.ppdwwptn as PPDWWPTN, m.pdchcd as PDCHCD,
+   st.name as SNAME
+  </sql>
+  <select id="findStPumprExport" resultMap="BaseResultMap" parameterType="java.util.Map">
+    	select
+		<include refid="Base_Column_List1" />
+		from ST_PUMP_R m  
+		left join sys_station st on st.code=m.stcd
+        WHERE 1=1 
+        and m.tm &gt;=#{starttime,jdbcType=TIMESTAMP} 
+        and m.tm &lt;=#{endtime,jdbcType=TIMESTAMP}
+        and st.id =#{stationid,jdbcType=VARCHAR}
+		order by m.tm desc
+  </select>
+  <select id="pageCountStPumprExport" resultType="java.lang.Integer" parameterType="java.util.Map">
+    	select
+		count(*)
+		from ST_PUMP_R m  
+		left join sys_station st on st.code=m.stcd
+        WHERE 1=1 
+        and m.tm &gt;=#{starttime,jdbcType=TIMESTAMP} 
+        and m.tm &lt;=#{endtime,jdbcType=TIMESTAMP}
+        and st.id =#{stationid,jdbcType=VARCHAR}
+  </select>
+  <select id="findRegimeByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+    		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from ST_PUMP_R m  
+		left join sys_station st on st.code=m.stcd
+        WHERE 1=1
+        <if test="starttime !='0'.toString() and starttime !=null">
+        and m.tm &gt;=#{starttime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="endtime !=null">
+        and m.tm &lt;=#{endtime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="stcd !='0'.toString() and stcd !=null">
+        and m.stcd =#{stcd,jdbcType=VARCHAR}
+        </if>
+        <if test="sname!=null">
+        and st.name like '%'||#{sname,jdbcType=VARCHAR}||'%'
+        </if>
+		order by m.tm desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+  </select>
+  <select id="pageRegimeCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from ST_PUMP_R m 
+		left join sys_station st on st.code=m.stcd
+	    WHERE 1=1
+         <if test="starttime !='0'.toString() and starttime !=null">
+        and m.tm &gt;=#{starttime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="endtime !=null">
+        and m.tm &lt;=#{endtime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="stcd !='0'.toString() and stcd !=null">
+         and m.stcd= #{stcd,jdbcType=VARCHAR}
+        </if>
+        <if test="sname!=null">
+         and st.name like '%'||#{sname,jdbcType=VARCHAR}||'%'
+        </if>
+        </select>
+        <select id="findHistoryWater" resultType="com.benqzl.pojo.water.StPumpr" parameterType="java.util.Map">
+        select
+        max(r.ppupz) as ppupz,max(r.ppdwz)as ppdwz,max(r.stcd) as SNAME, TO_CHAR(r.tm,'yyyy-mm-dd HH24') as STCD
+        from ST_PUMP_R r
+        left join sys_station s
+        on s.code = r.stcd
+        where 1=1
+        <if test="time !=null">
+        and to_char(r.tm,'yyyy')=#{time,jdbcType=VARCHAR}
+        </if>
+        <if test="year!=null">
+         and to_char(r.tm,'yyyy')=#{year,jdbcType=VARCHAR}
+        </if>
+        <if test="month!=null">
+         and to_char(r.tm,'yyyy-MM')=#{month,jdbcType=VARCHAR}
+        </if>
+        <if test="day!=null">
+         and to_char(r.tm,'yyyy-MM-dd')=#{day,jdbcType=VARCHAR}
+        </if>
+        <if test="sid !=null">
+        and s.id=#{sid}        
+        </if>
+        group by TO_CHAR(r.tm,'yyyy-mm-dd HH24')
+        ORDER BY STCD asc
+        </select>
+        <select id="findWaterStation" resultType="com.benqzl.pojo.water.StPumpr" parameterType="java.util.Map">
+        select
+        distinct s.name as SNAME
+        from (select s.name as name from ST_PUMP_R r
+        left join sys_station s
+        on s.code = r.stcd
+        where 1=1
+        <if test="time !=null">
+        and to_char(tm,'yyyy')=#{time,jdbcType=VARCHAR}
+        </if>
+        <if test="year!=null">
+         and to_char(tm,'yyyy')=#{year,jdbcType=VARCHAR}
+        </if>
+        <if test="month!=null">
+         and to_char(tm,'yyyy-MM')=#{month,jdbcType=VARCHAR}
+        </if>
+        <if test="day!=null">
+         and to_char(tm,'yyyy-MM-dd')=#{day,jdbcType=VARCHAR}
+        </if>
+       
+        order by r.tm asc) s
+        </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from ST_PUMP_R
+    where F_ID = #{fId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from ST_PUMP_R
+    where F_ID = #{fId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.water.StPumpr" >
+    insert into ST_PUMP_R (F_ID, STCD, TM, PPUPZ, 
+      PPDWZ, OMCN, OMPWR, 
+      PMPQ, PPUPWPTN, PPDWWPTN, 
+      PDCHCD)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select SYS_GUID(),
+			#{item.stcd,jdbcType=VARCHAR}, #{item.tm,jdbcType=TIMESTAMP},
+			#{item.ppupz,jdbcType=DECIMAL},
+			#{item.ppdwz,jdbcType=DECIMAL}, #{item.omcn,jdbcType=DECIMAL}, #{item.ompwr,jdbcType=DECIMAL},
+			#{item.pmpq,jdbcType=DECIMAL}, #{item.ppupwptn,jdbcType=VARCHAR},
+			#{item.ppdwwptn,jdbcType=VARCHAR},
+			#{item.pdchcd,jdbcType=VARCHAR} from dual)
+		</foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.water.StPumpr" >
+    insert into ST_PUMP_R
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="fId != null" >
+        F_ID,
+      </if>
+      <if test="stcd != null" >
+        STCD,
+      </if>
+      <if test="tm != null" >
+        TM,
+      </if>
+      <if test="ppupz != null" >
+        PPUPZ,
+      </if>
+      <if test="ppdwz != null" >
+        PPDWZ,
+      </if>
+      <if test="omcn != null" >
+        OMCN,
+      </if>
+      <if test="ompwr != null" >
+        OMPWR,
+      </if>
+      <if test="pmpq != null" >
+        PMPQ,
+      </if>
+      <if test="ppupwptn != null" >
+        PPUPWPTN,
+      </if>
+      <if test="ppdwwptn != null" >
+        PPDWWPTN,
+      </if>
+      <if test="pdchcd != null" >
+        PDCHCD,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="fId != null" >
+        #{fId,jdbcType=VARCHAR},
+      </if>
+      <if test="stcd != null" >
+        #{stcd,jdbcType=VARCHAR},
+      </if>
+      <if test="tm != null" >
+        #{tm,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ppupz != null" >
+        #{ppupz,jdbcType=DECIMAL},
+      </if>
+      <if test="ppdwz != null" >
+        #{ppdwz,jdbcType=DECIMAL},
+      </if>
+      <if test="omcn != null" >
+        #{omcn,jdbcType=DECIMAL},
+      </if>
+      <if test="ompwr != null" >
+        #{ompwr,jdbcType=DECIMAL},
+      </if>
+      <if test="pmpq != null" >
+        #{pmpq,jdbcType=DECIMAL},
+      </if>
+      <if test="ppupwptn != null" >
+        #{ppupwptn,jdbcType=VARCHAR},
+      </if>
+      <if test="ppdwwptn != null" >
+        #{ppdwwptn,jdbcType=VARCHAR},
+      </if>
+      <if test="pdchcd != null" >
+        #{pdchcd,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.water.StPumpr" >
+    update ST_PUMP_R
+    <set >
+      <if test="stcd != null" >
+        STCD = #{stcd,jdbcType=VARCHAR},
+      </if>
+      <if test="tm != null" >
+        TM = #{tm,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ppupz != null" >
+        PPUPZ = #{ppupz,jdbcType=DECIMAL},
+      </if>
+      <if test="ppdwz != null" >
+        PPDWZ = #{ppdwz,jdbcType=DECIMAL},
+      </if>
+      <if test="omcn != null" >
+        OMCN = #{omcn,jdbcType=DECIMAL},
+      </if>
+      <if test="ompwr != null" >
+        OMPWR = #{ompwr,jdbcType=DECIMAL},
+      </if>
+      <if test="pmpq != null" >
+        PMPQ = #{pmpq,jdbcType=DECIMAL},
+      </if>
+      <if test="ppupwptn != null" >
+        PPUPWPTN = #{ppupwptn,jdbcType=VARCHAR},
+      </if>
+      <if test="ppdwwptn != null" >
+        PPDWWPTN = #{ppdwwptn,jdbcType=VARCHAR},
+      </if>
+      <if test="pdchcd != null" >
+        PDCHCD = #{pdchcd,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where F_ID = #{fId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.water.StPumpr" >
+    update ST_PUMP_R
+    set STCD = #{stcd,jdbcType=VARCHAR},
+      TM = #{tm,jdbcType=TIMESTAMP},
+      PPUPZ = #{ppupz,jdbcType=DECIMAL},
+      PPDWZ = #{ppdwz,jdbcType=DECIMAL},
+      OMCN = #{omcn,jdbcType=DECIMAL},
+      OMPWR = #{ompwr,jdbcType=DECIMAL},
+      PMPQ = #{pmpq,jdbcType=DECIMAL},
+      PPUPWPTN = #{ppupwptn,jdbcType=VARCHAR},
+      PPDWWPTN = #{ppdwwptn,jdbcType=VARCHAR},
+      PDCHCD = #{pdchcd,jdbcType=VARCHAR}
+    where F_ID = #{fId,jdbcType=VARCHAR}
+  </update>
+</mapper>

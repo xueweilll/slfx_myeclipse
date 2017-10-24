@@ -1,0 +1,489 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<base href="<%=basePath%>">
+
+<title>调度接收单信息</title>
+
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+<meta http-equiv="description" content="This is my page">
+<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+</head>
+
+<body>
+	<input id="Id" type="hidden" value="${receipt.getId()}" />
+	<input id="state" type="hidden" value="${state}" />
+	<input id="fileAccessory" type="hidden" value="${fileaddress}"/>
+	<div>
+		<p>
+			<img alt="" src="images/zlogo.png"> <span align="center"
+				style="font-size: 25;">调&nbsp;&nbsp;度&nbsp;&nbsp;令</span>
+		</p>
+	</div>
+	<form id="ffgate" method="post"
+		style="margin: 2px; margin-left:10px; text-align: left">
+		<table cellpadding="0" cellspacing="5" border="0">
+			<tr>
+				<td><label for="Code"
+					style="display: inline-block; width: 80px;">调度令编号:</label></td>
+				<td><input id="Code" name="Code" class="easyui-textbox"
+					type="text" style="width:250px;" value="${receipt.getCode()}"
+					data-options="disabled:true" /></td>
+			</tr>
+			<tr>
+				<td><label for="Way">调度令方式:</label></td>
+				<td><input id="Way" name="Way" style="width:250px;"
+					value="${receipt.getWay()}" /></td>
+			</tr>
+			<tr>
+				<td><label for="DispatchType">调度令类型:</label></td>
+				<td><input id="DispatchType" name="DispatchType"
+					style="width:250px;" value="${receipt.getDispatchtype()}" /></td>
+			</tr>
+
+			<tr id="AccessoryLabel" >
+				<td><label  for="DispatchAccessory">调度附件:</label></td>
+				<td><input id="DispatchAccessory" type="file" accept=".doc,.docx,.txt,.pdf" onchange="change(this)" name="DispatchAccessory"
+					style="width:120px;float:left ;"/>
+					<label id="upAccessory" class="easyui-linkbutton" style="width:40px;" data-options="disabled:true">上传</label>
+					<label id="downAccessory" style="width:40px;display:none;"class="easyui-linkbutton">下载</label>
+					<label id="deleteAccessory" style="width:40px;float:right;display:none;"class="easyui-linkbutton">删除</label></td>
+				<!-- <td><label id="up" class="easyui-linkbutton"style="width:50px;">上传</label></td> -->
+			</tr>
+			<tr>
+				<td><label for="DispatchAccessory">文件名:</label></td>
+				<td><input id="DispatchAccessorys" class="easyui-textbox" name="DispatchAccessorys"
+					style="width:250px;" value="${DispatchAccessory}" data-options="disabled:true" /></td>
+			</tr>
+			<tr>
+				<td><label for="Launcher">调度令发起人:</label></td>
+				<td><input id="Launcher" class="easyui-textbox" type="text"
+					name="Launcher"
+					data-options="required:true,validType:'length[1,5]'"
+					style="width:250px;" value="${receipt.getLauncher()}" /></td>
+			</tr>
+			<%-- 	<tr>
+				<td><label for="LaunchTime">调度发起时间:</label></td>
+				<td><input id="LaunchTime" name="LaunchTime" style="width:250px;"
+					value="${launchTime}" /></td>
+			</tr>
+			<tr>
+				<td><label for="EndTime">调度结束时间:</label></td>
+				<td><input id="EndTime" name="EndTime" value="${endTime}"  style="width:250px;"/></td>
+			</tr> --%>
+			<tr>
+				<td><label for="Memo">调度令内容:</label></td>
+				<td><input id="Memo" class="easyui-textbox" type="text"
+					name="Memo" data-options="required:true" style="width:250px;"
+					value="${receipt.getMemo()}" style="" /></td>
+			</tr>
+			<tr>
+				<td><label for="Receipter"
+					style="display: inline-block; width: 80px">调度令接收人:</label></td>
+				<td><input id="Receipter" name="Receipter" style="width:250px;"
+					value="${receipt.getReceipter()}" /></td>
+			</tr>
+
+			<tr>
+				<td><label for="ReceipteTime">调度令接收时间:</label></td>
+				<td><input id="ReceipteTime" name="ReceipteTime"
+					style="width:250px;" value="${receiptetime}" /></td>
+			</tr>
+		</table>
+
+		<div id="btn" style="text-align: left; ">
+			<a id="sub" href="javascript:void(0)" class="easyui-linkbutton"
+				style="margin-left:80px;" data-options="iconCls:'icon-save'">保存</a>
+			<a id="commit" href="javascript:void(0)" class="easyui-linkbutton"
+				style="margin-left:30px;" data-options="iconCls:'icon-save'">提交</a><a
+				id="can" href="javascript:void(0)" class="easyui-linkbutton"
+				style="margin-left:30px;" data-options="iconCls:'icon-cancel'">取消</a>
+		</div>
+	</form>
+	<script type="text/javascript">
+		$(function() {
+			/* var id=$('#Id').val();
+			if(id==""){
+				$.post('dispatchinstructions/findCode.html?pref=ar',function(data){
+					$('#Code').textbox('setText',data);
+				})
+			} */
+			/* $("#LaunchTime").datetimebox({
+				required : true,
+				showSeconds : true,
+				missingMessage : "该输入项为必输项",
+				editable : false
+			});
+			$("#EndTime").datetimebox({
+				required : true,
+				showSeconds : true,
+				missingMessage : "该输入项为必输项",
+				editable : false
+			}); */
+			var Accessory = $("#fileAccessory").val();
+			var upfilename="";
+			if(Accessory!=undefined){
+				upfilename=Accessory;
+			}
+			var a=$("#DispatchAccessorys").val();
+           if(a!=""){
+        	   $("#Launcher").textbox({
+					required : false,
+				});
+		        $("#Memo").textbox({
+					required : false,
+				});
+        	   
+           }
+			var buttons = $.extend([], $.fn.datetimebox.defaults.buttons);
+			buttons.splice(3, 0, {
+				text : '清空',
+				handler : function(target) {
+					$(target).datetimebox('setValue', '');
+					$(target).datetimebox('hidePanel');
+				}
+			});
+
+			function myformatter(date) {
+				var y = date.getFullYear();
+				var m = date.getMonth() + 1;
+				var d = date.getDate();
+				var h = date.getHours();
+				var min = date.getMinutes();
+				var sec = date.getSeconds();
+				return y + '-' + (m < 10 ? ('0' + m) : m) + '-'
+						+ (d < 10 ? ('0' + d) : d) + " "
+						+ (h < 10 ? ('0' + h) : h) + ':'
+						+ (min < 10 ? ('0' + min) : min) + ':'
+						+ (sec < 10 ? ('0' + sec) : sec);
+			}
+
+			$("#ReceipteTime").datetimebox({
+				buttons : buttons,
+				required : true,
+				showSeconds : true,
+				missingMessage : "该输入项为必输项",
+				editable : false
+			});
+
+			var curr_time = new Date();
+			$("#ReceipteTime").datetimebox("setValue", myformatter(curr_time));
+
+			$("#Way").combobox({
+				url : 'paramers/wayData.html',
+				valueField : 'id',
+				textField : 'text',
+				editable : false,
+				required : true,
+				value : $("#Way").val(),
+				onChange:function(newValue,oleValue){
+					if(newValue=="1"){
+						$('#upAccessory').linkbutton('enable');
+					}else{
+						$('#upAccessory').linkbutton('disable');
+					}
+				}
+			});
+			if($("#Way").combobox("getValue")==1){
+           	 $('#upAccessory').linkbutton({
+           		 disabled:false
+           	 });
+            }
+			$("#DispatchType").combobox({
+				url : 'paramers/dispatchTypeData.html',
+				valueField : 'id',
+				textField : 'text',
+				editable : false,
+				required : true,
+				disabled : true,
+				value : $("#DispatchType").val()
+			});
+
+			$("#Receipter").combobox({
+				url : 'areareceipt/userList.html',
+				valueField : 'id',
+				textField : 'name',
+				editable : false,
+				value : $("#Receipter").val(),
+				required : true
+			}); 
+		/* 	$("#Receipter").combogrid({
+				width : 'auto',
+				url : 'areareceipt/userList.html',
+				remoteSort : false,
+				editable : false,
+				idField : 'id',
+				textField : 'name',
+				columns : [ [ {
+					field : 'dname',
+					width : '120px',
+					title : '部门名称'
+				}, {
+					field : 'name',
+					width :'120px',
+					title : '人员名称'
+				},  {
+					field : 'id',
+					hidden : true
+				} ] ]
+			}); */
+			$("#commit").bind(
+					"click",
+					function() {
+						var isValid = $("#ffgate").form('validate');
+						if (!isValid) {
+							$.messager.progress('close');
+							return false;
+						}
+						var data = {
+							"id" : ($("#Id").val() == "" ? 0 : $("#Id").val()),
+							"code" : $("#Code").textbox("getText"),
+							"memo" : $("#Memo").textbox("getValue"),
+							"launcher" : $("#Launcher ").textbox("getValue"),
+							"launchtime" : $("#ReceipteTime").datetimebox(
+									"getValue"),
+							"endtime" : $("#ReceipteTime").datetimebox(
+									"getValue"),
+							"receiptetime" : $("#ReceipteTime").datetimebox(
+									"getValue"),
+							"way" : $("#Way").combobox("getValue"),
+							"dispatchtype" : $("#DispatchType").combobox(
+									"getValue"),
+							"receipter" : $("#Receipter").combobox("getValue"),
+							"fileaddress":upfilename,//上传文件名称
+							"state" : 1
+						};
+					 	$.ajax({
+							type : "POST",
+							url : "areareceipt/save.html",
+							dataType : "text",
+							data : {
+								"jsonStr" : JSON.stringify(data)
+							},
+							success : function(msg) {
+								var data = eval('(' + msg + ')');
+								alert("编号为：" + data.code);
+								$.messager.progress('close');
+								reflush();
+								$('#dialog').window('close');
+							}
+						}); 
+					});
+
+			$("#sub").bind(
+					"click",
+					function() {
+						$.messager.progress();
+						var isValid = $("#ffgate").form('validate');
+						if (!isValid) {
+							$.messager.progress('close');
+							return false;
+						}
+						var data = {
+							"id" : ($("#Id").val() == "" ? 0 : $("#Id").val()),
+							"code" : $("#Code").textbox("getText"),
+							"memo" : $("#Memo").textbox("getValue"),
+							"launcher" : $("#Launcher ").textbox("getValue"),
+							"launchtime" : $("#ReceipteTime").datetimebox(
+									"getValue"),
+							"endtime" : $("#ReceipteTime").datetimebox(
+									"getValue"),
+							"receiptetime" : $("#ReceipteTime").datetimebox(
+									"getValue"),
+							"way" : $("#Way").combobox("getValue"),
+							"dispatchtype" : $("#DispatchType").combobox(
+									"getValue"),
+							"receipter" : $("#Receipter").combobox("getValue"),
+							"fileaddress":upfilename,//上传文件名称
+							"state" : 0
+						};
+
+						$.ajax({
+							type : "POST",
+							url : "areareceipt/save.html",
+							dataType : "text",
+							data : {
+								"jsonStr" : JSON.stringify(data)
+							},
+							success : function() {
+								$.messager.progress('close');
+								reflush();
+								$('#dialog').window('close');
+							}
+						});
+					});
+
+			$("#can").bind("click", function() {
+				var id = $("#Id").val();
+				if (id != null && id.length > 0) {
+					$('#dialog').window('close');
+				} else {
+					var s = $("#Code").textbox("getValue");
+					var state = $("#state").val();
+					var type = $("#DispatchType").combobox("getValue");
+					$("#ffgate").form("clear");
+					$("#Code").textbox("setValue", s);
+					$("#Id").val(id);
+					$("#state").val(state);
+					$("#DispatchType").combobox("setValue", type);
+				}
+			});
+
+			/* if($("#DispatchType").combobox("getValue") == "1"){
+				document.getElementById("commit").style.display="none";
+			}	
+			 */
+			 $("#upAccessory").bind('click',function(){
+				 if($(this).linkbutton('options').disabled == false){
+				 if($("#DispatchAccessory").val()==""){
+					$.messager.alert("操作提示","请选择上传文件","info");
+					return false;
+				}else{
+				 $.ajaxFileUpload({		        
+				        url:'areareceipt/saveAccessory.html',
+				        secureuri:false,                       //是否启用安全提交,默认为false
+				        //fileElementId:'myBlogImage',           //文件选择框的id属性
+				        dataType:'text',                       //服务器返回的格式,可以是json或xml等
+				        //fileElementId:arrId,					//数组
+				        data:{
+						"upfilename":upfilename
+					     },
+				        fileElementId:'DispatchAccessory',					//单个
+				        success:function(data, status){        //服务器响应成功时的处理函数
+				        upfilename=data;
+				        var filename=new Array();
+				        filename=data.split("_");//截取字符串
+				        $("#DispatchAccessorys").textbox("setValue",filename[1]);
+				        $("#Launcher").textbox({
+							required : false,
+						});
+				        $("#Memo").textbox({
+							required : false,
+						});
+				        $.messager.alert("操作提示","上传成功","info");
+				        },
+				        error:function(data, status, e){ //服务器响应失败时的处理函数
+				           $.messager.alert("操作提示","上传失败请重新上传","error");
+				        }
+				    });
+				}}});
+			 if($("#DispatchAccessorys").val()!=""){
+				 $("#downAccessory").show();
+				 $("#deleteAccessory").show();
+			 } 
+			 $("#DispatchAccessorys").textbox({
+					onChange : function(newValue, oldValue) {
+						if (oldValue=="") {
+							 $("#downAccessory").show();
+							 $("#deleteAccessory").show();
+						}
+						if(newValue==""){
+							 $("#downAccessory").hide();
+							 $("#deleteAccessory").hide();
+						}
+					}
+			 });
+				$("#downAccessory").bind("click",function(){
+					var link="areareceipt/downAccessory.html?filename="+myEncoder(upfilename);
+					window.location.href=link;
+				});
+				$("#deleteAccessory").bind("click",function(){
+					$.ajax({
+						type : "POST",
+						url : "areareceipt/deleteAccessory.html",
+						dataType : "text",
+						data : {
+							"upfilename" : upfilename
+						},
+						success : function(data) {
+							if(data="true"){
+							upfilename="";
+							$("#DispatchAccessorys").textbox("setValue","");
+							$("#Launcher").textbox({
+								required : true,
+							});
+					        $("#Memo").textbox({
+								required : true,
+							});
+					        $.messager.alert("操作提示","删除成功","info");
+						}else{
+							$.messager.alert("操作提示","删除失败","error");
+						}
+							}
+					});
+				});
+			if ($("#state").val() == "1") {
+				$("#Code").textbox({
+					disabled : true
+				});
+				$("#Launcher").textbox({
+					disabled : true
+				});
+				$("#Memo").textbox({
+					disabled : true
+				});
+				$("#Way").combobox({
+					disabled : true
+				});
+				$("#Receipter").combobox({
+					disabled : true
+				});
+				$("#DispatchType").combobox({
+					disabled : true
+				});
+				$("#LaunchTime").combobox({
+					disabled : true
+				});
+				$("#EndTime").combobox({
+					disabled : true
+				});
+				$("#ReceipteTime").combobox({
+					disabled : true
+				});
+				$("#sub").hide();
+				$("#commit").hide();
+				$("#can").hide();
+			    $("#AccessoryLabel").hide();
+			    $("#upAccessory").hide();
+			    $("#downAccessory").show();
+			}
+
+		});
+
+		function reflush() {
+			//if($("#DispatchType").combobox("getValue") == "0"){
+			document.getElementById('areareceipt.htmlifm').contentWindow.$(
+					'#receipt_list').datagrid('reload');
+			/* }else if($("#DispatchType").combobox("getValue") == "1"){
+				document.getElementById('areareceipt/bigList.htmlifm').contentWindow.$('#receipt_list').datagrid('reload');
+			} */
+		}
+		
+		function change(o){
+			if(o.value.indexOf('.jsp') > -1 || o.value.indexOf('.asp') || o.value.indexOf('.aspx') || o.value.indexOf('.html') || o.value.indexOf('.htm')){
+				$.messager.alert("操作提示","文档类型不正确!","error");
+				$("#DispatchAccessory").val("");
+			}else if (o.value.indexOf('.txt') > -1 || o.value.indexOf('.doc') > -1 || o.value.indexOf('.docx') > -1 || o.value.indexOf('.pdf') > -1){
+				
+			}else {
+				$.messager.alert("操作提示","文档类型只能选择word或者pdf格式!","error");
+				$("#DispatchAccessory").val("");
+			}
+		}
+	</script>
+</body>
+</html>

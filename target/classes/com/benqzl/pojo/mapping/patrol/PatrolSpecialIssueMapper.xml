@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialIssueMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialIssue" >
+    <id column="flow_isid" property="id" jdbcType="VARCHAR" />
+     <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="CLASSES" property="classes" jdbcType="DECIMAL" />
+    <result column="CONTENT" property="content" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <association property="user" javaType="com.benqzl.pojo.system.User">
+    	<id column="CREATER" property="userid" jdbcType="VARCHAR" />   	
+    	<result column="EMPLOYEEID" property="employeeid" jdbcType="VARCHAR" />
+    	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+	    	<id column="EMPLOYEEID" property="id" jdbcType="VARCHAR" />   	
+	    	<result column="EMPLOYEENAME" property="name" jdbcType="VARCHAR" />   	
+    	</association>
+    </association>
+    <association property="patrolSpecialResolve" javaType="com.benqzl.pojo.patrol.PatrolSpecialResolve">
+    	<id column="id" property="id"/>
+    	<result column="flow_isids" property="isid"/>
+    	<result column="creater" property="creater"/>
+    	<result column="createtime" property="createtime"/>
+    	<result column="content" property="content"/>
+    	<result column="remark" property="remark"/>
+    </association>
+    <association property="patrolSpecialFolw" javaType="com.benqzl.pojo.patrol.PatrolSpecialFolw">
+    	<id column="id" property="id"/>
+    	<result column="flow_isid" property="isid"/>
+    	<result column="qf" property="qf"/>
+    	<result column="fj" property="fj"/>
+    	<result column="zx" property="zx"/>
+    	<result column="ss" property="ss"/>
+    	<result column="hz" property="hz"/>
+    	<result column="sb" property="sb"/>
+    	<result column="sy" property="sy"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, CODE,CREATER, CREATETIME, CLASSES, CONTENT, REMARK
+  </sql>
+   <sql id="Base_Column_List1" >
+    ID, CODE,CREATER, CREATETIME, CLASSES, CONTENT, REMARK
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_SPECIAL_ISSUE
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_SPECIAL_ISSUE
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialIssue" >
+    insert into PL_SPECIAL_ISSUE (ID, CODE,CREATER, CREATETIME, 
+      CLASSES, CONTENT, REMARK
+      )
+    values (#{id,jdbcType=VARCHAR},#{code,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, #{createtime,jdbcType=DATE}, 
+      #{classes,jdbcType=DECIMAL}, #{content,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialIssue" >
+    insert into PL_SPECIAL_ISSUE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="classes != null" >
+        CLASSES,
+      </if>
+      <if test="content != null" >
+        CONTENT,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=DATE},
+      </if>
+      <if test="classes != null" >
+        #{classes,jdbcType=DECIMAL},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialIssue" >
+    update PL_SPECIAL_ISSUE
+    <set >
+      <if test="code != null" >
+        CODE = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=DATE},
+      </if>
+      <if test="classes != null" >
+        CLASSES = #{classes,jdbcType=DECIMAL},
+      </if>
+      <if test="content != null" >
+        CONTENT = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialIssue" >
+    update PL_SPECIAL_ISSUE
+    set CREATER = #{creater,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=DATE},
+      CLASSES = #{classes,jdbcType=DECIMAL},
+      CONTENT = #{content,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 新增 -->
+  <select id="selectEgpatrolByPage1" parameterType="java.util.Map" resultMap="BaseResultMap">
+  select B.* from
+		(select A.*,ROWNUM RN from(
+                  SELECT           
+                       i.id  as flow_isid,i.creater,i.createtime,
+                       i.classes,i.content,i.remark,i.code,
+                       U.EMPLOYEEID,
+                       e.name AS employeename,
+                       f.fj
+                  from pl_special_issue i
+                  left join sys_user u on u.userid = i.creater
+                  left join sys_employee e on e.id = u.employeeid 
+                  left join pl_special_flow f on f.isid=i.id
+                  
+                  <where>   
+                   <if test="startTime != null">   
+                       and i.createtime &gt;=#{startTime,jdbcType=VARCHAR}
+                   </if> 
+                   <if test="endTime != null">  
+                       and i.createtime &lt;= #{endTime,jdbcType=VARCHAR}
+                   </if>
+                   	<if test="type =='0'.toString()">
+		               and i.classes=3 and f.fj=0
+		           </if>
+                  and f.qf=1
+                </where>  
+                   order by i.createtime desc
+    ) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		where RN &gt; #{p1}
+  </select>
+    <!-- 新增 -->
+  <select id="selectEgpatrolByPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+  select B.* from
+		(select A.*,ROWNUM RN from(
+    SELECT           
+                       i.*,
+                       U.EMPLOYEEID，
+                       e.name AS employeename
+                       
+                       
+                  from pl_special_issue i
+                  left join sys_user u
+                    on u.userid = i.creater
+                  left join sys_employee e
+                    on e.id = u.employeeid
+    ) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		where RN &gt; #{p1}
+  </select>
+  <select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		 SELECT count(*)
+                  from pl_special_issue i
+                  left join sys_user u
+                    on u.userid = i.creater
+                  left join sys_employee e
+                    on e.id = u.employeeid
+                  left join pl_special_flow f
+                    on f.isid = i.id
+                    <where>   
+                   <if test="startTime != null">   
+                       and i.createtime &gt;=#{startTime,jdbcType=VARCHAR}
+                   </if> 
+                   <if test="endTime != null">  
+                       and i.createtime &lt;= #{endTime,jdbcType=VARCHAR}
+                   </if>
+                    <if test="type =='0'.toString()">
+		               and i.classes=3 and f.fj=0
+		   			 </if>
+                 and f.qf=1 
+                </where> 
+                 order by i.createtime desc
+	</select>
+	<!-- <select id="selectByCombobox" resultMap="BaseResultMap">
+		select i.id,i.code from pl_special_issue i left join pl_special_flow f on
+		i.id = f.isid
+		where f.ss = 0
+	</select> -->
+	
+	<select id="selectByCombobox" resultType="com.benqzl.pojo.patrol.PatrolSpecialIssue">
+		select i.id,i.code from pl_special_issue i left join pl_special_flow f on
+		i.id = f.isid
+		where f.ss = 0
+	</select>
+	<select id="selectByIssue" parameterType="java.util.Map" resultType="com.benqzl.pojo.patrol.PatrolSpecialIssue">
+	    select i.id,i.code from pl_special_issue i left join pl_special_flow f on
+		i.id = f.isid
+		where f.zx = 1 and f.ss=0
+		<!-- classes=3为应急巡检 -->
+		<if test="classes=='3'.toString()">
+		 and i.classes=3
+		</if>
+		<!-- classes=2为定期巡检 -->
+		<if test="classes=='2'.toString()">
+		 and i.classes&lt;3
+		</if>
+	</select>
+	<select id="findIssueById" parameterType="String" resultType="com.benqzl.pojo.patrol.PatrolSpecialIssue">
+		select * from pl_special_issue
+		where id=#{id}
+	</select>
+	
+	<!-- 新增定期 -->
+  <select id="selectRegularEgpatrolByPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+  select B.* from
+		(select A.*,ROWNUM RN from(
+                  SELECT           
+                       i.id  as flow_isid,i.creater,i.createtime,
+                       i.classes,i.content,i.remark,i.code,
+                       U.EMPLOYEEID,
+                       e.name AS employeename,
+                        f.fj                    
+                  from pl_special_issue i
+                  left join sys_user u on u.userid = i.creater
+                  left join sys_employee e on e.id = u.employeeid 
+                  left join pl_special_flow f on f.isid=i.id
+                  
+                  <where>   
+                   <if test="startTime != null">   
+                       and i.createtime &gt;=#{startTime,jdbcType=VARCHAR}
+                   </if> 
+                   <if test="endTime != null">  
+                       and i.createtime &lt;= #{endTime,jdbcType=VARCHAR}
+                   </if>
+                  	<if test="type =='0'.toString()">
+		               and f.fj=0
+		           </if>
+		           and f.qf=1 
+                </where>  
+                   order by i.createtime desc
+    ) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		where RN &gt; #{p1}
+  </select>
+  <!-- 定期pageCount -->
+  <select id="regularPageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		 SELECT count(*)
+                  from pl_special_issue i
+                  left join sys_user u
+                    on u.userid = i.creater
+                  left join sys_employee e
+                    on e.id = u.employeeid
+                  left join pl_special_flow f
+                    on f.isid = i.id
+                    <where>   
+                   <if test="startTime != null">   
+                       and i.createtime &gt;=#{startTime,jdbcType=VARCHAR}
+                   </if> 
+                   <if test="endTime != null">  
+                       and i.createtime &lt;= #{endTime,jdbcType=VARCHAR}
+                   </if>
+                  <if test="type =='0'.toString()">
+		              and f.fj=0
+		   			 </if>
+		   			 and f.qf=1 
+                </where> 
+                 order by i.createtime desc
+	</select>
+	<select id="findIssueByIsid" parameterType="java.lang.String" resultMap="BaseResultMap">
+	    select <include refid="Base_Column_List1" /> from pl_special_issue 
+	    where id=#{isid,jdbcType=VARCHAR}
+	</select>
+</mapper>

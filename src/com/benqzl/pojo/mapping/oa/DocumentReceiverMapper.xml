@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.DocumentReceiverMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.DocumentReceiver" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="DOCUMENTID" property="documentid" jdbcType="VARCHAR" />
+    <result column="RECEIVERID" property="receiverid" jdbcType="VARCHAR" />
+    <result column="RECEIPTDATE" property="receiptdate" jdbcType="DATE" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, DOCUMENTID, RECEIVERID, RECEIPTDATE, STATE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from OA_DOCUNMENT_RECEIVER
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from OA_DOCUNMENT_RECEIVER
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  
+  <update id="updateState" parameterType="java.lang.String">
+       update  OA_DOCUNMENT_RECEIVER set state=1,ReceiptDate=sysdate
+    where DOCUMENTID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="deleteState" parameterType="java.lang.String">
+        update  OA_DOCUNMENT_RECEIVER set state=2,ReceiptDate=sysdate
+    where DOCUMENTID = #{id,jdbcType=VARCHAR}
+  </update>
+   <insert id="insert" parameterType="java.util.List" >
+   insert into OA_DOCUNMENT_RECEIVER (ID, DOCUMENTID, RECEIVERID, 
+      RECEIPTDATE, STATE)
+    <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.document.id,jdbcType=VARCHAR}, #{item.receiverid,jdbcType=VARCHAR}, 
+      #{item.receiptdate,jdbcType=DATE}, #{item.state,jdbcType=DECIMAL}  from dual) 
+    </foreach>
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.oa.DocumentReceiver" >
+    insert into OA_DOCUNMENT_RECEIVER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="documentid != null" >
+        DOCUMENTID,
+      </if>
+      <if test="receiverid != null" >
+        RECEIVERID,
+      </if>
+      <if test="receiptdate != null" >
+        RECEIPTDATE,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="documentid != null" >
+        #{documentid,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverid != null" >
+        #{receiverid,jdbcType=VARCHAR},
+      </if>
+      <if test="receiptdate != null" >
+        #{receiptdate,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.oa.DocumentReceiver" >
+    update OA_DOCUNMENT_RECEIVER
+    <set >
+      <if test="documentid != null" >
+        DOCUMENTID = #{documentid,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverid != null" >
+        RECEIVERID = #{receiverid,jdbcType=VARCHAR},
+      </if>
+      <if test="receiptdate != null" >
+        RECEIPTDATE = #{receiptdate,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.oa.DocumentReceiver" >
+    update OA_DOCUNMENT_RECEIVER
+    set DOCUMENTID = #{documentid,jdbcType=VARCHAR},
+      RECEIVERID = #{receiverid,jdbcType=VARCHAR},
+      RECEIPTDATE = #{receiptdate,jdbcType=DATE},
+      STATE = #{state,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="deleteByDocumentID" parameterType="java.lang.String">
+  	delete from OA_DOCUNMENT_RECEIVER where ID= #{id,jdbcType=VARCHAR}
+  </delete>
+</mapper>

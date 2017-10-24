@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchCallbackMapper">
+	<resultMap id="BaseResultMap"
+		type="com.benqzl.pojo.dispatch.ReceiptDispatchCallback">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+		<result column="RDID" property="rdid" jdbcType="VARCHAR" />
+		<result column="CALLBACK" property="callback" jdbcType="VARCHAR" />
+		<result column="CALLBACKUNIT" property="callbackunit" jdbcType="VARCHAR" />
+		<result column="CALLBACKPEOPLE" property="callbackpeople"
+			jdbcType="VARCHAR" />
+		<result column="CALLBACKTIME" property="callbacktime" jdbcType="TIMESTAMP" />
+		<result column="OPERATER" property="operater" jdbcType="VARCHAR" />
+		<association property="operateUser" javaType="com.benqzl.pojo.system.User">
+			<id column="OPERATER" property="userid" />
+			<result column="OPERATENAME" property="username" />
+		</association>
+	</resultMap>
+	<resultMap id="BaseRDMap" type="com.benqzl.pojo.dispatch.ReceiptDispatch">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="RECEIPTID" property="receiptid" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<result column="TRANSMITCONTENTS" property="transmitcontents"
+			jdbcType="VARCHAR" />
+		<result column="TRANSMITER" property="transmiter" jdbcType="VARCHAR" />
+		<result column="TRANSMITTIME" property="transmittime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="TRSTATE" property="trstate" jdbcType="DECIMAL" />
+		<result column="COMPLETETIME" property="completetime" jdbcType="TIMESTAMP" />
+		<result column="DISPATCHTYPE" property="dispatchtype" jdbcType="VARCHAR" />
+		<association property="receipt" javaType="com.benqzl.pojo.dispatch.Receipt">
+			<id column="RECEIPTID" property="id" />
+			<result column="RECEIPTER" property="receipter" />
+			<result column="RECEIPTETIME" property="receiptetime" />
+			<result column="LAUNCHER" property="launcher" />
+			<result column="LAUNCHTIME" property="launchtime" />
+			<result column="ENDTIME" property="endtime" />
+			<result column="RMEMO" property="memo"></result>
+			<result column="RCODE" property="code"></result>
+		</association>
+		<association property="names"
+			javaType="com.benqzl.pojo.dispatch.ReceiptDispatchUserName">
+			<result column="CREATENAME" property="CreateName" />
+			<result column="SENDUSERNAME" property="SendUserName" />
+			<result column="TRANSMITNAME" property="TransmitName" />
+			<result column="RECEIPTNAME" property="ReceiptName" />
+			<result column="RCREATENAME" property="RCreateName" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, CREATER, CREATETIME, EDITTIME, RDID, CALLBACK,
+		CALLBACKUNIT,
+		CALLBACKPEOPLE,
+		CALLBACKTIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_RD_CALLBACK
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		DIS_RD_CALLBACK
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchCallback">
+		insert into DIS_RD_CALLBACK
+		(ID, CREATER, CREATETIME,
+		EDITTIME, RDID, CALLBACK,
+		CALLBACKUNIT,
+		CALLBACKPEOPLE, CALLBACKTIME,OPERATER
+		)
+		values (#{id,jdbcType=VARCHAR},
+		#{creater,jdbcType=VARCHAR},
+		#{createtime,jdbcType=TIMESTAMP},
+		#{edittime,jdbcType=TIMESTAMP}, #{rdid,jdbcType=VARCHAR},
+		#{callback,jdbcType=VARCHAR},
+		#{callbackunit,jdbcType=VARCHAR},
+		#{callbackpeople,jdbcType=VARCHAR},
+		#{callbacktime,jdbcType=TIMESTAMP},
+		#{operater,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchCallback">
+		insert into DIS_RD_CALLBACK
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="creater != null">
+				CREATER,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="edittime != null">
+				EDITTIME,
+			</if>
+			<if test="rdid != null">
+				RDID,
+			</if>
+			<if test="callback != null">
+				CALLBACK,
+			</if>
+			<if test="callbackunit != null">
+				CALLBACKUNIT,
+			</if>
+			<if test="callbackpeople != null">
+				CALLBACKPEOPLE,
+			</if>
+			<if test="callbacktime != null">
+				CALLBACKTIME,
+			</if>
+			<if test="operater != null">
+				OPERATER,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="creater != null">
+				#{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="edittime != null">
+				#{edittime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="rdid != null">
+				#{rdid,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				#{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="callbackunit != null">
+				#{callbackunit,jdbcType=VARCHAR},
+			</if>
+			<if test="callbackpeople != null">
+				#{callbackpeople,jdbcType=VARCHAR},
+			</if>
+			<if test="callbacktime != null">
+				#{callbacktime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="operater != null">
+				#{operater,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchCallback">
+		update DIS_RD_CALLBACK
+		<set>
+			<if test="creater != null">
+				CREATER = #{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="edittime != null">
+				EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="rdid != null">
+				RDID = #{rdid,jdbcType=VARCHAR},
+			</if>
+			<if test="callback != null">
+				CALLBACK = #{callback,jdbcType=VARCHAR},
+			</if>
+			<if test="callbackunit != null">
+				CALLBACKUNIT = #{callbackunit,jdbcType=VARCHAR},
+			</if>
+			<if test="callbackpeople != null">
+				CALLBACKPEOPLE = #{callbackpeople,jdbcType=VARCHAR},
+			</if>
+			<if test="callbacktime != null">
+				CALLBACKTIME = #{callbacktime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="operater != null">
+				OPERATER = #{operater,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchCallback">
+		update
+		DIS_RD_CALLBACK
+		set CREATER = #{creater,jdbcType=VARCHAR},
+		CREATETIME =
+		#{createtime,jdbcType=TIMESTAMP},
+		EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+		RDID
+		= #{rdid,jdbcType=VARCHAR},
+		CALLBACK = #{callback,jdbcType=VARCHAR},
+		CALLBACKUNIT = #{callbackunit,jdbcType=VARCHAR},
+		CALLBACKPEOPLE =
+		#{callbackpeople,jdbcType=VARCHAR},
+		CALLBACKTIME =
+		#{callbacktime,jdbcType=TIMESTAMP}, OPERATER = #{operater,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findRdList" resultMap="BaseRDMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		rd.*,zu.name as
+		CreateName, su.name as
+		TRANSMITNAME,ru.name as
+		ReceiptName,r.receipter,r.receiptetime,r.launcher,r.launchtime,r.endtime
+		from dis_receipt_dispatch rd left join dis_receipt r on r.id =
+		rd.receiptid
+		left join (select userid,name from SYS_EMPLOYEE join
+		SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) zu on zu.userid =
+		rd.creater
+		left join (select userid,name from SYS_EMPLOYEE join
+		SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) su on su.userid =
+		rd.transmiter
+		left join (select userid,name from SYS_EMPLOYEE join
+		SYS_USER
+		on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) ru on ru.userid =
+		r.receipter
+		<where>
+			rd.dispatchtype=#{type}
+			<if test="state == 1">
+				and rd.trstate >=1 
+			</if>
+			<if test="state == 2">
+				and rd.trstate >=2
+			</if>
+			<if test="code != null">
+				and rd.code like '%${code}%'
+			</if>
+			<if test="launcher != null">
+				and r.launcher like '%${launcher}%'
+			</if>
+			<if test="rpid != null">
+				<if test="state == 1">
+				and rd.trstate != 3 
+				</if>
+				and rd.id in(
+				<foreach collection="rpid" item="item" index="index"
+					separator="union all">
+					(select #{item,jdbcType=VARCHAR} from dual)
+				</foreach>
+				)
+			</if>
+			<if test="begintime !=null">
+				and r.launchtime &gt;=#{begintime}
+			</if>
+			<if test="endtime !=null">
+				and r.launchtime &lt;=#{endtime}
+			</if>
+		</where>
+		order by r.launchtime desc ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="findRdCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select Count(*) from dis_receipt_dispatch rd left
+		join
+		dis_receipt r on
+		r.id = rd.receiptid
+		left join (select userid,name from
+		SYS_EMPLOYEE join
+		SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) zu
+		on zu.userid =
+		rd.creater
+		left join (select userid,name from
+		SYS_EMPLOYEE join SYS_USER
+		on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) su
+		on su.userid = rd.sender
+		left
+		join (select userid,name from
+		SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) ru
+		on ru.userid = r.receipter
+		<where>
+			rd.dispatchtype=#{type}
+				<if test="state == 1">
+				and rd.trstate >=1 
+			</if>
+			<if test="state == 2">
+				and rd.trstate >=2
+			</if>
+			<if test="code != null">
+				and rd.code like '%${code}%'
+			</if>
+			<if test="launcher != null">
+				and r.launcher like '%${launcher}%'
+			</if>
+			<if test="rpid != null">
+				and rd.id in(
+				<foreach collection="rpid" item="item" index="index"
+					separator="union all">
+					(select #{item,jdbcType=VARCHAR} from dual)
+				</foreach>
+				)
+			</if>
+			<if test="begintime !=null">
+				and r.launchtime &gt;=#{begintime}
+			</if>
+			<if test="endtime !=null">
+				and r.launchtime &lt;=#{endtime}
+			</if>
+		</where>
+	</select>
+	<select id="selectByRDID" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select c.*,t.name as OPERATENAME from dis_rd_callback c
+		left join
+		(select u.userid,e.name from sys_user u left join sys_employee e on
+		u.employeeid = e.id) t on c.operater = t.userid
+		where c.rdid = #{rdid}
+	</select>
+</mapper>

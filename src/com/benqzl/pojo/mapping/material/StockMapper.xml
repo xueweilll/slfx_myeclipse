@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.material.StockMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.material.Stock" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="PARENTID" property="parentid" jdbcType="VARCHAR" />
+    <result column="CASUSE" property="casuse" jdbcType="VARCHAR" />
+    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="HANDLER" property="handler" jdbcType="VARCHAR" />
+    <result column="HANDLETIME" property="handletime" jdbcType="TIMESTAMP" />
+    <result column="PROPOSER" property="proposer" jdbcType="VARCHAR" />
+    <result column="PROPOSERTIME" property="proposertime" jdbcType="TIMESTAMP" />
+    <result column="ADDRESS" property="address" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+  </resultMap>
+  <resultMap type="com.benqzl.pojo.system.Material" id="BaseResultMap_Material">
+  	<id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="SIZEID" property="sizeid" jdbcType="VARCHAR" />
+    <result column="PRICKLEID" property="prickleid" jdbcType="VARCHAR" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    ID, CREATETIME, CODE, MEMO, PARENTID, CASUSE, TYPE, CREATER, HANDLER, HANDLETIME, 
+    PROPOSER, PROPOSERTIME, ADDRESS, STATE
+  </sql>
+  <sql id="Base_Column_List1" >
+    m.ID as ID, m.CREATETIME as CREATETIME, m.CODE as CODE, m.MEMO as MEMO, 
+    m.PARENTID as PARENTID, m.CASUSE as CASUSE, m.TYPE as TYPE, r.name as CREATER, d.name as HANDLER , m.HANDLETIME as HANDLETIME, 
+    e.name as PROPOSER, m.PROPOSERTIME as PROPOSERTIME, m.ADDRESS as ADDRESS, m.STATE as STATE
+  </sql>
+  
+  <select id="findStockAll" resultMap="BaseResultMap" parameterType="java.util.Map">
+  	select m.id as id,m.code as code,a.name as PROPOSER from MA_STOCK m
+  	join (select userid,name from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) a on a.userid=m.PROPOSER
+		where m.state in (1,3) and m.type=5
+	<if test="id != null">and m.id=#{id,jdbcType=VARCHAR}</if>
+  </select>
+  
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from MA_STOCK m  
+		left join
+		(select userid,name from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) r on r.userid=m.Creater
+		left join
+		(select userid,name from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) d on d.userid=m.handler
+		left join
+		(select userid,name from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) e on e.userid=m.PROPOSER
+		<where>
+			<if test="handler != null">
+				<if test="type == 0">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 1">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 2">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 4">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 5">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state=0
+				</if>
+				<if test="type == 6">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 3">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 7">
+					and m.state=0
+				</if>
+			</if>
+			<if test="code != null">
+				and m.code  like '%'||  #{code,jdbcType=VARCHAR} ||'%'
+			</if>
+			<if test="starttime != null">
+				and m.CreateTime &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and m.CreateTime &lt;= #{endtime}
+			</if>
+			<if test="type != null">
+				and m.type=#{type,jdbcType=VARCHAR}
+			</if>
+			 and m.state!=9
+		</where>
+		order by m.state,m.CreateTime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from MA_STOCK m 
+		<where>
+			<if test="handler != null">
+				<if test="type == 0">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 1">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 2">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 4">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 5">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state=0
+				</if>
+				<if test="type == 6">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 3">
+					and m.handler=#{handler,jdbcType=VARCHAR}
+					and m.state!=1
+				</if>
+				<if test="type == 7">
+					and m.state=0
+				</if>
+			</if>
+			<if test="code != null">
+				and m.code  like '%'||  #{code,jdbcType=VARCHAR} ||'%'
+			</if>
+			<if test="starttime != null">
+				and m.CreateTime &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and m.CreateTime &lt;= #{endtime}
+			</if>
+			<if test="type != null">
+				and m.type=#{type,jdbcType=VARCHAR}
+			</if>
+			 and m.state!=9
+		</where>
+	</select>
+  
+  <select id="findMaterials" resultMap="BaseResultMap_Material" parameterType="java.util.Map">
+  	select m.id as id ,m.name as name, m.type as type,s.name as SIZEID ,p.name as PRICKLEID,m.memo as memo
+  	 from sys_material m join sys_size s on m.sizeid=s.id join sys_prickle p on m.prickleId=p.id
+  	where m.state=1 and m.type=#{types,jdbcType=DECIMAL}
+  	<if test="ids !=null">  
+  	and  m.id <if test="type == null">not</if>  in
+  	(<foreach collection="ids" item="item" index="index" separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+	</foreach>)
+	</if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from MA_STOCK
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByIdAndType" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    ID, CREATETIME, CODE, MEMO, PARENTID, CASUSE, TYPE, CREATER, HANDLETIME, PROPOSERTIME, ADDRESS, STATE 
+    <if test="type ==null">, HANDLER,PROPOSER</if>
+    <if test="type !=null">, re.name as HANDLER,rc.name as PROPOSER</if>
+    from MA_STOCK m
+    <if test="type !=null">
+    left join (select userid,name from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) re on re.userid=m.handler
+	left join
+		(select userid,name  from SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) rc on rc.userid=m.PROPOSER
+    </if>
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from MA_STOCK
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.material.Stock" >
+    insert into MA_STOCK (ID, CREATETIME, CODE, 
+      MEMO, PARENTID, CASUSE, 
+      TYPE, CREATER, HANDLER, 
+      HANDLETIME, PROPOSER, PROPOSERTIME, 
+      ADDRESS, STATE)
+    values (#{id,jdbcType=VARCHAR}, #{createtime,jdbcType=DATE}, #{code,jdbcType=VARCHAR}, 
+      #{memo,jdbcType=VARCHAR}, #{parentid,jdbcType=VARCHAR}, #{casuse,jdbcType=VARCHAR}, 
+      #{type,jdbcType=DECIMAL}, #{creater,jdbcType=VARCHAR}, #{handler,jdbcType=VARCHAR}, 
+      #{handletime,jdbcType=DATE}, #{proposer,jdbcType=VARCHAR}, #{proposertime,jdbcType=DATE}, 
+      #{address,jdbcType=VARCHAR}, #{state,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.material.Stock" >
+    insert into MA_STOCK
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="code != null" >
+        CODE,
+      </if>
+      <if test="memo != null" >
+        MEMO,
+      </if>
+      <if test="parentid != null" >
+        PARENTID,
+      </if>
+      <if test="casuse != null" >
+        CASUSE,
+      </if>
+      <if test="type != null" >
+        TYPE,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="handler != null" >
+        HANDLER,
+      </if>
+      <if test="handletime != null" >
+        HANDLETIME,
+      </if>
+      <if test="proposer != null" >
+        PROPOSER,
+      </if>
+      <if test="proposertime != null" >
+        PROPOSERTIME,
+      </if>
+      <if test="address != null" >
+        ADDRESS,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null" >
+        #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null" >
+        #{parentid,jdbcType=VARCHAR},
+      </if>
+      <if test="casuse != null" >
+        #{casuse,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=DECIMAL},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="handler != null" >
+        #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handletime != null" >
+        #{handletime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="proposer != null" >
+        #{proposer,jdbcType=VARCHAR},
+      </if>
+      <if test="proposertime != null" >
+        #{proposertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateState" parameterType="java.util.Map">
+  	update MA_STOCK set state=#{state,jdbcType=DECIMAL},HANDLETIME=#{time,jdbcType=TIMESTAMP}<if test="userid !=null">, handler=#{userid,jdbcType=VARCHAR}</if> where id=#{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

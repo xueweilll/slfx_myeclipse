@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolNormalMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolNormal" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <result column="DEGREE" property="degree" jdbcType="DECIMAL" />
+  </resultMap>
+  
+   <resultMap id="BaseResultMap1" type="com.benqzl.pojo.patrol.PatrolNormal" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <result column="DEGREE" property="degree" jdbcType="DECIMAL" />
+    <association property="createuser" javaType="com.benqzl.pojo.system.User">
+    <id property="id" column="USERID"/>
+    <result property="username" column="UNAME"/>
+    <association property="employee" javaType="com.benqzl.pojo.system.Employee">
+    <id property="id" column="ID"/>
+    <result property="name" column="ENAME"/>
+    </association>
+    </association>
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+    <id property="id" column="ID"/>
+    <result property="name" column="SNAME"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, PARTTIME, CREATER, STATE, CREATETIME, SID, DEGREE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_PATROL_NORMAL
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findmobileyanzheng" resultMap="BaseResultMap" parameterType="java.util.Map">
+      select  n.*,d.* from PL_PATROL_NORMAL n
+      left join pl_normal_details  d on d.PatrolID =n.id
+      left join pl_normal_people p on p.PatrolID=n.id
+      where n.parttime=#{parttime} and
+      n.state=#{state} 
+      and n.sid=#{sid} and
+      p.Handler in(#{handler})
+      and n.degree=#{degree} 
+  </select>
+  <select id="findpatrolnormal" resultMap="BaseResultMap1" parameterType="java.util.Map">
+	   select B.* from
+		(select A.*,ROWNUM RN from(
+		select
+		p.ID as ID, p.PARTTIME as parttime, 
+		p.CREATER as CREATER, 
+		p.STATE as STATE, 
+		p.CREATETIME as CREATETIME, 
+		p.SID as SID, p.DEGREE as DEGREE,
+		s.name as SNAME,
+		u.username as UNAME,
+		e.name as ENAME
+		from PL_PATROL_NORMAL p
+		left join SYS_USER u on u.USERID=p.creater
+		left join sys_employee e on e.id=u.employeeid
+		left join SYS_station s on s.id =p.sid
+		where 1 = 1
+<!-- 		 <if test="createrid != null and createrid !='' and createrid !='0'.toString()" >
+		and s.createrid = #{createrid,jdbcType=VARCHAR}
+		</if>  -->
+		<if test="begintime != null and begintime!=''" >
+		and p.CREATETIME &gt;= #{begintime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and p.CREATETIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="stationid != null and stationid!=''" >
+		and p.SID = #{stationid,jdbcType=VARCHAR}
+		</if>
+		<!-- type=0表示状态为保存 -->
+		<if test="type =='0'.toString()">
+		and p.state=0
+		</if>
+		<if test="type !='0'.toString()">
+		and p.state!=9
+		</if>
+		order by p.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		where RN &gt; #{p1}
+  </select>
+  <select id="findpatrolnormalcount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+    select count(*) from
+		(select A.*,ROWNUM RN from(
+		select
+		p.ID as ID, p.PARTTIME as parttime, 
+		p.CREATER as CREATER, 
+		p.STATE as STATE, 
+		p.CREATETIME as CREATETIME, 
+		p.SID as SID, p.DEGREE as DEGREE
+		from PL_PATROL_NORMAL p
+		left join SYS_USER u on u.USERID=p.creater
+		left join SYS_station s on s.id =p.sid
+		where 1 = 1
+<!-- 		 <if test="createrid != null and createrid !='' and createrid !='0'.toString()" >
+		and s.createrid = #{createrid,jdbcType=VARCHAR}
+		</if>  -->
+		<if test="begintime != null and begintime!=''" >
+		and p.CREATETIME &gt;= #{begintime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and p.CREATETIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="stationid != null and stationid!=''" >
+		and p.SID = #{stationid,jdbcType=VARCHAR}
+		</if>
+		<if test="type =='0'.toString()">
+		and p.state=0
+		</if>
+		<if test="type !='0'.toString()">
+		and p.state!=9
+		</if>
+		order by p.CREATETIME desc) A
+	
+		) B 
+		
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_PATROL_NORMAL
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolNormal" >
+    insert into PL_PATROL_NORMAL (ID, PARTTIME, CREATER, 
+      STATE, CREATETIME, SID, 
+      DEGREE)
+    values (#{id,jdbcType=VARCHAR}, #{parttime,jdbcType=TIMESTAMP}, #{creater,jdbcType=VARCHAR}, 
+      #{state,jdbcType=DECIMAL}, #{createtime,jdbcType=TIMESTAMP}, #{sid,jdbcType=VARCHAR}, 
+      #{degree,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolNormal" >
+    insert into PL_PATROL_NORMAL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="parttime != null" >
+        PARTTIME,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="sid != null" >
+        SID,
+      </if>
+      <if test="degree != null" >
+        DEGREE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="parttime != null" >
+        #{parttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="degree != null" >
+        #{degree,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolNormal" >
+    update PL_PATROL_NORMAL
+    <set >
+      <if test="parttime != null" >
+        PARTTIME = #{parttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sid != null" >
+        SID = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="degree != null" >
+        DEGREE = #{degree,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <!--  更新手机端日常巡检状态变为提交 -->
+  <update id="updateMobileCommit" parameterType="java.lang.String">
+      update PL_PATROL_NORMAL 
+      set STATE = 1
+      where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolNormal" >
+    update PL_PATROL_NORMAL
+    set PARTTIME = #{parttime,jdbcType=TIMESTAMP},
+      CREATER = #{creater,jdbcType=VARCHAR},
+      STATE = #{state,jdbcType=DECIMAL},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      SID = #{sid,jdbcType=VARCHAR},
+      DEGREE = #{degree,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+    <update id="deleteByNormalPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolNormal">
+    update PL_PATROL_NORMAL
+    set 
+      STATE = 9
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+    <select id="validatemobilenormal" parameterType="com.benqzl.pojo.patrol.PatrolNormal" resultMap="BaseResultMap1">
+    select count(*) as STATE,sum(degree) as DEGREE
+    from PL_PATROL_NORMAL
+    where 
+    to_char(parttime,'yyyy-MM')=to_char(to_date(#{creater,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'),'yyyy-MM')
+    and sid=#{sid,jdbcType=VARCHAR}
+    and degree=#{degree}
+    and state>=0
+    and state!=9
+  </select>
+  <select id="validatenormal" parameterType="com.benqzl.pojo.patrol.PatrolNormal" resultMap="BaseResultMap1">
+    select count(*) as STATE,sum(degree) as DEGREE
+    from PL_PATROL_NORMAL
+    where 
+    to_char(parttime,'yyyy-MM')=to_char(to_date(#{creater,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'),'yyyy-MM')
+    and sid=#{sid,jdbcType=VARCHAR}
+    and degree=#{degree}
+   <!--  and state>0 -->
+    and state!=9
+  </select>
+  <update id="updateState" parameterType="java.util.Map">
+  	update PL_PATROL_NORMAL set state=#{state} where 
+  	id in (
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+  </update>
+</mapper>

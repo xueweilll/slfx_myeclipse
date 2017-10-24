@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.water.TrWarnlogMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.water.TrWarnlog">
+		<id column="F_ID" property="fId" jdbcType="VARCHAR" />
+		<result column="F_STATIONCODE" property="fStationcode"
+			jdbcType="VARCHAR" />
+		<result column="F_CAPTION" property="fCaption" jdbcType="VARCHAR" />
+		<result column="F_WARNTIME" property="fWarntime" jdbcType="TIMESTAMP" />
+		<result column="F_FREETIME" property="fFreetime" jdbcType="TIMESTAMP" />
+		<result column="F_WARNSTATE" property="fWarnstate" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		F_ID, F_STATIONCODE, F_CAPTION, F_WARNTIME, F_FREETIME,
+		F_WARNSTATE
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from T_R_WARNLOG
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from
+		T_R_WARNLOG
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.water.TrWarnlog">
+		insert into T_R_WARNLOG (F_ID, F_STATIONCODE, F_CAPTION,
+		F_WARNTIME,
+		F_FREETIME, F_WARNSTATE
+		)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select SYS_GUID(),
+			#{item.fStationcode,jdbcType=VARCHAR},
+			#{item.fCaption,jdbcType=VARCHAR},
+			#{item.fWarntime,jdbcType=TIMESTAMP},
+			#{item.fFreetime,jdbcType=TIMESTAMP},
+			#{item.fWarnstate,jdbcType=VARCHAR}
+			from dual)
+		</foreach>
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.water.TrWarnlog">
+		insert into T_R_WARNLOG
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="fId != null">
+				F_ID,
+			</if>
+			<if test="fStationcode != null">
+				F_STATIONCODE,
+			</if>
+			<if test="fCaption != null">
+				F_CAPTION,
+			</if>
+			<if test="fWarntime != null">
+				F_WARNTIME,
+			</if>
+			<if test="fFreetime != null">
+				F_FREETIME,
+			</if>
+			<if test="fWarnstate != null">
+				F_WARNSTATE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="fId != null">
+				#{fId,jdbcType=VARCHAR},
+			</if>
+			<if test="fStationcode != null">
+				#{fStationcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fCaption != null">
+				#{fCaption,jdbcType=VARCHAR},
+			</if>
+			<if test="fWarntime != null">
+				#{fWarntime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="fFreetime != null">
+				#{fFreetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="fWarnstate != null">
+				#{fWarnstate,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.water.TrWarnlog">
+		update T_R_WARNLOG
+		<set>
+			<if test="fStationcode != null">
+				F_STATIONCODE = #{fStationcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fCaption != null">
+				F_CAPTION = #{fCaption,jdbcType=VARCHAR},
+			</if>
+			<if test="fWarntime != null">
+				F_WARNTIME = #{fWarntime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="fFreetime != null">
+				F_FREETIME = #{fFreetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="fWarnstate != null">
+				F_WARNSTATE = #{fWarnstate,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.water.TrWarnlog">
+		update T_R_WARNLOG
+		set F_STATIONCODE = #{fStationcode,jdbcType=VARCHAR},
+		F_CAPTION =
+		#{fCaption,jdbcType=VARCHAR},
+		F_WARNTIME = #{fWarntime,jdbcType=TIMESTAMP},
+		F_FREETIME = #{fFreetime,jdbcType=TIMESTAMP},
+		F_WARNSTATE =
+		#{fWarnstate,jdbcType=VARCHAR}
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</update>
+	<select id="findByPage" parameterType="java.util.Map" resultMap="map1">
+		select * from (select s.*,rownum rn from
+		(
+		select a.*,b.name from
+		t_r_warnlog a ,sys_station b
+		where a.f_stationcode=b.code and
+		b.isdel='0'
+		<if test="stationname !=null">
+			and b.name='${stationname}'
+		</if>
+		<if test="begin !=null">
+			and a.f_warntime &gt;=to_date('${begin}','yyyy-mm-dd
+			hh24:mi:ss')
+		</if>
+		<if test="end !=null">
+			and a.f_warntime &lt;=to_date('${end}','yyyy-mm-dd
+			hh24:mi:ss')
+		</if>
+		) s
+		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from t_r_warnlog a ,sys_station b
+		where
+		a.f_stationcode=b.code and b.isdel='0'
+		<if test="stationname !=null">
+			and b.name='${stationname}'
+		</if>
+		<if test="begin !=null">
+			and a.f_warntime &gt;=to_date('${begin}','yyyy-mm-dd
+			hh24:mi:ss')
+		</if>
+		<if test="end !=null">
+			and a.f_warntime &lt;=to_date('${end}','yyyy-mm-dd
+			hh24:mi:ss')
+		</if>
+	</select>
+	<resultMap type="com.benqzl.pojo.water.TrWarnlog" id="map1">
+		<id column="F_ID" property="fId" jdbcType="DECIMAL" />
+		<result column="F_STATIONCODE" property="fStationcode"
+			jdbcType="VARCHAR" />
+		<result column="F_CAPTION" property="fCaption" jdbcType="VARCHAR" />
+		<result column="F_WARNTIME" property="fWarntime" jdbcType="TIMESTAMP" />
+		<result column="F_FREETIME" property="fFreetime" jdbcType="TIMESTAMP" />
+		<result column="F_WARNSTATE" property="fWarnstate" jdbcType="VARCHAR" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="F_STATIONCODE" property="code" />
+			<result column="NAME" property="name" />
+		</association>
+	</resultMap>
+	<select id="findStation" resultType="com.benqzl.pojo.system.Station">
+		select * from sys_station
+		where isdel='0'
+	</select>
+</mapper>

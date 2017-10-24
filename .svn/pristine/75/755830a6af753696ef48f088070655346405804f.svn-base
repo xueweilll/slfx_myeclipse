@@ -1,0 +1,508 @@
+package com.benqzl.controller.dispatch.schedule;
+
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.benqzl.controller.BasicController;
+import com.benqzl.pojo.dispatch.ReceiptDispatch;
+import com.benqzl.pojo.dispatch.ReceiptDispatchDepartment;
+import com.benqzl.pojo.dispatch.ReceiptDispatchInstructions;
+import com.benqzl.pojo.dispatch.ReceiptDispatchStations;
+import com.benqzl.pojo.system.User;
+import com.benqzl.service.activiti.ActivitiUnitService;
+import com.benqzl.service.dispatch.ReceiptDispatchDepartmentService;
+import com.benqzl.service.dispatch.ReceiptDispatchService;
+import com.benqzl.service.system.EmployeeService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+/** 
+* @ClassName: ReceiptDispatchController 
+* @Description: TODO(这里用一句话描述这个类的作用) 
+* @author xw 
+* @date 2016年9月1日 下午2:41:55 
+*  
+*/
+@Controller
+@RequestMapping("receiptDispatch")
+public class ReceiptDispatchController extends BasicController {
+
+	public ReceiptDispatchController() {
+		super(ReceiptDispatchController.class);
+	}
+
+	@RequestMapping(value = "", method = RequestMethod.GET)
+	public ModelAndView index() {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("dispatch/receiptDispatchSend");
+		return mv;
+	}
+
+	@RequestMapping(value = "receiptDispatchInfo", method = RequestMethod.GET)
+	public ModelAndView dispatchIssuedInfo(String id,String isDisplay,String departmentid) {
+		ModelAndView mv = new ModelAndView();
+		ReceiptDispatch rd = receiptDispatchService.selectByPk(id);
+		mv.addObject("rd", rd);
+		mv.addObject("launchtime",datetimeFormat.format(rd.getReceipt().getLaunchtime()));
+		mv.addObject("endtime",datetimeFormat.format(rd.getReceipt().getEndtime()));
+		mv.addObject("receiptetime",datetimeFormat.format(rd.getReceipt().getReceiptetime()));
+		mv.addObject("isDisplay",isDisplay);
+		mv.addObject("typeName",rd.getDispatchtype()=="0"?"电话":"传真");
+		mv.addObject("departmentid",departmentid);
+		mv.setViewName("dispatch/receiptDispatchSendInfo");
+		return mv;
+	}
+	
+	
+	
+	/** 
+	* @Title: mobileRdSend 
+	* @Description: 手机app上执行页面调用接口
+	* @param @param id
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	@RequestMapping(value = "mobileRdSend", method = RequestMethod.POST)
+	@ResponseBody
+	public String mobileRdSend(String id){
+		ReceiptDispatch rd = receiptDispatchService.selectByMobile(id);
+		gson = new GsonBuilder().registerTypeAdapter(ReceiptDispatch.class,
+				new JsonSerializer<ReceiptDispatch>() {
+					@Override
+					public JsonElement serialize(ReceiptDispatch src, Type typeOfSrc,JsonSerializationContext context) {
+						JsonObject o = new JsonObject();
+						o.addProperty("id", src.getId());
+						o.addProperty("fjcode", src.getCode());
+						if(src.getReceipt() != null){
+							o.addProperty("ddcode", src.getReceipt().getCode());
+						}
+						o.addProperty("memo", src.getMemo());
+						o.addProperty("creater", src.getNames().getCreateName());
+						o.addProperty("createtime",	datetimeFormat.format(src.getCreatetime()));
+						o.addProperty("typeName", src.getDispatchtype()=="0"?"电话":"传真");
+						o.addProperty("launchtime", datetimeFormat.format(src.getReceipt().getLaunchtime()));
+						o.addProperty("endtime", datetimeFormat.format(src.getReceipt().getEndtime()));
+						o.addProperty("receiptetime", datetimeFormat.format(src.getReceipt().getReceiptetime()));
+						o.addProperty("launcher", src.getReceipt().getLauncher());
+						o.addProperty("receipter", src.getNames().getReceiptName());
+						o.addProperty("rmemo", src.getReceipt().getMemo());
+						Gson gsondetails = new GsonBuilder().registerTypeAdapter(ReceiptDispatchStations.class,
+								new JsonSerializer<ReceiptDispatchStations>() {
+							@Override
+							public JsonElement serialize(ReceiptDispatchStations arg0, Type typeOfSrc,JsonSerializationContext context) {
+								JsonObject o = new JsonObject();
+								o.addProperty("sid", arg0.getSid());
+								o.addProperty("stationname", arg0.getStation().getName());
+								o.addProperty("runcount", arg0.getRuncount());
+								o.addProperty("keepcount", arg0.getKeepcount());
+								if(arg0.getGatetype() == null){
+									o.addProperty("gatetype", "");
+								}else if(arg0.getGatetype().equals("0")){
+									o.addProperty("gatetype", "关闸");
+								}else if(arg0.getGatetype().equals("1")){
+									o.addProperty("gatetype", "开闸");
+								}
+								return o;
+							}
+						}).create();
+						o.addProperty("stationdetails", gsondetails.toJson(src.getDispatchStations()));
+						return o;
+					}
+				}).create();
+		System.out.println(gson.toJson(rd));
+		return gson.toJson(rd);
+	}
+
+	@Autowired
+	private ReceiptDispatchService receiptDispatchService;
+	
+	@Autowired
+	private ActivitiUnitService activitiUnitService;
+	
+	@Autowired
+	private ReceiptDispatchDepartmentService receiptDispatchDepartmentService;
+
+	@RequestMapping(value = "pageBind", method = RequestMethod.POST)
+	@ResponseBody
+	public String pageBind(HttpSession seesion,int page, int rows, String bh,String conditions,String typeDate,
+			String starttime,String endtime) {
+		String strJson = "";
+		Map<String, Object> map = new HashMap<String, Object>();
+		gson = new Gson();
+		User user = (User)seesion.getAttribute("loginUser");
+		List<ReceiptDispatchDepartment> list = new ArrayList<>();
+		page = (page == 0 ? 1 : page);
+		rows = (rows == 0 ? 15 : rows);
+		int start = (page - 1) * rows;
+		rows = start + rows;
+		logger.info("this page rows is " + page + "|" + rows);
+		map.put("p1", start);
+		map.put("p2", rows);
+		if(starttime==""||starttime==null){
+			map.put("starttime", null);
+		}else{
+			try {
+				map.put("starttime", datetimeFormat.parse(starttime));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}if(endtime==""||endtime==null){
+			map.put("endtime", null);
+		}else{
+			try {
+				map.put("endtime", datetimeFormat.parse(endtime));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		if(bh==""||bh==null){
+			map.put("bh", null);
+		}else{
+			map.put("bh", bh.replaceAll(" ", ""));
+		}
+		if(typeDate.equals("1")){
+			map.put("rpid", null);
+		}else{
+			try {
+				List<Map<String, Object>> strings = activitiUnitService.findByDepartment(user.getUserid(), "B");
+						
+						/*(user.getUserid(), null, "engineeringDepartment");*/
+				if(strings.size()==0){
+					Map<String, Object> jsonMap = new HashMap<String, Object>();
+					jsonMap.put("total", 0);
+					jsonMap.put("rows", list);
+					strJson=gson.toJson(jsonMap);
+					return strJson;
+				}else{
+					int k = 0;
+					String strwhere = "";
+					for(Map<String,Object> string:strings){
+						String s = "";
+						if(string.get("objId")!=null){
+							s += "(rd.id = '" + string.get("objId").toString() + "' and rdd.departmentid ='" +  string.get("departmentId") +"') ";
+							if (k == 0) {
+								if (strings.size() == 1) {
+									strwhere = "( " + s + ")";
+								} else {
+									strwhere = "( " + s + "or ";
+								}
+							} else if (k == (strings.size() - 1)) {
+								strwhere += " " + s + " ) ";
+							} else {
+								strwhere += s + "or ";
+							}
+							k++;
+						}else{
+							k++;
+						}
+					
+					}
+					/*List<String> objid=new ArrayList<>();
+					List<String> departmentid=new ArrayList<>();
+					for(Map<String,Object> string:strings){
+						objid.add(string.get("objId").toString());
+						departmentid.add(string.get("departmentId").toString());
+					}*/
+					
+					map.put("rpid", strwhere);
+				}
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		list = receiptDispatchDepartmentService.findRdSendList(map);
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+		int total = receiptDispatchDepartmentService.findRdSendCount(map);
+		jsonMap.put("total", total);
+		jsonMap.put("rows", list);
+		gson = new GsonBuilder().registerTypeAdapter(ReceiptDispatchDepartment.class,
+				new JsonSerializer<ReceiptDispatchDepartment>() {
+					@Override
+					public JsonElement serialize(ReceiptDispatchDepartment arg0,
+							Type typeOfSrc, JsonSerializationContext context) {
+						JsonObject o = new JsonObject();
+						ReceiptDispatch src= arg0.getRd();	
+						o.addProperty("departmentid", arg0.getDepartmentid());
+						if(arg0.getDepartment()==null){
+							o.addProperty("name", "");
+						}else{							
+							o.addProperty("name", arg0.getDepartment().getName());
+						}
+						o.addProperty("id", src.getId());
+						o.addProperty("code", src.getCode());
+						if ("0".equals(src.getDispatchtype())) {
+							o.addProperty("dispatchtype", "片区调度");
+						} else {
+							o.addProperty("dispatchtype", "大包围调度");
+						}
+						o.addProperty("launcher", src.getReceipt()
+								.getLauncher());
+						o.addProperty("launchTime", datetimeFormat.format(src
+								.getReceipt().getLaunchtime()));
+						o.addProperty("endTime", datetimeFormat.format(src
+								.getReceipt().getEndtime()));
+						o.addProperty("receipter", src.getNames()
+								.getReceiptName());
+						o.addProperty("receipteTime", datetimeFormat.format(src
+								.getReceipt().getReceiptetime()));
+						o.addProperty("memo", src.getMemo());
+						o.addProperty("creater", src.getNames().getCreateName());
+						o.addProperty("createtime",
+								datetimeFormat.format(src.getCreatetime()));
+						if(arg0.getSenduser() != null){
+							o.addProperty("sender", arg0.getSenduser().getUsername());
+						}
+						if (arg0.getSendtime() != null) {
+							o.addProperty("sendTime",
+									datetimeFormat.format(arg0.getSendtime()));
+						}
+						if ("0".equals(src.getDispatchtype())) {
+					/*		if(src.getState() == 1){
+								o.addProperty("stateName", "已提交");
+							}else if(src.getState() ==2){
+								o.addProperty("stateName", "片区调度中");
+							}else if(src.getState()!=9){
+								o.addProperty("stateName", "片区调度完成");
+							}*/
+							if(arg0.getState()==null){
+								o.addProperty("stateName", "");
+							}
+							else if(arg0.getState()==0){
+								o.addProperty("stateName","未执行");
+							}else if(arg0.getState()==1){
+								o.addProperty("stateName", "片区调度中");
+							}else if(arg0.getState()==2){
+								o.addProperty("stateName","片区调度完成");
+							}
+						} else {
+//							if (src.getState() == 0) {
+//								o.addProperty("stateName", "新建");
+//							} else if (src.getState() == 1) {
+//								o.addProperty("stateName", "已提交");
+//							} else if (src.getState() == 2) {
+//								o.addProperty("stateName", "已下发未转发");
+//							} else if (src.getState() == 3) {
+//								o.addProperty("stateName", "已转发未下发");
+//							} else if (src.getState() == 4) {
+//								o.addProperty("stateName", "下发并且已转发");
+//							} else if (src.getState() == 5) {
+//								o.addProperty("stateName", "回访中");
+//							} else if (src.getState() == 6) {
+//								o.addProperty("stateName", "督查中");
+//							} else if (src.getState() == 7) {
+//								o.addProperty("stateName", "转发完成");
+//							} else if (src.getState() == 8) {
+//								o.addProperty("stateName", "完成");
+//							}
+						/*	if (src.getSender() == null || "".equals(src.getSender())){
+								o.addProperty("stateName", "已分解");
+							}else {
+								o.addProperty("stateName", "片区调度中");
+							}*/
+						    if(arg0.getState()==null){
+								o.addProperty("stateName", "");
+							}
+						    else if(arg0.getState()==0){
+								o.addProperty("stateName","未执行");
+							}else if(arg0.getState()==1){
+								o.addProperty("stateName", "片区调度中");
+							}else if(arg0.getState()==2){
+								o.addProperty("stateName","片区调度完成");
+							}
+							
+						}
+						return o;
+					}
+				}).create();
+		strJson = gson.toJson(jsonMap);
+
+		logger.info("this document list strJson is " + strJson);
+
+		return strJson;
+	}
+
+	@RequestMapping(value = "/instructionsBind", method = RequestMethod.POST)
+	@ResponseBody
+	public String instructionsBind(String id) {
+		List<ReceiptDispatchInstructions> list = receiptDispatchService.selectInstructionsByRDID(id);
+		gson = new GsonBuilder().registerTypeAdapter(
+				ReceiptDispatchInstructions.class,
+				new JsonSerializer<ReceiptDispatchInstructions>() {
+					@Override
+					public JsonElement serialize(
+							ReceiptDispatchInstructions src, Type typeOfSrc,
+							JsonSerializationContext context) {
+						JsonObject o = new JsonObject();
+						String zl = "";
+						String beng = "";
+						if (src.getInstruction() == 0) {
+							zl = "关闸";// 1:开闸 3:关泵 4:开泵 5:关闸开泵 6:关闸关泵 7:开闸关泵
+							beng = "不操作";
+						} else if (src.getInstruction() == 1) {
+							zl = "开闸";
+							beng = "不操作";
+						} else if (src.getInstruction() == 3) {
+							beng = "关泵";
+							zl = "不操作";
+						} else if (src.getInstruction() == 4) {
+							beng = "开泵";
+							zl = "不操作";
+						} else if (src.getInstruction() == 5) {
+							zl = "关闸";
+							beng = "开泵";
+						} else if (src.getInstruction() == 6) {
+							zl = "关闸";
+							beng = "关泵";
+						} else if (src.getInstruction() == 7) {
+							zl = "开闸";
+							beng = "关泵";
+						}else if (src.getInstruction() == 8) {
+							zl = "开闸";
+							beng = "开泵";
+						}
+
+						o.addProperty("GateOperate", zl);
+						o.addProperty("UnitOperate", beng);
+						if (src.getGateoperatetime() != null) {
+							o.addProperty("GateOperateTime", datetimeFormat
+									.format(src.getGateoperatetime()));
+						}
+						if (src.getUnitoperatetime() != null) {
+							o.addProperty("UnitOperateTime", datetimeFormat
+									.format(src.getUnitoperatetime()));
+						}
+						return o;
+					}
+				}).create();
+		return gson.toJson(list);
+	}
+
+	@RequestMapping(value = "/stationBind", method = RequestMethod.POST)
+	@ResponseBody
+	public String stationBind(HttpSession seesion,String id,String departmentids) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		//User user = (User)seesion.getAttribute("loginUser");
+		gson = new Gson();
+	/*	String strJson="";
+		try {
+			
+			List<Map<String, Object>> strings = activitiUnitService.findDistricts(user.getUserid(), "B");
+					
+			List<ReceiptDispatchStations> list = new ArrayList<>();
+			if(strings.size()==0){
+				Map<String, Object> jsonMap = new HashMap<String, Object>();
+				map.put("departmentid", null);
+				jsonMap.put("total", 0);
+				jsonMap.put("rows", list);
+				strJson=gson.toJson(jsonMap);
+				return strJson;
+			}else{
+						List<String> departmentid=new ArrayList<>();
+			for(Map<String,Object> string:strings){
+					departmentid.add(string.get("departmentId").toString());
+				}
+				if(departmentids != null){
+					map.put("departmentid", departmentids);
+				}
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}*/
+		map.put("id", id);
+		if(departmentids != null){
+			map.put("departmentid", departmentids);
+		}
+		List<ReceiptDispatchStations> list = receiptDispatchService
+				.selectStationsByRDID(map);
+		gson = new GsonBuilder().registerTypeAdapter(
+				ReceiptDispatchStations.class,
+				new JsonSerializer<ReceiptDispatchStations>() {
+					@Override
+					public JsonElement serialize(ReceiptDispatchStations src,
+							Type typeOfSrc, JsonSerializationContext context) {
+						JsonObject o = new JsonObject();
+						o.addProperty("stationname", src.getStation().getName());
+						o.addProperty("runcount", src.getRuncount());
+						o.addProperty("keepcount", src.getKeepcount());
+						o.addProperty("gatetype", src.getGatetype());
+						return o;
+					}
+				}).create();
+		return gson.toJson(list);
+	}
+
+	/** 
+	* @Title: send 
+	* @Description: 下发(这里用一句话描述这个方法的作用) 
+	* @param @param id
+	* @param @param session
+	* @param @return    设定文件 
+	* @return String    返回类型 
+	* @throws 
+	*/
+	@Autowired EmployeeService employeeService;
+	@Autowired ReceiptDispatchDepartmentService dds;
+	@RequestMapping(value = "/send", method = RequestMethod.POST)
+	@ResponseBody
+	public String send(String id, String departmentid,HttpSession session){
+		try {
+			ReceiptDispatch rd = receiptDispatchService.selectByPk(id);
+			
+			int state =0;
+			//if(rd.getState() == 1){
+				state = 2;
+			//}
+			
+			HashMap<String,Object> map = new HashMap<String, Object>();
+			map.put("state", state);
+			
+			map.put("id", id);
+			User user =(User)session.getAttribute("loginUser");
+			if(user != null){
+				map.put("sender", user.getUserid());
+			}
+			
+			Map<String, Object> mu= new HashMap<String, Object>();
+			mu.put("sdid", id);
+			mu.put("departmentid", departmentid);
+			List<ReceiptDispatchStations> stations = receiptDispatchService.selectStationByUserid(mu);
+			List<String> l = new ArrayList<>();
+			for(ReceiptDispatchStations s : stations){
+				l.add(s.getSid());
+			}
+             map.put("departmentid",departmentid);
+			receiptDispatchService.updateByPrimaryKeySend(map);
+		/*	ReceiptDispatchDepartment department=dds.selectByPk(map);
+			if(department.getState()==1){
+				dds.update(map);				
+			}*/
+			//activitiUnitService.messagePushByDorSid("district",user.getUserid(), rd.getReceiptid(), departmentid);
+			HashMap<String, Object> mapAc = new HashMap<String, Object>();
+			mapAc.put("stationList", l);
+			activitiUnitService.completeTaskByDepartment(user.getUserid(), rd.getId(), departmentid, mapAc);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "{'result':false,'msg':'下发失敗！'}";
+		}
+		return "{'result':true}";
+	}
+}

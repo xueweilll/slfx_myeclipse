@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialExcuteDetailsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialExcuteDetails" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="EID" property="eid" jdbcType="VARCHAR" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+     <association property="specialExcutestation" javaType="com.benqzl.pojo.system.Station">
+				<id column="ESID" property="id" jdbcType="VARCHAR" />
+				<result column="CODE" property="code" jdbcType="VARCHAR" />
+				<result column="NAME" property="name" jdbcType="VARCHAR" />
+				<result column="LAT" property="lat" jdbcType="DECIMAL" />
+				<result column="LON" property="lon" jdbcType="DECIMAL" />
+				<result column="LEVELS" property="levels" jdbcType="DECIMAL" />
+				<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+				<result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+				<result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+				<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+				<result column="NVRUSERNAME" property="nvrusername" jdbcType="VARCHAR" />
+				<result column="NVRPASSWORD" property="nvrpassword" jdbcType="VARCHAR" />
+				<result column="NVRPROT" property="nvrprot" jdbcType="VARCHAR" />
+				<result column="NVRURL" property="nvrurl" jdbcType="VARCHAR" />
+				<result column="IMGURL" property="imgurl" jdbcType="VARCHAR" />
+				<result column="DEPARTMENTID" property="departmentid"
+					jdbcType="VARCHAR" />
+				<result column="CONTROLWATERLEVEL" jdbcType="DECIMAL"
+					property="controlwaterlevel" />
+				<result column="ADDRESS" property="address" jdbcType="VARCHAR" />
+			</association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, EID, SID
+  </sql>
+  <sql id="Base_Column_List1">
+		es.sid as SID,es.id as ID,s.id as ESID,s.name as NAME,s.controlwaterlevel as CONTROLWATERLEVEL,
+		s.isdel as ISDEL
+	</sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_SPECIAL_EXECUTE_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findExcuteDetails" resultMap="BaseResultMap" parameterType="java.util.Map">
+  select
+		<include refid="Base_Column_List1" />
+		from PL_SPECIAL_EXECUTE_DETAILS es
+		left join sys_station s on s.id=es.sid
+		left join PL_SPECIAL_EXECUTE e  on e.id=es.eid
+		where e.isid = #{isid,jdbcType=VARCHAR}
+		and s.departmentid=#{did,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_SPECIAL_EXECUTE_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteBypseccutedetailsKey" parameterType="java.lang.String">
+    delete from PL_SPECIAL_EXECUTE_DETAILS es
+    where es.eid in(select e.id from PL_SPECIAL_EXECUTE e
+    where e.isid = #{isid,jdbcType=VARCHAR})
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcuteDetails" >
+    insert into PL_SPECIAL_EXECUTE_DETAILS (ID, EID, SID)
+    values (#{id,jdbcType=VARCHAR}, #{eid,jdbcType=VARCHAR}, #{sid,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertegpatorlDepartemntlDetails" >
+   insert into PL_SPECIAL_EXECUTE_DETAILS 
+        (ID, EID, SID)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.eid,jdbcType=VARCHAR},
+			#{item.sid,jdbcType=VARCHAR}
+			from dual)
+		</foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcuteDetails" >
+    insert into PL_SPECIAL_EXECUTE_DETAILS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="eid != null" >
+        EID,
+      </if>
+      <if test="sid != null" >
+        SID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="eid != null" >
+        #{eid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcuteDetails" >
+    update PL_SPECIAL_EXECUTE_DETAILS
+    <set >
+      <if test="eid != null" >
+        EID = #{eid,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        SID = #{sid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcuteDetails" >
+    update PL_SPECIAL_EXECUTE_DETAILS
+    set EID = #{eid,jdbcType=VARCHAR},
+      SID = #{sid,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

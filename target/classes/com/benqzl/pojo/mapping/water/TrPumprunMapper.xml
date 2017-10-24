@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.water.TrPumprunMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.water.TrPumprun">
+		<id column="F_ID" property="fId" jdbcType="VARCHAR" />
+		<result column="F_STATIONCODE" property="fStationcode"
+			jdbcType="VARCHAR" />
+		<result column="F_PUMPCODE" property="fPumpcode" jdbcType="VARCHAR" />
+		<result column="F_TIME" property="fTime" jdbcType="TIMESTAMP" />
+		<result column="F_RUNSTATE" property="fRunstate" jdbcType="VARCHAR" />
+		<result column="F_DIR" property="fDir" jdbcType="VARCHAR" />
+		<result column="F_VA" property="fVa" jdbcType="DECIMAL" />
+		<result column="F_VB" property="fVb" jdbcType="DECIMAL" />
+		<result column="F_VC" property="fVc" jdbcType="DECIMAL" />
+		<result column="F_IA" property="fIa" jdbcType="DECIMAL" />
+		<result column="F_IB" property="fIb" jdbcType="DECIMAL" />
+		<result column="F_IC" property="fIc" jdbcType="DECIMAL" />
+		<result column="F_POWER" property="fPower" jdbcType="DECIMAL" />
+		<result column="F_FLOW" property="fFlow" jdbcType="DECIMAL" />
+		<result column="F_TEMP" property="fTemp" jdbcType="DECIMAL" />
+	</resultMap>
+	<resultMap id="BaseResultMap1" type="com.benqzl.pojo.util.RealTimeUnitReport">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="F_STATIONCODE" property="scode"
+			jdbcType="VARCHAR" />
+	    <result column="SNAME" property="sname" jdbcType="VARCHAR"/>
+		<result column="F_PUMPCODE" property="ucode" jdbcType="VARCHAR" />
+		<result column="DESIGNDISCHARGE" property="designdischarge" jdbcType="DECIMAL" />
+		<result column="COUNTUNIT" property="countunit" jdbcType="DECIMAL"/>
+	    <result column="UNAME" property="uname" jdbcType="VARCHAR"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		F_ID, F_STATIONCODE, F_PUMPCODE, F_TIME, F_RUNSTATE, F_DIR, F_VA, F_VB,
+		F_VC, F_IA,
+		F_IB, F_IC, F_POWER, F_FLOW, F_TEMP,name
+	</sql>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		F_ID, F_TIME, F_RUNSTATE, F_DIR, F_VA, F_VB,
+		F_VC, F_IA,
+		F_IB, F_IC, F_POWER, F_FLOW, F_TEMP,sys_station.name as F_STATIONCODE,sys_unit.name as F_PUMPCODE
+		from T_R_PUMPRUN  left join sys_station on T_R_PUMPRUN.F_STATIONCODE = sys_station.code 
+		left join sys_unit on sys_unit.code = T_R_PUMPRUN.F_PUMPCODE and sys_station.id=sys_unit.sid
+		<where>
+			<if test="code != null">
+				and F_STATIONCODE like '%'|| #{code,jdbcType=VARCHAR}
+				||'%'
+			</if>
+			<if test="starttime != null">
+				and F_TIME &gt;=#{starttime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and F_TIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+		</where>
+		order by F_TIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from T_R_PUMPRUN
+		<where>
+			<if test="code != null">
+				and F_STATIONCODE like '%'|| #{code,jdbcType=VARCHAR}
+				||'%'
+			</if>
+			<if test="starttime != null">
+				and F_TIME &gt;=#{starttime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and F_TIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+		</where>
+	</select>
+	<select id="explortRealTimeUnitReport" resultMap="BaseResultMap1" parameterType="java.util.Map">
+	  select A.* from(
+		select t.F_PUMPCODE as F_PUMPCODE,
+		t.F_STATIONCODE as F_STATIONCODE,
+		t.countunit as COUNTUNIT,
+		u.name as UNAME,u.designdischarge as DESIGNDISCHARGE,s.name as SNAME,
+		s.LEVELS as LEVELS
+		from (
+		select
+		t.F_PUMPCODE as F_PUMPCODE, t.F_STATIONCODE AS F_STATIONCODE,
+		count(t.f_pumpcode) as countunit
+		from T_R_PUMPRUN t
+		where 1=1
+			<if test="scode != null">
+				and t.F_STATIONCODE in(
+				<foreach collection="scode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+			</if>
+			<if test="ucode !=null">
+			    and t.F_PUMPCODE in(
+			    <foreach collection="ucode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+			</if>
+			<if test="begintime != null">
+				and t.F_TIME &gt;=#{begintime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and t.F_TIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="month !=null">
+			     and to_char(t.f_time,'yyyy-MM')=#{month}
+			</if>
+		    and t.f_runstate=1
+		 group by t.f_pumpcode, t.f_stationcode	
+		 order by t.f_stationcode
+		)t
+		 left join sys_station s
+         on s.code = t.f_stationcode and s.isdel=0
+       left join sys_unit u on u.code=t.f_pumpcode and u.sid=s.id
+       and u.isdel=0
+		) A
+		order by A.LEVELS,A.UNAME ASC
+	</select>
+	<select id="findRealTimeUnitReportByPage" resultMap="BaseResultMap1" parameterType="java.util.Map">
+	    select * from
+		(select A.*,ROWNUM RN from(
+		select t.F_PUMPCODE as F_PUMPCODE,
+		t.F_STATIONCODE as F_STATIONCODE,
+		t.countunit as COUNTUNIT,
+		u.name as UNAME,u.designdischarge as DESIGNDISCHARGE,s.name as SNAME,
+		s.LEVELS as LEVELS
+		from (
+		select
+		t.F_PUMPCODE as F_PUMPCODE, t.F_STATIONCODE AS F_STATIONCODE,
+		count(t.f_pumpcode) as countunit
+		from T_R_PUMPRUN t
+		where 1=1
+			<if test="scode != null">
+				and t.F_STATIONCODE in(
+				<foreach collection="scode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+			</if>
+			<if test="ucode !=null">
+			    and t.F_PUMPCODE in(
+			    <foreach collection="ucode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+			</if>
+			<if test="begintime != null">
+				and t.F_TIME &gt;=#{begintime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and t.F_TIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="month !=null">
+			     and to_char(t.f_time,'yyyy-MM')=#{month}
+			</if>
+		    and t.f_runstate=1
+		 group by t.f_pumpcode, t.f_stationcode	
+		 order by t.f_stationcode
+		)t
+		 left join sys_station s
+         on s.code = t.f_stationcode and s.isdel=0
+       left join sys_unit u on u.code=t.f_pumpcode and u.sid=s.id
+       and u.isdel=0
+		) A
+		
+		order by A.LEVELS,A.UNAME ASC)
+		
+	</select>
+		<select id="pageRealTimeUnitReportCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+	    select count(B.F_STATIONCODE) from
+		(select A.*,ROWNUM RN from(
+		select t.F_PUMPCODE as F_PUMPCODE,
+		t.F_STATIONCODE as F_STATIONCODE,
+		t.countunit as COUNTUNIT from (
+		select
+		t.F_PUMPCODE as F_PUMPCODE, t.F_STATIONCODE AS F_STATIONCODE,
+		count(t.f_pumpcode) as countunit
+		from T_R_PUMPRUN t
+		where 1=1
+			<if test="scode != null">
+				and t.F_STATIONCODE in(
+				<foreach collection="scode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+		</if>
+			<if test="ucode !=null">
+			    and t.F_PUMPCODE in(
+			    <foreach collection="ucode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+		</if>
+			<if test="begintime != null">
+				and t.F_TIME &gt;=#{begintime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and t.F_TIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="month !=null">
+			     and to_char(t.f_time,'yyyy-MM')=#{month}
+			</if>
+		    and t.f_runstate=1
+		 group by t.f_pumpcode, t.f_stationcode	
+		 order by t.f_stationcode
+		)t
+		 left join sys_station s
+         on s.code = t.f_stationcode
+       left join sys_unit u on u.code=t.f_pumpcode and u.sid=s.id
+		) A
+		)B
+		
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from T_R_PUMPRUN
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from T_R_PUMPRUN
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.water.TrPumprun">
+		insert into T_R_PUMPRUN (F_ID, F_STATIONCODE, F_PUMPCODE,
+		F_TIME, F_RUNSTATE, F_DIR,
+		F_VA, F_VB, F_VC, F_IA,
+		F_IB, F_IC, F_POWER, F_FLOW,
+		F_TEMP)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select SYS_GUID(),
+			#{item.fStationcode,jdbcType=VARCHAR}, #{item.fPumpcode,jdbcType=VARCHAR},
+			#{item.fTime,jdbcType=TIMESTAMP}, #{item.fRunstate,jdbcType=VARCHAR},
+			#{item.fDir,jdbcType=VARCHAR},
+			#{item.fVa,jdbcType=DECIMAL}, #{item.fVb,jdbcType=DECIMAL}, #{item.fVc,jdbcType=DECIMAL},
+			#{item.fIa,jdbcType=DECIMAL},
+			#{item.fIb,jdbcType=DECIMAL}, #{item.fIc,jdbcType=DECIMAL}, #{item.fPower,jdbcType=DECIMAL},
+			#{item.fFlow,jdbcType=DECIMAL},
+			#{item.fTemp,jdbcType=DECIMAL} from dual)
+		</foreach>
+		
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.water.TrPumprun">
+		insert into T_R_PUMPRUN
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="fId != null">
+				F_ID,
+			</if>
+			<if test="fStationcode != null">
+				F_STATIONCODE,
+			</if>
+			<if test="fPumpcode != null">
+				F_PUMPCODE,
+			</if>
+			<if test="fTime != null">
+				F_TIME,
+			</if>
+			<if test="fRunstate != null">
+				F_RUNSTATE,
+			</if>
+			<if test="fDir != null">
+				F_DIR,
+			</if>
+			<if test="fVa != null">
+				F_VA,
+			</if>
+			<if test="fVb != null">
+				F_VB,
+			</if>
+			<if test="fVc != null">
+				F_VC,
+			</if>
+			<if test="fIa != null">
+				F_IA,
+			</if>
+			<if test="fIb != null">
+				F_IB,
+			</if>
+			<if test="fIc != null">
+				F_IC,
+			</if>
+			<if test="fPower != null">
+				F_POWER,
+			</if>
+			<if test="fFlow != null">
+				F_FLOW,
+			</if>
+			<if test="fTemp != null">
+				F_TEMP,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="fId != null">
+				#{fId,jdbcType=VARCHAR},
+			</if>
+			<if test="fStationcode != null">
+				#{fStationcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fPumpcode != null">
+				#{fPumpcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fTime != null">
+				#{fTime,jdbcType=DATE},
+			</if>
+			<if test="fRunstate != null">
+				#{fRunstate,jdbcType=VARCHAR},
+			</if>
+			<if test="fDir != null">
+				#{fDir,jdbcType=VARCHAR},
+			</if>
+			<if test="fVa != null">
+				#{fVa,jdbcType=DECIMAL},
+			</if>
+			<if test="fVb != null">
+				#{fVb,jdbcType=DECIMAL},
+			</if>
+			<if test="fVc != null">
+				#{fVc,jdbcType=DECIMAL},
+			</if>
+			<if test="fIa != null">
+				#{fIa,jdbcType=DECIMAL},
+			</if>
+			<if test="fIb != null">
+				#{fIb,jdbcType=DECIMAL},
+			</if>
+			<if test="fIc != null">
+				#{fIc,jdbcType=DECIMAL},
+			</if>
+			<if test="fPower != null">
+				#{fPower,jdbcType=DECIMAL},
+			</if>
+			<if test="fFlow != null">
+				#{fFlow,jdbcType=DECIMAL},
+			</if>
+			<if test="fTemp != null">
+				#{fTemp,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.water.TrPumprun">
+		update T_R_PUMPRUN
+		<set>
+			<if test="fStationcode != null">
+				F_STATIONCODE = #{fStationcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fPumpcode != null">
+				F_PUMPCODE = #{fPumpcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fTime != null">
+				F_TIME = #{fTime,jdbcType=DATE},
+			</if>
+			<if test="fRunstate != null">
+				F_RUNSTATE = #{fRunstate,jdbcType=VARCHAR},
+			</if>
+			<if test="fDir != null">
+				F_DIR = #{fDir,jdbcType=VARCHAR},
+			</if>
+			<if test="fVa != null">
+				F_VA = #{fVa,jdbcType=DECIMAL},
+			</if>
+			<if test="fVb != null">
+				F_VB = #{fVb,jdbcType=DECIMAL},
+			</if>
+			<if test="fVc != null">
+				F_VC = #{fVc,jdbcType=DECIMAL},
+			</if>
+			<if test="fIa != null">
+				F_IA = #{fIa,jdbcType=DECIMAL},
+			</if>
+			<if test="fIb != null">
+				F_IB = #{fIb,jdbcType=DECIMAL},
+			</if>
+			<if test="fIc != null">
+				F_IC = #{fIc,jdbcType=DECIMAL},
+			</if>
+			<if test="fPower != null">
+				F_POWER = #{fPower,jdbcType=DECIMAL},
+			</if>
+			<if test="fFlow != null">
+				F_FLOW = #{fFlow,jdbcType=DECIMAL},
+			</if>
+			<if test="fTemp != null">
+				F_TEMP = #{fTemp,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.water.TrPumprun">
+		update T_R_PUMPRUN
+		set F_STATIONCODE = #{fStationcode,jdbcType=VARCHAR},
+		F_PUMPCODE = #{fPumpcode,jdbcType=VARCHAR},
+		F_TIME = #{fTime,jdbcType=DATE},
+		F_RUNSTATE = #{fRunstate,jdbcType=VARCHAR},
+		F_DIR = #{fDir,jdbcType=VARCHAR},
+		F_VA = #{fVa,jdbcType=DECIMAL},
+		F_VB = #{fVb,jdbcType=DECIMAL},
+		F_VC = #{fVc,jdbcType=DECIMAL},
+		F_IA = #{fIa,jdbcType=DECIMAL},
+		F_IB = #{fIb,jdbcType=DECIMAL},
+		F_IC = #{fIc,jdbcType=DECIMAL},
+		F_POWER = #{fPower,jdbcType=DECIMAL},
+		F_FLOW = #{fFlow,jdbcType=DECIMAL},
+		F_TEMP = #{fTemp,jdbcType=DECIMAL}
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</update>
+</mapper>

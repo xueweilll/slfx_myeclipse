@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialExcuteMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialExcute">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ISID" property="isid" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="BaseResultMap1" type="com.benqzl.pojo.patrol.PatrolSpecialExcute">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ISID" property="isid" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		<collection property="patrolSpecialExcuteDetails"
+			ofType="com.benqzl.pojo.patrol.PatrolSpecialExcuteDetails">
+			<id column="EDID" property="id" jdbcType="VARCHAR" />
+			<result column="EID" property="eid" jdbcType="VARCHAR" />
+			<result column="SID" property="sid" jdbcType="VARCHAR" />
+		</collection>
+      <collection property="specialExcutestation" ofType="com.benqzl.pojo.system.Station">
+				<id column="ESID" property="id" jdbcType="VARCHAR" />
+				<result column="CODE" property="code" jdbcType="VARCHAR" />
+				<result column="NAME" property="name" jdbcType="VARCHAR" />
+				<result column="LAT" property="lat" jdbcType="DECIMAL" />
+				<result column="LON" property="lon" jdbcType="DECIMAL" />
+				<result column="LEVELS" property="levels" jdbcType="DECIMAL" />
+				<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+				<result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+				<result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+				<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+				<result column="NVRUSERNAME" property="nvrusername" jdbcType="VARCHAR" />
+				<result column="NVRPASSWORD" property="nvrpassword" jdbcType="VARCHAR" />
+				<result column="NVRPROT" property="nvrprot" jdbcType="VARCHAR" />
+				<result column="NVRURL" property="nvrurl" jdbcType="VARCHAR" />
+				<result column="IMGURL" property="imgurl" jdbcType="VARCHAR" />
+				<result column="DEPARTMENTID" property="departmentid"
+					jdbcType="VARCHAR" />
+				<result column="CONTROLWATERLEVEL" jdbcType="DECIMAL"
+					property="controlwaterlevel" />
+				<result column="ADDRESS" property="address" jdbcType="VARCHAR" />
+			</collection>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID, ISID, CREATER, CREATETIME, CONTENT, REMARK
+	</sql>
+	<sql id="Base_Column_List1">
+		e.id as ID, e.isid as ISID, e.creater as CREATER, 
+		e.createtime as CREATETIME, e.content as CONTENT, e.remark as REMARK,
+		es.sid as SID,es.id as EDID,s.id as ESID,s.name as NAME,s.controlwaterlevel as CONTROLWATERLEVEL
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_SPECIAL_EXECUTE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="findexcute" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from PL_SPECIAL_EXECUTE 
+		where isid = #{isid,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from PL_SPECIAL_EXECUTE
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="deleteBypsexcuteKey" parameterType="java.lang.String">
+		delete from PL_SPECIAL_EXECUTE
+		where isid=#{isid,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcute">
+		insert into PL_SPECIAL_EXECUTE (ID, ISID, CREATER,
+		CREATETIME, CONTENT, REMARK
+		)
+		values (#{id,jdbcType=VARCHAR}, #{isid,jdbcType=VARCHAR},
+		#{creater,jdbcType=VARCHAR},
+		#{createtime,jdbcType=TIMESTAMP}, #{content,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcute">
+		insert into PL_SPECIAL_EXECUTE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="isid != null">
+				ISID,
+			</if>
+			<if test="creater != null">
+				CREATER,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="content != null">
+				CONTENT,
+			</if>
+			<if test="remark != null">
+				REMARK,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="isid != null">
+				#{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="creater != null">
+				#{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcute">
+		update PL_SPECIAL_EXECUTE
+		<set>
+			<if test="isid != null">
+				ISID = #{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="creater != null">
+				CREATER = #{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="content != null">
+				CONTENT = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				REMARK = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialExcute">
+		update PL_SPECIAL_EXECUTE
+		set ISID = #{isid,jdbcType=VARCHAR},
+		CREATER = #{creater,jdbcType=VARCHAR},
+		CREATETIME = #{createtime,jdbcType=DATE},
+		CONTENT = #{content,jdbcType=VARCHAR},
+		REMARK = #{remark,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

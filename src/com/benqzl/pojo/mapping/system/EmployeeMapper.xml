@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.benqzl.dao.system.EmployeeMapper">
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Employee">
+    <id column="ID" jdbcType="VARCHAR" property="id" />
+    <!-- <result column="DEPARTMENTID" jdbcType="VARCHAR" property="departmentid" /> -->
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="BIRTHDAY" property="birthday" />
+    <result column="POSITION" jdbcType="VARCHAR" property="position" />
+    <result column="TELEPHONE" jdbcType="VARCHAR" property="telephone" />
+    <result column="PHONE" jdbcType="VARCHAR" property="phone" />
+    <result column="SEX" jdbcType="DECIMAL" property="sex" />
+    <result column="AGE" jdbcType="DECIMAL" property="age" />
+    <result column="CREATETIME" property="createtime" />
+    <result column="EDITTIME" property="edittime" />
+    <result column="LEVE" property="leve"/>
+    <result column="SID" property="sid"/>
+    <result column="DEPARTMENTID" property="departmentid"/>
+    <result column="ISDEL" jdbcType="DECIMAL" property="isdel" />
+    <association property="department" javaType="com.benqzl.pojo.system.Department">
+    <id property="id" column="DEPARTMENTID"/>
+    <result property="name" column="DNAME"/>
+    </association>
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+    <id property="id" column="STATIONID"/>
+    <result property="name" column="SNAME"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List">
+    e.ID as ID, e.DEPARTMENTID as DEPARTMENTID,d.Name as DNAME, e.NAME as Name, e.BIRTHDAY as BIRTHDAY, e.POSITION as POSITION, e.TELEPHONE as TELEPHONE, e.PHONE as PHONE, e.SEX as SEX, e.AGE as AGE, e.CREATETIME as CREATETIME, 
+    e.EDITTIME as EDITTIME, e.ISDEL as ISDEL, e.LEVE as LEVE,s.name as SNAME,e.sid as SID
+  </sql>
+    <sql id="Base_Column_List1">
+    e.ID as ID, e.DEPARTMENTID as DEPARTMENTID, e.NAME as Name, e.BIRTHDAY as BIRTHDAY, e.POSITION as POSITION, e.TELEPHONE as TELEPHONE, e.PHONE as PHONE, e.SEX as SEX, e.AGE as AGE, e.CREATETIME as CREATETIME, 
+    e.EDITTIME as EDITTIME, e.ISDEL as ISDEL, e.LEVE as LEVE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_EMPLOYEE e
+    join SYS_DEPARTMENT d on e.DEPARTMENTID=d.ID
+    left join SYS_STATION s on s.id=e.sid
+    where e.ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectFindLeve" parameterType="java.lang.String"
+  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List1"/>
+    from SYS_EMPLOYEE e
+    left join sys_user u on u.employeeid=e.id
+    where u.userid=#{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_EMPLOYEE e
+		join SYS_DEPARTMENT d on e.DEPARTMENTID=d.ID
+		where e.IsDel=0
+	</select>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from SYS_EMPLOYEE e
+		join SYS_DEPARTMENT d on e.DEPARTMENTID=d.ID
+		left join SYS_STATION s on s.id=e.sid
+		where 1=1
+	    <if test="name != null and name !=''" >
+		and e.Name like '%'||#{name,jdbcType=VARCHAR}||'%'
+		</if> 
+		<if test="id != null and id !='' and id !='0'.toString()" >
+		and e.DEPARTMENTID=#{id,jdbcType=VARCHAR}
+		</if> 
+	     and e.IsDel=0 order by d.CREATETIME ,e.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from SYS_EMPLOYEE e
+		join SYS_DEPARTMENT d on e.DEPARTMENTID=d.ID
+		left join SYS_STATION s on s.id=e.sid
+		where 1=1
+		<if test="name != null and name !=''" >
+		and e.NAME like '%'||#{name,jdbcType=VARCHAR}||'%'
+		</if> 
+	   <if test="id != null and id !='' and id !='0'.toString()" >
+		and e.DEPARTMENTID = #{id,jdbcType=VARCHAR}
+	   </if> 
+		 and e.IsDel = 0
+	</select>
+  <update id="deleteByPrimaryKey" parameterType="java.lang.String">
+    update  SYS_EMPLOYEE
+    set ISDEL = 1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Employee">
+    insert into SYS_EMPLOYEE (ID, DEPARTMENTID, NAME, 
+    <if test="birthday!=null">BIRTHDAY,</if>
+       POSITION, TELEPHONE, 
+      PHONE, SEX, AGE, CREATETIME, 
+      EDITTIME, ISDEL,LEVE,SID)
+    values (#{id,jdbcType=VARCHAR}, #{department.id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      <if test="birthday!=null">#{birthday,jdbcType=DATE},</if>  #{position,jdbcType=VARCHAR}, #{telephone,jdbcType=VARCHAR}, 
+      #{phone,jdbcType=VARCHAR}, #{sex,jdbcType=DECIMAL}, #{age,jdbcType=DECIMAL}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{edittime,jdbcType=TIMESTAMP}, #{isdel,jdbcType=DECIMAL},#{leve},#{sid})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Employee">
+    insert into SYS_EMPLOYEE
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="departmentid != null">
+        DEPARTMENTID,
+      </if>
+      <if test="name != null">
+        NAME,
+      </if>
+      <if test="birthday != null">
+        BIRTHDAY,
+      </if>
+      <if test="position != null">
+        POSITION,
+      </if>
+      <if test="telephone != null">
+        TELEPHONE,
+      </if>
+      <if test="phone != null">
+        PHONE,
+      </if>
+      <if test="sex != null">
+        SEX,
+      </if>
+      <if test="age != null">
+        AGE,
+      </if>
+      <if test="createtime != null">
+        CREATETIME,
+      </if>
+      <if test="edittime != null">
+        EDITTIME,
+      </if>
+      <if test="isdel != null">
+        ISDEL,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="departmentid != null">
+        #{departmentid,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="birthday != null">
+        #{birthday,jdbcType=DATE},
+      </if>
+      <if test="position != null">
+        #{position,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null">
+        #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        #{sex,jdbcType=DECIMAL},
+      </if>
+      <if test="age != null">
+        #{age,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null">
+        #{createtime,jdbcType=DATE},
+      </if>
+      <if test="edittime != null">
+        #{edittime,jdbcType=DATE},
+      </if>
+      <if test="isdel != null">
+        #{isdel,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Employee">
+    update SYS_EMPLOYEE
+    <set>
+      <if test="department.id != null">
+        DEPARTMENTID = #{department.id,jdbcType=VARCHAR},
+      </if>
+      <if test="sid !=null">
+        SID=#{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="birthday != null">
+        BIRTHDAY = #{birthday,jdbcType=DATE},
+      </if>
+      <if test="position != null">
+        POSITION = #{position,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null">
+        TELEPHONE = #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        PHONE = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        SEX = #{sex,jdbcType=DECIMAL},
+      </if>
+      <if test="age != null">
+        AGE = #{age,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null">
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null">
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isdel != null">
+        ISDEL = #{isdel,jdbcType=DECIMAL},
+      </if>
+      <if test="leve !=null">
+        LEVE =#{leve,jdbcType=DECIMAL}
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Employee">
+    update SYS_EMPLOYEE
+    set DEPARTMENTID = #{departmentid,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      BIRTHDAY = #{birthday,jdbcType=DATE},
+      POSITION = #{position,jdbcType=VARCHAR},
+      TELEPHONE = #{telephone,jdbcType=VARCHAR},
+      PHONE = #{phone,jdbcType=VARCHAR},
+      SEX = #{sex,jdbcType=DECIMAL},
+      AGE = #{age,jdbcType=DECIMAL},
+      CREATETIME = #{createtime,jdbcType=DATE},
+      EDITTIME = #{edittime,jdbcType=DATE},
+      ISDEL = #{isdel,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByUser" parameterType="java.lang.String" resultMap="BaseResultMap">
+  	select e.* from sys_employee e left join sys_user u 
+on e.id = u.employeeid where u.userid=#{userid} and u.isdel = '0' and e.isdel = '0'
+  </select>
+  <select id="findEmployeeName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select e.name as NAME,e.id as ID from sys_employee e left join sys_user u
+    on e.id=u.employeeid
+    where e.isdel='0' and u.isdel='0' 
+  </select>
+</mapper>

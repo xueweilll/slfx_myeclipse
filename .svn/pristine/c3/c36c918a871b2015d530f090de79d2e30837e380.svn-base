@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.TodoListMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.TodoList" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="TITLE" property="title" jdbcType="VARCHAR" />
+    <result column="DODATE" property="dodate" jdbcType="TIMESTAMP" />
+    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+    <result column="ISFEEDBACK" property="isfeedback" jdbcType="DECIMAL" />
+    <result column="FILEADDRESS" property="fileaddress" jdbcType="VARCHAR" />
+    <result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITERID" property="editerid" jdbcType="VARCHAR" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="ISPC" property="ispc" jdbcType="DECIMAL" />
+    <result column="ISPHONEMESS" property="isphonemess" jdbcType="DECIMAL" />
+    <collection property="todolistpeople" ofType="com.benqzl.pojo.oa.TodoListPeople">
+    	<id column="TODOLISTPEOPLE_ID" property="id" />
+    	<result column="STATE" property="state"/>
+    	<association property="user" javaType="com.benqzl.pojo.system.User">
+	    	<id column="DOTOER" property="userid" />
+	    	<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+	    	<result column="EMPLOYEEID" property="employeeid" jdbcType="VARCHAR" />
+	    	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+	    	<id column="EMPLOYEEID" property="id" />
+	    	<result column="NAME" property="name" jdbcType="VARCHAR" />
+	    	</association>
+	    </association>
+    </collection>
+  </resultMap>
+ 	<resultMap type="com.benqzl.pojo.oa.TodoListPeople" id="peoplemap">
+ 		<id column="ID" property="id" jdbcType="VARCHAR" />
+	    <result column="DOID" property="doid" jdbcType="VARCHAR" />
+	    <result column="DOTOER" property="dotoer" jdbcType="VARCHAR" />
+	    <result column="STATE" property="state" jdbcType="DECIMAL" />
+	    <result column="VIEWDATE" property="viewdate" jdbcType="TIMESTAMP" />
+	    <result column="FEEDBACKDATE" property="feedbackdate" jdbcType="TIMESTAMP" />
+	    <association property="todolist" javaType="com.benqzl.pojo.oa.TodoList">
+	    	<id column="DOID" property="id" />
+	    	<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		    <result column="DODATE" property="dodate" jdbcType="TIMESTAMP" />
+		    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+		    <result column="ISFEEDBACK" property="isfeedback" jdbcType="DECIMAL" />
+		    <result column="FILEADDRESS" property="fileaddress" jdbcType="VARCHAR" />
+		    <result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+		    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+		    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		    <result column="EDITERID" property="editerid" jdbcType="VARCHAR" />
+		    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+		    <result column="ISPC" property="ispc" jdbcType="DECIMAL" />
+		    <result column="ISPHONEMESS" property="isphonemess" jdbcType="DECIMAL" />
+	    </association>
+	    <association property="user" javaType="com.benqzl.pojo.system.User">
+	    	<id column="DOTOER" property="userid" />
+	    	<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+	    	<result column="EMPLOYEEID" property="employeeid" jdbcType="VARCHAR" />
+	    	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+	    	<id column="EMPLOYEEID" property="id" />
+	    	<result column="NAME" property="name" jdbcType="VARCHAR" />
+	    	</association>
+	    </association>
+ 	</resultMap>
+	<resultMap type="com.benqzl.pojo.system.User" id="usermap">
+		<id column="ID" property="userid" />
+	 	<result column="TEXT" property="username" jdbcType="VARCHAR" />
+	</resultMap>
+  <sql id="Base_Column_List" >
+    ID, TITLE, DODATE, CONTENTS, ISFEEDBACK, FILEADDRESS, CREATERID, ISDEL, CREATETIME, 
+    EDITERID, EDITTIME, ISPC, ISPHONEMESS
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="peoplemap" parameterType="java.lang.String" >
+    select b.*,c.username,a.title,a.dodate,a.contents,a.isfeedback,a.fileaddress,a.createrid,
+	a.isdel,a.createtime,a.editerid,a.edittime,a.ispc,a.isphonemess  from 
+	oa_todolist a,oa_dolist_people b,sys_user c where a.id=b.doid and b.dotoer=c.userid
+    and b.ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPrimaryKey2" resultMap="peoplemap" parameterType="java.lang.String" >
+    select b.*,c.username,a.title,a.dodate,a.contents,a.isfeedback,a.fileaddress,a.createrid,
+	a.isdel,a.createtime,a.editerid,a.edittime,a.ispc,a.isphonemess  from 
+	oa_todolist a,oa_dolist_people b,sys_user c where a.id=b.doid and b.dotoer=c.userid
+    and a.ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findByPage3" resultMap="BaseResultMap" parameterType="java.util.Map"> 		 		
+  		select * from (select s.*,rownum rn from 
+ 		(
+  		select * from oa_todolist where isdel!='0'
+  		<if test="userid !=null"> 
+  			and id in (select a.id from oa_todolist a ,oa_dolist_people b,sys_user c 
+    		where a.isdel!='0' and b.state !='3' and a.id=b.doid and b.dotoer=c.userid and c.userid='${userid}')
+  		</if>
+  		<if test="title !=null">
+  			and title like '%${title}%'  
+  		</if>
+  		      ) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  </select>
+  <select id="findByPage" resultMap="peoplemap" parameterType="java.util.Map">
+  		select * from (select s.*,rownum rn from 
+ ( 
+ select b.*,c.username,c.employeeid,d.name,
+ a.title,a.dodate,a.contents,a.isfeedback,a.fileaddress,a.createrid,
+a.isdel,a.createtime,a.editerid,a.edittime,a.ispc,a.isphonemess  from 
+oa_todolist a,oa_dolist_people b,sys_user c ,sys_employee d
+where a.id=b.doid and b.dotoer=c.userid and c.employeeid=d.id
+ and a.isdel !='0' and b.state !='3' 
+ 	 	<if test="title !=null"> 
+  			and a.title like'%${title}%' 
+  		</if>
+  		<if test="begin !=null">
+  			and a.dodate &gt;=to_date('${begin}','yyyy-MM-dd HH24:mi:ss') 
+  		</if>
+  		<if test="end !=null">
+  			and a.dodate &lt;=to_date('${end}','yyyy-MM-dd HH24:mi:ss') 
+  		</if> 
+  		<if test="userid !=null">
+  			and c.userid= '${userid}' 
+  		</if>
+  		<if test="todoid !=null">
+  			and a.id='${todoid}'
+  		</if>
+  		 order by b.state 
+ 	 ) s	
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1} 
+  </select>
+  <select id="findByPage2"  resultMap="BaseResultMap" parameterType="java.util.Map">
+  		select * from (select s.*,rownum rn from 
+ ( select a.*, b.dotoer,b.state,b.viewdate,b.feedbackdate,c.username from oa_todolist a,oa_dolist_people b,sys_user c
+  where a.id=b.doid and b.dotoer=c.userid and a.isdel !='0' and b.state !='3'
+ 	 	<!-- <if test="sid !=null">
+  			and sid ='${sid}'
+  		</if>
+  		<if test="name !=null">
+  			and a.name like '%${name}%'
+  		</if>  -->
+ 	 ) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1} 
+  </select>
+ 
+  <select id="pageCount"  resultType="int" parameterType="java.util.Map"> 
+  		select count(*) from oa_todolist where isdel!='0' 
+  		<if test="userid !=null"> 
+  			and id in (select a.id from oa_todolist a ,oa_dolist_people b,sys_user c 
+    where a.isdel!='0' and b.state !='3' and a.id=b.doid and b.dotoer=c.userid and c.userid='${userid}')
+  		</if>
+  		<if test="title !=null">
+  			and title like '%${title}%'  
+  		</if> 
+  </select>
+  <select id="pageCount2" resultType="int" parameterType="java.util.Map">
+  		select count(*) from oa_todolist a,oa_dolist_people b,sys_user c
+  where a.id=b.doid and b.dotoer=c.userid and a.isdel !='0' and b.state !='3' 
+  		<if test="title !=null"> 
+  			and a.title like '%${title}%'
+  		</if>
+  		<if test="dodate !=null">
+  			and a.dodate=to_date('${dodate}','yyyy-MM-dd HH24:mi:ss')
+  		</if>
+  		<if test="userid !=null">
+  			and c.userid='${userid}' 
+  		</if>
+  </select>
+  <select id="findUserNameById" parameterType="java.lang.String" resultType="java.lang.String">
+      select username from sys_user where userid=#{value} 
+  </select>
+  <select id="selectUsers" resultMap="map1">
+	  select * from sys_user a ,sys_employee b where a.employeeid=b.id and a.isdel='0'
+  </select>
+  <resultMap type="com.benqzl.pojo.system.User" id="map1">
+  	<id column="USERID" property="userid"/>
+  	<result column="EMPLOYEEID" property="employeeid"/>
+  	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+  		<id column="EMPLOYEEID" property="id"/>
+  		<result column="NAME" property="name"/>
+  	</association>
+  </resultMap>
+  <select id="selectusertree" resultMap="usermap">
+  	  select userid as id,username as text from sys_user where isdel !='0'
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from OA_TODOLIST
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  
+  <insert id="insert" parameterType="com.benqzl.pojo.oa.TodoList" >
+    insert into OA_TODOLIST (ID, TITLE, DODATE, 
+      CONTENTS, ISFEEDBACK, FILEADDRESS, 
+      CREATERID, ISDEL, CREATETIME, 
+      EDITERID, EDITTIME, ISPC, 
+      ISPHONEMESS)
+    values (#{id,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{dodate,jdbcType=TIMESTAMP}, 
+      #{contents,jdbcType=VARCHAR}, #{isfeedback,jdbcType=DECIMAL}, #{fileaddress,jdbcType=VARCHAR}, 
+      #{createrid,jdbcType=VARCHAR}, #{isdel,jdbcType=DECIMAL}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{editerid,jdbcType=VARCHAR}, #{edittime,jdbcType=TIMESTAMP}, #{ispc,jdbcType=DECIMAL}, 
+      #{isphonemess,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertTodolist" parameterType="com.benqzl.pojo.oa.TodoList" >
+    insert into OA_TODOLIST
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="title != null" >
+        TITLE,
+      </if>
+      <if test="dodate != null" >
+        DODATE,
+      </if>
+      <if test="contents != null" >
+        CONTENTS,
+      </if>
+      <if test="isfeedback != null" >
+        ISFEEDBACK,
+      </if>
+      <if test="fileaddress != null" >
+        FILEADDRESS,
+      </if>
+      <if test="createrid != null" >
+        CREATERID,
+      </if>
+      <if test="isdel != null" >
+        ISDEL,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="editerid != null" >
+        EDITERID,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="ispc != null" >
+        ISPC,
+      </if>
+      <if test="isphonemess != null" >
+        ISPHONEMESS,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="dodate != null" >
+        #{dodate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="contents != null" >
+        #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="isfeedback != null" >
+        #{isfeedback,jdbcType=DECIMAL},
+      </if>
+      <if test="fileaddress != null" >
+        #{fileaddress,jdbcType=VARCHAR},
+      </if>
+      <if test="createrid != null" >
+        #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="isdel != null" >
+        #{isdel,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="editerid != null" >
+        #{editerid,jdbcType=VARCHAR},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ispc != null" >
+        #{ispc,jdbcType=DECIMAL},
+      </if>
+      <if test="isphonemess != null" >
+        #{isphonemess,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <insert id="insertTodolistpeople" parameterType="com.benqzl.pojo.oa.TodoListPeople" >
+    insert into OA_DOLIST_PEOPLE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="doid != null" >
+        DOID,
+      </if>
+      <if test="dotoer != null" >
+        DOTOER,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="viewdate != null" >
+        VIEWDATE,
+      </if>
+      <if test="feedbackdate != null" >
+        FEEDBACKDATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="doid != null" >
+        #{doid,jdbcType=VARCHAR},
+      </if>
+      <if test="dotoer != null" >
+        #{dotoer,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="viewdate != null" >
+        #{viewdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="feedbackdate != null" >
+        #{feedbackdate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.oa.TodoList" >
+    update OA_TODOLIST
+    <set >
+      <if test="title != null" >
+        TITLE = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="dodate != null" >
+        DODATE = #{dodate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="contents != null" >
+        CONTENTS = #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="isfeedback != null" >
+        ISFEEDBACK = #{isfeedback,jdbcType=DECIMAL},
+      </if>
+      <if test="fileaddress != null" >
+        FILEADDRESS = #{fileaddress,jdbcType=VARCHAR},
+      </if>
+      <if test="createrid != null" >
+        CREATERID = #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="isdel != null" >
+        ISDEL = #{isdel,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="editerid != null" >
+        EDITERID = #{editerid,jdbcType=VARCHAR},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ispc != null" >
+        ISPC = #{ispc,jdbcType=DECIMAL},
+      </if>
+      <if test="isphonemess != null" >
+        ISPHONEMESS = #{isphonemess,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.oa.TodoList" >
+    update OA_TODOLIST
+    set TITLE = #{title,jdbcType=VARCHAR},
+      DODATE = #{dodate,jdbcType=TIMESTAMP},
+      CONTENTS = #{contents,jdbcType=VARCHAR},
+      ISFEEDBACK = #{isfeedback,jdbcType=DECIMAL},
+      FILEADDRESS = #{fileaddress,jdbcType=VARCHAR},
+      CREATERID = #{createrid,jdbcType=VARCHAR},
+      ISDEL = #{isdel,jdbcType=DECIMAL},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      EDITERID = #{editerid,jdbcType=VARCHAR},
+      EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      ISPC = #{ispc,jdbcType=DECIMAL},
+      ISPHONEMESS = #{isphonemess,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="deletetodolistpeople" parameterType="java.lang.String">
+  		update oa_dolist_people
+  		set state='3'
+  		where doid=#{doid}
+  </update>
+  <update id="deletetodolistpeopleById" parameterType="java.lang.String">
+  		update oa_dolist_people
+  		set state='3'
+  		where id=#{id}
+  </update>
+  <update id="deletetodolist" parameterType="java.lang.String">
+  		update oa_todolist
+  		set isdel='0'
+  		where id=#{id}
+  </update>
+  <update id="updateAll" parameterType="java.util.Date">
+  		update oa_dolist_people
+  		set state='1',viewdate=#{viewdate}  where state='0' 
+  		
+  </update>
+  <update id="updatetwo" parameterType="java.util.Map">
+  		update oa_dolist_people
+  		set state='1',viewdate=to_date('${feedbackdate}','yyyy-MM-dd HH24:mi:ss')
+  		where id='${id}'
+  </update>
+  <update id="updateone" parameterType="java.util.Map">
+  		update oa_dolist_people
+  		set state='2',FeedbackDate=to_date('${feedbackdate}','yyyy-MM-dd HH24:mi:ss')
+  		where id='${id}'
+  </update>
+  <select id="findtodolistByid" parameterType="java.lang.String" resultMap="BaseResultMap">
+  		select a.*,b.id as todolistpeople_id,b.state,b.dotoer,c.username from
+		oa_todolist a ,oa_dolist_people b,sys_user c 
+		where  a.isdel !='0' and b.state !='3' and a.id=b.doid and b.dotoer=c.userid and a.id=#{id} 
+  </select>
+  <select id="findUser" resultType="com.benqzl.pojo.system.User">
+  		select * from sys_user where isdel='0' 
+  </select>
+  <select id="findOtherPeopleByTodolistid" resultType="com.benqzl.pojo.oa.TodoListPeople" parameterType="java.util.Map">
+  		select * from oa_dolist_people 
+		where doid='${todolistid}' and id !='${id}'
+  </select>
+  <update id="updateTodolist" parameterType="java.lang.String">
+  		update oa_todolist a set a.isdel='2' where a.id=#{id}
+  </update>
+</mapper>

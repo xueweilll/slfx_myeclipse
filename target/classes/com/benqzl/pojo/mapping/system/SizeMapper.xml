@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.SizeMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Size" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="EDITER" property="editer" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <association property="user" javaType="com.benqzl.pojo.system.User">
+    <id property="id" column="USERID"/>
+    <result property="username" column="UNAME"/>
+    <result property="email" column="ENAME"/>
+    </association>
+    <association property="employee" javaType="com.benqzl.pojo.system.Employee">
+    <id property="id" column="ID"/>
+    <result property="name" column="ENAMES"/>
+    <result property="phone" column="HENAMES"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    s.ID as ID, s.EDITER as EDITER, s.NAME as NAME, s.CREATERID as CREATERID, s.CREATETIME as CREATETIME, 
+    s.EDITTIME as EDITTIME,u.username as UNAME,e.name as ENAMES
+  </sql>
+  <sql id="Base_Column_List1">
+  ID ,  EDITER,  NAME, CREATERID,  CREATETIME, 
+     EDITTIME
+  </sql>
+  <select id="findSizeName" resultMap="BaseResultMap" parameterType="java.lang.String">
+  select 
+  <include refid="Base_Column_List1"></include>
+  from SYS_SIZE where isdel=0
+  </select>
+  <select id="findSizeByPage" resultMap="BaseResultMap" parameterType="java.lang.String">
+     select B.*,u.username as ENAME,e.name as HENAMES from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from SYS_SIZE s
+		left join SYS_USER u on u.USERID=s.createrid
+		left join SYS_EMPLOYEE e on e.id =u.employeeid
+		where 1 = 1
+		 <if test="createrid != null and createrid !='' and createrid !='0'.toString()" >
+		and s.createrid = #{createrid,jdbcType=VARCHAR}
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and s.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and s.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		and s.isdel=0
+		order by S.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		left join sys_user u on u.userid=B.editer
+		left join sys_employee e on e.id =u.employeeid
+		where RN &gt; #{p1}
+  </select>
+  <select id="pageSizeCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		SYS_SIZE s
+		left join SYS_USER u on s.createrid=u.USERID
+		left join sys_employee e on e.id=u.employeeid
+		where 1 = 1
+		 <if test="createrid != null and createrid !=''and createrid !='0'.toString()" >
+		and s.createrid = #{createrid,jdbcType=VARCHAR}
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and s.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and s.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		and s.isdel=0
+	</select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_SIZE
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectSizeByPrimaryKey" parameterType="java.lang.String"  resultMap="BaseResultMap">
+   Select 
+    <include refid="Base_Column_List1" />
+    from
+   SYS_SIZE
+   where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from SYS_SIZE
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteSizeByPrimaryKey" parameterType="java.lang.String">
+     update sys_size set isdel=1
+     where id=#{id,jdbcType=VARCHAR} 
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Size" >
+    insert into SYS_SIZE (ID, EDITER, NAME, 
+      CREATERID, CREATETIME, EDITTIME
+      )
+    values (#{id,jdbcType=VARCHAR}, #{editer,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{createrid,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{edittime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+    <insert id="insertSize" parameterType="com.benqzl.pojo.system.Size" >
+    insert into SYS_SIZE (ID, EDITER, NAME, 
+      CREATERID, CREATETIME, EDITTIME,ISDEL
+      )
+    values (#{id,jdbcType=VARCHAR}, #{editer,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{createrid,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{edittime,jdbcType=TIMESTAMP},
+      #{isdel,jdbcType=DECIMAL}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Size" >
+    insert into SYS_SIZE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="editer != null" >
+        EDITER,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="createrid != null" >
+        CREATERID,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="editer != null" >
+        #{editer,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="createrid != null" >
+        #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateSizeByPrimaryKey" parameterType="com.benqzl.pojo.system.Size" >
+    update SYS_SIZE
+    <set >
+      <if test="editer != null" >
+        EDITER = #{editer,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="createrid != null" >
+        CREATERID = #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Size" >
+    update SYS_SIZE
+    <set >
+      <if test="editer != null" >
+        EDITER = #{editer,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="createrid != null" >
+        CREATERID = #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Size" >
+    update SYS_SIZE
+    set EDITER = #{editer,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      CREATERID = #{createrid,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      EDITTIME = #{edittime,jdbcType=TIMESTAMP}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="validatesize" parameterType="java.lang.String" resultType="java.lang.Integer">
+  select count(*) as num
+  from SYS_SIZE s
+  where s.isdel=0 and s.id=#{sizeid} 
+  </select>
+</mapper>

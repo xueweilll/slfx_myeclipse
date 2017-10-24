@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.Patrol" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLPLANDETAILSID" property="patrolplandetailsid" jdbcType="VARCHAR" />
+    <result column="PATROLTIME" property="patroltime" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="ADUITER" property="aduiter" jdbcType="VARCHAR" />
+    <result column="ADUITTIME" property="aduittime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, PATROLPLANDETAILSID, PATROLTIME, MEMO, STATE, CREATER, CREATETIME, ADUITER, ADUITTIME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_PATROL
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_PATROL
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.Patrol" >
+    insert into PL_PATROL (ID, PATROLPLANDETAILSID, PATROLTIME, 
+      MEMO, STATE, CREATER, 
+      CREATETIME, ADUITER, ADUITTIME
+      )
+    values (#{id,jdbcType=VARCHAR}, #{patrolplandetailsid,jdbcType=VARCHAR}, #{patroltime,jdbcType=TIMESTAMP}, 
+      #{memo,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{aduiter,jdbcType=VARCHAR}, #{aduittime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.Patrol" >
+    insert into PL_PATROL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="patrolplandetailsid != null" >
+        PATROLPLANDETAILSID,
+      </if>
+      <if test="patroltime != null" >
+        PATROLTIME,
+      </if>
+      <if test="memo != null" >
+        MEMO,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="aduiter != null" >
+        ADUITER,
+      </if>
+      <if test="aduittime != null" >
+        ADUITTIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolplandetailsid != null" >
+        #{patrolplandetailsid,jdbcType=VARCHAR},
+      </if>
+      <if test="patroltime != null" >
+        #{patroltime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="memo != null" >
+        #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="aduiter != null" >
+        #{aduiter,jdbcType=VARCHAR},
+      </if>
+      <if test="aduittime != null" >
+        #{aduittime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.Patrol" >
+    update PL_PATROL
+    <set >
+      <if test="patrolplandetailsid != null" >
+        PATROLPLANDETAILSID = #{patrolplandetailsid,jdbcType=VARCHAR},
+      </if>
+      <if test="patroltime != null" >
+        PATROLTIME = #{patroltime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="memo != null" >
+        MEMO = #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="aduiter != null" >
+        ADUITER = #{aduiter,jdbcType=VARCHAR},
+      </if>
+      <if test="aduittime != null" >
+        ADUITTIME = #{aduittime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.Patrol" >
+    update PL_PATROL
+    set PATROLPLANDETAILSID = #{patrolplandetailsid,jdbcType=VARCHAR},
+      PATROLTIME = #{patroltime,jdbcType=TIMESTAMP},
+      MEMO = #{memo,jdbcType=VARCHAR},
+      STATE = #{state,jdbcType=VARCHAR},
+      CREATER = #{creater,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      ADUITER = #{aduiter,jdbcType=VARCHAR},
+      ADUITTIME = #{aduittime,jdbcType=TIMESTAMP}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPPDtailsID" parameterType="java.lang.String" resultMap="BaseResultMap">
+  	select * from PL_PATROL where PATROLPLANDETAILSID=#{patrolplandetailsid}
+  </select>
+  
+</mapper>

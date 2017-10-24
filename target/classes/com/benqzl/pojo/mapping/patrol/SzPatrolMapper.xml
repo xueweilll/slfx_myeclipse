@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.SzPatrolMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.SzPatrol" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="PATROLTIME" property="patroltime" jdbcType="TIMESTAMP" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <result column="PATROLADDRESS" property="patroladdress" jdbcType="VARCHAR" />
+    <result column="PATROLCASE" property="patrolcase" jdbcType="VARCHAR" />
+    <result column="PATROLMEMO" property="patrolmemo" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATERTIME" property="creatertime" jdbcType="TIMESTAMP" />
+    <result column="HANDLER" property="handler" jdbcType="VARCHAR" />
+    <result column="HANDLERTIME" property="handlertime" jdbcType="TIMESTAMP" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />    
+    <association property="user" javaType="com.benqzl.pojo.system.User">
+    	<id column="CREATE" property="userid" />
+    	<result column="EMPLOYEEID" property="employeeid" />
+    	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+	    	<id column="EMPLOYEEID" property="id" />
+	    	<result column="EMPLOYEENAME" property="name" />    	  	
+    	</association>
+    </association>
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+    	<id column="SID" property="id" />
+    	<result column="STATIONNAME" property="name" />
+   	</association>
+   	<association property="userapproval" javaType="com.benqzl.pojo.system.User">
+    	<id column="HANDLER" property="userid" />
+    	<result column="EMPLOYEEID2" property="employeeid" />
+    	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+	    	<id column="EMPLOYEEID2" property="id" />
+	    	<result column="EMPLOYEENAME2" property="name" />    	  	
+    	</association>
+    </association>
+  </resultMap>
+  <select id="findSZPatrol" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select * from (select s.*,rownum rn from 
+  		(
+  	select a.*,b.employeeid,c.name as employeename,d.name as stationname from pl_szpatrol a,sys_user b,sys_employee c,sys_station d
+	where a.creater=b.userid and b.employeeid=c.id and a.sid=d.id and a.state!='9'
+	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if>
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	 order by a.createtime desc
+	 ) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  </select>
+  <select id="pageCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+  	select count(*) from pl_szpatrol a where state !='9' 
+  	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if>
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>	
+  </select>
+  <select id="pageCountNotAll" parameterType="java.util.Map" resultType="java.lang.Integer">
+  	select count(*) from pl_szpatrol a where state='0' 
+  	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if>
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>	
+  </select>
+  <select id="findSZPatrolNotAll" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select * from (select s.*,rownum rn from 
+  		(
+  	select a.*,b.employeeid,c.name as employeename,d.name as stationname from pl_szpatrol a,sys_user b,sys_employee c,sys_station d
+	where a.creater=b.userid and b.employeeid=c.id and a.sid=d.id and a.state='0'
+	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if>
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	 order by a.createtime desc
+	 ) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  </select>
+  <select id="pageApprovalCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+  	select count(*) from pl_szpatrol a where a.state in('1','2')  
+  	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if> 	
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>	
+  </select>
+  <select id="pageApprovalCountNotAll" parameterType="java.util.Map" resultType="java.lang.Integer">
+  	select count(*) from pl_szpatrol a where state ='1' 
+  	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if>  	
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>	
+  </select>
+  <select id="findSZPatrolApproval" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select * from (select s.*,rownum rn from 
+  		(
+  	select a.*,b.employeeid,c.name as employeename,d.name as stationname
+  	<!-- , 
+  	e.employeeid as employeeid2,f.name as employeename2 --> 
+  	from pl_szpatrol a,sys_user b,sys_employee c,sys_station d
+  	<!-- ,
+  	sys_user e,sys_employee f -->
+	where a.creater=b.userid and b.employeeid=c.id and a.sid=d.id
+	<!-- and a.handler=e.userid and e.employeeid=f.name  -->
+	and a.state in('1','2')
+	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if>	
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>	
+	 order by a.createtime desc
+	 ) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  </select>
+  <select id="findSZPatrolApprovalNotAll" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select * from (select s.*,rownum rn from 
+  		(
+  	select a.*,b.employeeid,c.name as employeename,d.name as stationname
+  	<!-- , 
+  	e.employeeid as employeeid2,f.name as employeename2 -->
+  	from pl_szpatrol a,sys_user b,sys_employee c,sys_station d
+  	<!-- ,
+  	sys_user e,sys_employee f -->
+	where a.creater=b.userid and b.employeeid=c.id and a.sid=d.id
+	<!-- and a.handler=e.userid and e.employeeid=f.name --> 
+	and a.state='1'
+	<if test="sid !=null">
+		and a.sid='${sid}'
+	</if>
+	<if test="begintime !=null">
+		and a.patroltime &gt;=to_date('${begintime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="endtime !=null">
+		and a.patroltime &lt;=to_date('${endtime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	 order by a.createtime desc
+	 ) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  </select>
+  <select id="findSzPatrolById" parameterType="java.lang.String" resultMap="BaseResultMap">
+  	select * from pl_szpatrol a,sys_user b,sys_employee c
+	where a.creater=b.userid and b.employeeid=c.id and a.id=#{id}
+  </select>
+  <select id="findStation" resultType="com.benqzl.pojo.system.Station">
+  	select * from sys_station
+  </select>
+  <select id="findStationById" resultType="java.lang.String" parameterType="java.lang.String">
+  	select b.id from pl_szpatrol a, sys_station b where a.sid=b.id and a.id=#{szid}
+  </select>
+  <select id="findSidByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+  	select b.sid from sys_user a,sys_employee b
+	where a.employeeid=b.id and a.userid=#{userid}
+  </select>
+  <select id="findStationByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+  	select c.id from sys_user a,sys_employee b,sys_station c
+	where a.employeeid=b.id and b.sid=c.id 
+	and a.userid=#{userid}
+  </select>
+  <select id="findUser" parameterType="java.lang.String" resultMap="map1">
+  	select a.*,b.name from sys_user a,sys_employee b
+	where a.employeeid=b.id and b.sid=#{sid}
+  </select>
+  <select id="findAllUser" parameterType="java.lang.String" resultMap="map1">
+  	select a.*,b.name from sys_user a,sys_employee b
+	where a.employeeid=b.id
+  </select>
+  <resultMap type="com.benqzl.pojo.system.User" id="map1">
+  	<id column="USERID" property="userid" />
+  	<result column="EMPLOYEEID" property="employeeid" />
+  	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+  		<id column="EMPLOYEEID" property="id" />
+  		<result column="NAME" property="name" />
+  	</association>
+  </resultMap>
+  <select id="findSzUserBySzId" parameterType="java.lang.String" resultType="java.lang.String">
+  	select userid from pl_szpatroluser where szpatrolid=#{szid}
+  </select>
+  <sql id="Base_Column_List" >
+    ID, CREATETIME, EDITTIME, PATROLTIME, SID, PATROLADDRESS, PATROLCASE, PATROLMEMO, 
+    CREATER, CREATERTIME, HANDLER, HANDLERTIME, STATE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_SZPATROL
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_SZPATROL
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <update id="deleteSz" parameterType="java.lang.String" >
+    update  PL_SZPATROL set state='9'
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="deleteSzUser" parameterType="java.lang.String">
+  	delete pl_szpatroluser where szpatrolid=#{id}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.SzPatrol" >
+    insert into PL_SZPATROL (ID, CREATETIME, EDITTIME, 
+      PATROLTIME, SID, PATROLADDRESS, 
+      PATROLCASE, PATROLMEMO, CREATER, 
+      CREATERTIME, HANDLER, HANDLERTIME, 
+      STATE)
+    values (#{id,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{edittime,jdbcType=TIMESTAMP}, 
+      #{patroltime,jdbcType=TIMESTAMP}, #{sid,jdbcType=VARCHAR}, #{patroladdress,jdbcType=VARCHAR}, 
+      #{patrolcase,jdbcType=VARCHAR}, #{patrolmemo,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, 
+      #{creatertime,jdbcType=TIMESTAMP}, #{handler,jdbcType=VARCHAR}, #{handlertime,jdbcType=TIMESTAMP}, 
+      #{state,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSzPztrol" parameterType="com.benqzl.pojo.patrol.SzPatrol" >
+    insert into PL_SZPATROL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="patroltime != null" >
+        PATROLTIME,
+      </if>
+      <if test="sid != null" >
+        SID,
+      </if>
+      <if test="patroladdress != null" >
+        PATROLADDRESS,
+      </if>
+      <if test="patrolcase != null" >
+        PATROLCASE,
+      </if>
+      <if test="patrolmemo != null" >
+        PATROLMEMO,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="creatertime != null" >
+        CREATERTIME,
+      </if>
+      <if test="handler != null" >
+        HANDLER,
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="patroltime != null" >
+        #{patroltime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="patroladdress != null" >
+        #{patroladdress,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolcase != null" >
+        #{patrolcase,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolmemo != null" >
+        #{patrolmemo,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="creatertime != null" >
+        #{creatertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="handler != null" >
+        #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        #{handlertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  
+  <insert id="insertSzPatrolUser" parameterType="com.benqzl.pojo.patrol.SzPatrolUser" >
+    insert into PL_SZPATROLUSER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="szpatrolid != null" >
+        SZPATROLID,
+      </if>
+      <if test="userid != null" >
+        USERID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="szpatrolid != null" >
+        #{szpatrolid,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.SzPatrol" >
+    insert into PL_SZPATROL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="patroltime != null" >
+        PATROLTIME,
+      </if>
+      <if test="sid != null" >
+        SID,
+      </if>
+      <if test="patroladdress != null" >
+        PATROLADDRESS,
+      </if>
+      <if test="patrolcase != null" >
+        PATROLCASE,
+      </if>
+      <if test="patrolmemo != null" >
+        PATROLMEMO,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="creatertime != null" >
+        CREATERTIME,
+      </if>
+      <if test="handler != null" >
+        HANDLER,
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="patroltime != null" >
+        #{patroltime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="patroladdress != null" >
+        #{patroladdress,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolcase != null" >
+        #{patrolcase,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolmemo != null" >
+        #{patrolmemo,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="creatertime != null" >
+        #{creatertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="handler != null" >
+        #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        #{handlertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateSzPztrol" parameterType="com.benqzl.pojo.patrol.SzPatrol" >
+    update PL_SZPATROL
+    <set >
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="patroltime != null" >
+        PATROLTIME = #{patroltime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sid != null" >
+        SID = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="patroladdress != null" >
+        PATROLADDRESS = #{patroladdress,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolcase != null" >
+        PATROLCASE = #{patrolcase,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolmemo != null" >
+        PATROLMEMO = #{patrolmemo,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="creatertime != null" >
+        CREATERTIME = #{creatertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="handler != null" >
+        HANDLER = #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME = #{handlertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.SzPatrol" >
+    update PL_SZPATROL
+    <set >
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="patroltime != null" >
+        PATROLTIME = #{patroltime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sid != null" >
+        SID = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="patroladdress != null" >
+        PATROLADDRESS = #{patroladdress,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolcase != null" >
+        PATROLCASE = #{patrolcase,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolmemo != null" >
+        PATROLMEMO = #{patrolmemo,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="creatertime != null" >
+        CREATERTIME = #{creatertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="handler != null" >
+        HANDLER = #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME = #{handlertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.SzPatrol" >
+    update PL_SZPATROL
+    set CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      PATROLTIME = #{patroltime,jdbcType=TIMESTAMP},
+      SID = #{sid,jdbcType=VARCHAR},
+      PATROLADDRESS = #{patroladdress,jdbcType=VARCHAR},
+      PATROLCASE = #{patrolcase,jdbcType=VARCHAR},
+      PATROLMEMO = #{patrolmemo,jdbcType=VARCHAR},
+      CREATER = #{creater,jdbcType=VARCHAR},
+      CREATERTIME = #{creatertime,jdbcType=TIMESTAMP},
+      HANDLER = #{handler,jdbcType=VARCHAR},
+      HANDLERTIME = #{handlertime,jdbcType=TIMESTAMP},
+      STATE = #{state,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="report" parameterType="com.benqzl.pojo.patrol.SzPatrol">
+  	update PL_SZPATROL
+    <set >
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="patroltime != null" >
+        PATROLTIME = #{patroltime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sid != null" >
+        SID = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="patroladdress != null" >
+        PATROLADDRESS = #{patroladdress,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolcase != null" >
+        PATROLCASE = #{patrolcase,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolmemo != null" >
+        PATROLMEMO = #{patrolmemo,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="creatertime != null" >
+        CREATERTIME = #{creatertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="handler != null" >
+        HANDLER = #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME = #{handlertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

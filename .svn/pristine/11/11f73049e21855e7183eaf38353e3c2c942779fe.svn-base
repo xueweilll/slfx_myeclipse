@@ -1,0 +1,649 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<base href="<%=basePath%>">
+<title>工程科分解编辑</title>
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+<meta http-equiv="description" content="This is my page">
+<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+</head>
+
+<body>
+	<input type="hidden" id="rid" value="${id}" />
+	<input type="hidden" id="receiptId" value="${dispatch.getId()}" />
+	<input type="hidden" id="reid" value="${reid}" />
+	<input type="hidden" id="state" value="${state}" />
+	<div>
+		<p>
+			<img alt="" src="images/zlogo.png"> <span align="center"
+				style="font-size: 25;">分&nbsp;&nbsp;解&nbsp;&nbsp;单</span>
+		</p>
+	</div>
+
+	<form id="ffemp" method="post"
+		style="margin: 10px; text-align: center;">
+		<!-- <input id="id" data-options="hidden:true" class="easyui-textbox" /> -->
+		<input id="code" type="hidden" />
+		<div>
+			<table>
+				<tr>
+					<td><label for="code">分解单编号:</label> <input id="id"
+						value="${dcode}" class="easyui-textbox"
+						data-options="required:true,disabled:true" style="width:200" /></td>
+					<td><label for="receiptId">调度令编号:</label> <input
+						id="receiptid" data-options="required:true" value="${code}"
+						style="width:200" /></td>
+
+				</tr>
+				<tr>
+					<td><label for="way">调度令方式:</label> <input id="way"
+						class="easyui-textbox" data-options="disabled:true,required:true"
+						value="${way}" style="width:200" /></td>
+					<td><label for="Launcher">调度令发起人:</label><input id="launcher"
+						class="easyui-textbox" data-options="required:true,disabled:true"
+						value="${launcher}" style="width:200" /></td>
+					<%-- <label for="promotetime">调度发起时间:</label> <input
+						id="promotetime" class="easyui-textbox" name="brand"
+						data-options="required:true,disabled:true" style="width:200"
+						value="${launchertime}" /></td> --%>
+				</tr>
+				<%-- <tr>
+					<td><label for="Launcher">调度发起人:</label> <input id="launcher"
+						class="easyui-textbox" data-options="required:true,disabled:true"
+						value="${launcher}" style="width:200" /></td>
+					<td><label for="EndTime">调度结束时间:</label> <input id="endtime"
+						class="easyui-textbox" data-options="required:true,disabled:true"
+						value="${endtime}" style="width:200" /></td> 
+				</tr>--%>
+				<tr>
+					<td><label for="Receipter">调度令接收人:</label> <input
+						id="receipter" class="easyui-textbox"
+						data-options="required:true,disabled:true" value="${receipteter}"
+						style="width:200" /></td>
+					<td><label for="ReceipteTime">调度令接收时间:</label> <input
+						id="receiptetime" class="easyui-textbox" style="width:200"
+						data-options="required:true,disabled:true"
+						value="${receiptetertime}" /></td>
+				</tr>
+				<tr>
+					<td><label for="memo">签发备注:</label> <input id="rmemo"
+						style="width:200px;height:80px;" class="easyui-textbox"
+						data-options="multiline:true,disabled:true" value="${memo}" /></td>
+					<td><label for="memo">分解备注:</label> <input id="memo"
+						style="width:200px;height:80px;" class="easyui-textbox"
+						value="${dispatch.getRedispatch().getMemo()}"
+						data-options="multiline:true" /></td>
+				</tr>
+			</table>
+
+			<div style='display:none;'>
+				<table id="instructions"></table>
+			</div>
+
+			<div>
+				<table id="stations"></table>
+			</div>
+		</div>
+		</br>
+		<div id="btn" style="text-align: center">
+			<a id="save" href="javascript:void(0)" class="easyui-linkbutton"
+				data-options="iconCls:'icon-save'" onclick=save(0)>保存</a>&nbsp;&nbsp;
+			<a id="submit" href="javascript:void(0)" class="easyui-linkbutton"
+				data-options="iconCls:'icon-save'" onclick=save(1)>保存并提交</a> <a
+				id="cancel" href="javascript:void(0)" class="easyui-linkbutton"
+				data-options="iconCls:'icon-cancel'" onclick="cancle()">关闭</a>
+		</div>
+	</form>
+	<script type="text/javascript">
+		var editIndex1 = undefined;
+		var editIndex2 = undefined;
+		var aaa = $("#reid").val();
+		$(function() {
+			 $('#receiptid').combobox({
+				url:'dispatchAreaList/dispatchAreaDocket.html',
+				textField:'code',
+				valueField:'id',
+				editable:false,
+				required:true,
+				onSelect : function(node) {
+					$('#receiptId').val(node.id);
+					$('#way').textbox('setValue',node.way);
+					$('#promotetime').textbox('setValue',node.launchertime);
+					$('#launcher').textbox('setValue',node.launcher);
+					$('#endtime').textbox('setValue',node.endtime);
+					$('#receipter').textbox('setValue',node.receipteter);
+					$('#receiptetime').textbox('setValue',node.receiptetertime);
+					$('#rmemo').textbox('setValue',node.memo);
+				} 
+				});
+			$('#instructions').datagrid({
+				
+				columns:[[	       			        
+			        {field:'instruction1',title:'闸门操作',width:80,editor:{type:'combobox',
+                            options:{
+                                valueField:'id',
+                                textField:'text',
+                                method:'post',
+                                url:'paramers/instruction.html',
+                                required:true,
+                                editable:false,
+                                onSelect:function(record){                                	
+                                	var ed1 = $('#instructions').datagrid('getEditor', {
+						                index: editIndex1,
+						                field: 'gateoperatetime'					                
+						            });
+						            if(record.id==1 || record.id==2){
+						            	$(ed1.target).datetimebox({
+						            		required:true,
+						            		disabled:false
+						            	})
+						            }else{
+						            	$(ed1.target).datetimebox({
+						            		required:false,
+						            		disabled:true
+						            	})
+						            }						            
+                                }                               
+                            }}},
+			        {field:'gateoperatetime',title:'闸门操作时间',editor:{type:'datetimebox',options:{editable:false}},width:160,id:"a"},
+			        {field:'instruction2',title:'机组操作',width:80,editor:{type:'combobox',
+                            options:{
+                                valueField:'id',
+                                textField:'text',
+                                method:'post',
+                                url:'paramers/gate.html',
+                                required:true,
+                                editable:false,
+                                onSelect:function(record){                                	
+                                	var ed1 = $('#instructions').datagrid('getEditor', {
+						                index: editIndex1,
+						                field: 'unitoperatetime'					                
+						            });
+						            if(record.id==1 || record.id==2){
+						            	$(ed1.target).datetimebox({
+						            		required:true,
+						            		disabled:false
+						            	});
+						            }else{
+						            	$(ed1.target).datetimebox({
+						            		required:false,
+						            		disabled:true
+						            	});
+						            }						           
+                                }
+                            }}},
+			        {field:'unitoperatetime',title:'机组操作时间',editor:{type:'datetimebox',options:{editable:false}},width:160}
+			    ]],    
+			    width : '620px',
+				height : '200px',
+				nowrap : false,
+				singleSelect : true,				
+				rownumbers : true,
+				striped : true,
+				collapsible : false,
+				toolbar:[{
+		            text:'添加调度指令',
+		            iconCls:'icon-add',
+		            handler:append1
+		        },{
+		            text:'删除调度指令',
+		            iconCls:'icon-cut',
+		            handler:removeit1
+		        }],
+		        iconCls: 'icon-edit',
+		        onClickCell: onClickCell1,
+		        onEndEdit: onEndEdit1		        
+			});			
+	        $('#stations').datagrid({
+	        	
+				columns:[[
+			        {   
+			        	 field:'sid',title:'枢纽',width:200,
+			        	editor:{type:'combobox',
+                            options:{
+                                valueField:'id',
+                                textField:'name',
+                                method:'post',
+                                url:'dispatchAreaList/station.html',
+                                required:true,
+                                editable:false,
+                                onSelect:function(record){                      
+                            		var rows=$('#stations').datagrid('getRows');
+    								var k=0;
+    								for(var i=0;i<rows.length;i++){
+    									if(rows[i].sid==record.name){
+    										k++;
+    									}
+    								}								
+    								if(k>0){
+    									alert("枢纽已存在,请重新选择");
+    									$(this).combobox('setValue','');
+    								}
+                                	var ed1=$('#stations').datagrid('getEditor',{
+                                		index: editIndex2,
+                                		field:'id'
+                                	});
+                                	var ed3=$('#stations').datagrid('getEditor',{
+                                		index:editIndex2,
+                                	    field:'departmentid'
+                                	});
+                                $(ed1.target).textbox('setText',record.id);
+                                $(ed3.target).textbox('setText',record.departmentid);
+                                
+                                }                             
+                    }
+			       
+			        	}
+			      }
+			        ,{field:'id',
+  	            title:'枢纽id',
+	             hidden:true, 
+	         editor:{
+		        type:'textbox',
+		        options:{
+			    editable:false
+			    }
+            }},
+            {field:'departmentid',
+            	title:'部门id',
+            	hidden:true,
+            	editor:{
+            	type:'textbox',
+		        options:{
+			    editable:false
+            }}},{
+            	field:'runcount',
+            	title:'运行数量',
+            	width:80,
+            	editor:{
+            		type:'numberspinner',
+            		options:{
+            			/* min:0,  */
+            			value:0,
+                    	editable:false
+            		}
+            	}
+            },{
+            	field:'keepcount',
+            	title:'保持数量',
+            	width:80,
+            	editor:{
+            		type:'textbox',
+            		options:{
+                    	editable:false
+            		}
+            	}
+            },{
+            	field:'gatetype',
+            	title:'闸门状态',
+            	width:80,
+            	editor:{
+            		type:'combobox',
+            		options:{
+            			valueField:'id',
+                        textField:'text',
+                        method:'post',
+                        url:'paramers/gateType.html',
+                        editable:false
+            		}
+            	},
+            	formatter: function(value,row,index){
+    				if (row.gatetype == "0"){
+    					return "关闸";
+    				} else if (row.gatetype == "1"){
+    					return "开闸";
+    				}
+    			}
+            }
+			    ]],
+			    width : '620px',
+				height : '200px',
+				singleSelect : true,
+				rownumbers : true,
+				striped : true,
+				collapsible : false,
+				toolbar:[{
+		            text:'添加明细',
+		            iconCls:'icon-add',
+		            handler:append2
+		        },{
+		            text:'删除明细',
+		            iconCls:'icon-cut',
+		            handler:removeit2
+		        }],
+		        iconCls: 'icon-edit',
+		        onClickCell: onClickCell2,
+		        onEndEdit: onEndEdit2		        
+			});
+			if (aaa != "") {
+				$('#instructions').datagrid({
+					url : "dispatchAreaList/instructions.html?id="+ aaa
+				});
+				$('#stations').datagrid({
+					url : "dispatchAreaList/stations.html?id="+ aaa
+				});
+			}		
+		});		
+        function endEditing1(){
+            if (editIndex1 == undefined){return true;}
+            if ($('#instructions').datagrid('validateRow', editIndex1)){
+                $('#instructions').datagrid('endEdit', editIndex1);
+                editIndex1 = undefined;
+                return true;
+            } else {
+                return false;
+            }
+            
+        }
+        function cancle(){
+        	$('#dialog').window('close');
+        }
+        function endEditing2(){
+            if (editIndex2 == undefined){return true;}
+            if ($('#stations').datagrid('validateRow', editIndex2)){
+                $('#stations').datagrid('endEdit', editIndex2);
+                editIndex2 = undefined;
+                return true;
+            } else {
+                return false;
+            }
+        }
+        function onClickCell1(index, field){
+            if (editIndex1 != index){
+                if (endEditing1()){
+                    $('#instructions').datagrid('selectRow', index).datagrid('beginEdit', index);
+                    var ed = $('#instructions').datagrid('getEditor', {index:index,field:field});
+                    if (ed){
+                        ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+                    }
+                    editIndex1 = index;
+                } else {
+                    setTimeout(function(){
+                        $('#instructions').datagrid('selectRow', editIndex1);
+                    },0);
+                }
+            }
+        }
+        function onClickCell2(index, field){
+            if (editIndex2 != index){
+                if (endEditing2()){
+                    $('#stations').datagrid('selectRow', index).datagrid('beginEdit', index);
+                    var ed = $('#stations').datagrid('getEditor', {index:index,field:field});
+                    if (ed){
+                        ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+                    }
+                    editIndex2 = index;
+                } else {
+                    setTimeout(function(){
+                        $('#stations').datagrid('selectRow', editIndex2);
+                    },0);
+                }
+            }
+        }
+        function onEndEdit1(index, row){
+            var ed1 = $(this).datagrid('getEditor', {
+                index: index,
+                field: 'instruction1'
+            });
+            row.instruction1 = $(ed1.target).combobox('getText');
+            var ed2 = $(this).datagrid('getEditor', {
+                index: index,
+                field: 'instruction2'
+            });
+            row.instruction2 = $(ed2.target).combobox('getText');          
+        }
+        function onEndEdit2(index, row){
+            var ed1 = $(this).datagrid('getEditor', {
+                index: index,
+                field: 'sid'
+            });
+            row.sid = $(ed1.target).combobox('getText');
+        }
+        function append1(){
+            if (endEditing1()){
+                $('#instructions').datagrid('appendRow',{});
+                editIndex1 = $('#instructions').datagrid('getRows').length-1;
+                $('#instructions').datagrid('selectRow', editIndex1).datagrid('beginEdit', editIndex1);              
+            }
+        }
+        function append2(){
+            if (endEditing2()){
+                $('#stations').datagrid('appendRow',{});
+                editIndex2 = $('#stations').datagrid('getRows').length-1;
+                $('#stations').datagrid('selectRow', editIndex2).datagrid('beginEdit', editIndex2);              
+            }
+        }
+        function removeit1(){
+            if (editIndex1 == undefined){return;}
+            $('#instructions').datagrid('cancelEdit', editIndex1)
+                    .datagrid('deleteRow', editIndex1);
+                   
+            editIndex1 = undefined;
+        }
+        function removeit2(){
+            if (editIndex2 == undefined){return;}
+            $('#stations').datagrid('cancelEdit', editIndex2)
+                    .datagrid('deleteRow', editIndex2);
+                   
+            editIndex2 = undefined;
+        }
+		function reflush() {
+			document.getElementById('dispatchAreaList.htmlifm').contentWindow.$('#selfdispatch').datagrid('reload');
+		}
+	
+		function save(obj){
+			var isValid = $("#ffemp").form('validate');
+			if (!isValid) {
+				$.messager.progress('close');
+				alert("必填项不能空着");
+				return ;
+			}
+			var instructions=$('#instructions').datagrid('getRows');
+		/* 	if(instructions.length==0){
+				$.messager.progress('close');
+				alert("调度指令不能为空");
+				return;
+			} *///调度指令隐藏
+			var stations=$('#stations').datagrid('getRows');
+			if(stations.length==0){
+				$.messager.progress('close');
+				alert("明细不能为空");
+				return;
+			}
+			var instructiones=new Array();
+			var gateoperatetimes=new Array();
+			var unitoperatetimes=new Array();
+			var receiptDispatchInstructions=new Array();
+			if(endEditing1()){
+				for(var i=0;i<instructions.length;i++){
+					var instruction1=instructions[i].instruction1;
+					var gateoperatetime=instructions[i].gateoperatetime;
+					var instruction2=instructions[i].instruction2;
+					var unitoperatetime=instructions[i].unitoperatetime;
+					if(instruction1=="不操作" && instruction2=="不操作"){
+						$.messager.progress('close');
+						alert("闸门与机组不能都不操作");
+						return;
+					}
+					if(instruction1=="开闸" && instruction2=="开泵"){
+						$.messager.progress('close');
+						alert("不能既开闸又开泵");
+						return;
+					}
+					if(instruction1=="关闸" && instruction2=="不操作"){
+						
+						receiptDispatchInstructions.push({"instruction":"0","gateoperatetime":gateoperatetime});
+						instructiones[i]="0";
+						gateoperatetimes[i]=gateoperatetime;
+						unitoperatetimes[i]="0";
+					}else if(instruction1=="开闸" && instruction2=="不操作"){
+						instructiones[i]="1";
+						receiptDispatchInstructions.push({"instruction":"1","gateoperatetime":gateoperatetime});
+						gateoperatetimes[i]=gateoperatetime;
+						unitoperatetimes[i]="0";
+					}else if(instruction1=="不操作" && instruction2=="关泵"){
+						receiptDispatchInstructions.push({"instruction":"3","unitoperatetime":unitoperatetime});
+						instructiones[i]="3";
+						gateoperatetimes[i]="0";
+						unitoperatetimes[i]=unitoperatetime;
+					}else if(instruction1=="不操作" && instruction2=="开泵"){
+						receiptDispatchInstructions.push({"instruction":"4","unitoperatetime":unitoperatetime});
+						instructiones[i]="4";
+						gateoperatetimes[i]="0";
+						unitoperatetimes[i]=unitoperatetime;
+					}else if(instruction1=="关闸" && instruction2=="开泵"){
+						receiptDispatchInstructions.push({"instruction":"5","gateoperatetime":gateoperatetime,"unitoperatetime":unitoperatetime});
+						instructiones[i]="5";
+						gateoperatetimes[i]=gateoperatetime;
+						unitoperatetimes[i]=unitoperatetime;
+					}else if(instruction1=="关闸" && instruction2=="关泵"){
+						receiptDispatchInstructions.push({"instruction":"6","gateoperatetime":gateoperatetime,"unitoperatetime":unitoperatetime});
+						instructiones[i]="6";
+						gateoperatetimes[i]=gateoperatetime;
+						unitoperatetimes[i]=unitoperatetime;
+					}else if(instruction1=="开闸" && instruction2=="关泵"){
+						receiptDispatchInstructions.push({"instruction":"7","gateoperatetime":gateoperatetime,"unitoperatetime":unitoperatetime});
+						instructiones[i]="7";
+						gateoperatetimes[i]=gateoperatetime;
+						unitoperatetimes[i]=unitoperatetime;
+					}
+				}
+			}
+			var sides="";
+			var stations1 = [];
+			//var stations2=[];
+			if(endEditing2()){	
+				for(var i=0;i<stations.length;i++){
+					//stations2[i]=stations[i].id;
+					var keepcount="";
+					var gatetype="";
+					var runcount="";
+					if(stations[i].keepcount == undefined){
+						keepcount="";
+					}else {
+						keepcount = stations[i].keepcount;
+					}
+					if(stations[i].gatetype == undefined){
+						gatetype="";
+					}else {
+						gatetype = stations[i].gatetype;
+					}
+					if(stations[i].runcount == undefined){
+						runcount="";
+					}else {runcount
+						runcount = stations[i].runcount;
+					}
+					stations1.push({"sid":stations[i].id,"departmentid":stations[i].departmentid,"runcount":runcount,"keepcount":keepcount,"gatetype":gatetype});
+				}
+				for (var i = 0; i < stations.length - 1; i++) {
+					for (var j = i + 1; j < stations.length; j++) {
+						if (stations[i].id == stations[j].id) {
+							alert("泵站不能重复!");
+							$.messager.progress('close');
+							return;
+						}
+					}
+				}
+			}
+
+			
+			
+			var id=$("#id").val()==""?"0":$("#id").val();
+			var receiptid = $('#receiptid').combobox('getText');
+			/* var promotetime=$("#promotetime").datetimebox("getText"); */
+			var memo= $("#memo").textbox("getValue").replace(/\s+/g,"");
+			
+			var submit; 
+			if(obj==0){
+				 submit=0;//保存
+			 }else{
+				 submit=1;//提交
+			 }
+		    var data={
+		    		'code':$("#id").textbox("getValue"),
+		    		'receiptid':$("#receiptId").val(),	
+		    		'memo':memo,
+		    		'receiptDispatchInstructions':receiptDispatchInstructions,
+		    		'dispatchStations':stations1
+		    		};
+		   if(obj=="1"){
+		    $.messager.confirm('确认对话框', '您确定要提交吗？', function(r){
+		    	if (r){
+					$.ajax({
+						url : "dispatchAreaList/"+(obj=="0" ? "save":"commit")+".html",
+						type : "POST",
+						dataType : "text",
+						data : {
+							'reid':$("#reid").val(),
+							'id':$("#rid").val(),
+							'submit':submit,
+							'state':$("#state").val(),  
+							"json" :JSON.stringify(data)
+						},
+						success : function(msg) {
+							data = eval('(' + msg + ')');
+							$.messager.progress('close');
+							if(data.result){
+								$.messager.show({
+									title:'我的消息',
+									msg:'保存成功',
+									timeout:5000,
+									showType:'slide'
+								});
+								reflush();
+							}else{
+								$.messager.alert("操作提示", data.msg, "error");
+							}
+							$('#dialog').window('close');
+						}
+					});
+		    	}
+		    });
+		}else{
+			$.ajax({
+				url : "dispatchAreaList/"+(obj=="0" ? "save":"commit")+".html",
+				type : "POST",
+				dataType : "text",
+				data : {
+					'reid':$("#reid").val(),
+					'id':$("#rid").val(),
+					'submit':submit,
+					'state':$("#state").val(),  
+					"json" :JSON.stringify(data)
+				},
+				success : function(msg) {
+					data = eval('(' + msg + ')');
+					$.messager.progress('close');
+					if(data.result){
+						$.messager.show({
+							title:'我的消息',
+							msg:'保存成功',
+							timeout:5000,
+							showType:'slide'
+						});
+						reflush();
+					}else{
+						$.messager.alert("操作提示", data.msg, "error");
+					}
+					$('#dialog').window('close');
+				}
+			});
+		}							
+		}
+	</script>
+</body>
+</html>

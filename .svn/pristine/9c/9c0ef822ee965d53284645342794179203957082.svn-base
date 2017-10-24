@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.Receipt">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="DISPATCHTYPE" property="dispatchtype" jdbcType="DECIMAL" />
+		<result column="WAY" property="way" jdbcType="DECIMAL" />
+		<result column="LAUNCHER" property="launcher" jdbcType="VARCHAR" />
+		<result column="LAUNCHTIME" property="launchtime" jdbcType="TIMESTAMP" />
+		<result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+		<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+		<result column="RECEIPTETIME" property="receiptetime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="HANDLER" property="handler" jdbcType="VARCHAR" />
+		<result column="HANDLETIME" property="handletime" jdbcType="TIMESTAMP" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="ADUITMEMO" property="aduitmemo" jdbcType="VARCHAR" />
+		<result column="FILEADDRESS" property="fileaddress" jdbcType="VARCHAR" />
+		<association property="redispatch"
+			javaType="com.benqzl.pojo.dispatch.ReceiptDispatch">
+			<id column="rid" property="receiptid" />
+			<result column="DCODE" property="code" jdbcType="VARCHAR" />
+			<result column="DMEMO" property="memo" jdbcType="VARCHAR" />
+		</association>
+		<association property="receipteUser" javaType="com.benqzl.pojo.system.User">
+			<id column="RECEIPTER" property="userid" />
+			<result column="RECEIPTER_NAME" property="username" />
+		</association>
+		<association property="handlerUser" javaType="com.benqzl.pojo.system.User">
+			<id column="HANDLER" property="userid" />
+			<result column="HANDLER_NAME" property="username" />
+		</association>
+		<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<id column="ID" property="id" />
+			<result column="ENAME" property="name" />
+		</association>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID, DISPATCHTYPE, WAY, LAUNCHER, LAUNCHTIME, ENDTIME,
+		RECEIPTER,
+		RECEIPTETIME, STATE,
+		CREATER, CREATETIME, HANDLER,
+		HANDLETIME, CODE, MEMO, ADUITMEMO, FILEADDRESS
+	</sql>
+	<sql id="Base_Column_List1">
+		r.ID as ID, r.DISPATCHTYPE as DISPATCHTYPE, r.WAY as WAY,
+		r.LAUNCHER as
+		LAUNCHER, r.LAUNCHTIME as LAUNCHTIME, r.ENDTIME as
+		ENDTIME,
+		r.RECEIPTER as RECEIPTER,
+		r.RECEIPTETIME as RECEIPTETIME,
+		r.STATE as
+		STATE,
+		r.CREATER as CREATER, r.CREATETIME as CREATETIME,
+		r.HANDLER as
+		HANDLER,e.name as ENAME,
+		r.HANDLETIME as HANDLETIME, r.CODE
+		as CODE, r.MEMO as
+		MEMO,u.username as RECEIPTER_NAME, r.ADUITMEMO,
+		r.FILEADDRESS
+	</sql>
+	<sql id="Base_Column_List2">
+		r.ID as ID, r.DISPATCHTYPE as DISPATCHTYPE, r.WAY as WAY, r.LAUNCHER as
+		LAUNCHER, r.LAUNCHTIME as LAUNCHTIME, r.ENDTIME as ENDTIME,
+		r.RECEIPTER as RECEIPTER,
+		r.RECEIPTETIME as RECEIPTETIME, r.STATE as
+		STATE,
+		r.CREATER as CREATER, r.CREATETIME as CREATETIME, r.HANDLER as
+		HANDLER,
+		r.HANDLETIME as HANDLETIME, r.CODE as CODE, r.MEMO as
+		MEMO,u.username as RECEIPTER_NAME
+		,d.MEMO as DMEMO,d.code as DCODE,e.name as ENAME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		r.* ,e.name as RECEIPTER_NAME
+		from DIS_RECEIPT r left join sys_user u on u.userid=r.receipter left join
+		sys_employee e on u.EmployeeId =
+		e.id
+		where r.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		DIS_RECEIPT
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+
+	<select id="findByIds" resultMap="BaseResultMap" parameterType="java.util.List">
+		select
+		*
+		from dis_receipt where state= 2 and DispatchType=1
+		<if test="list !=null">
+			and id in(
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+		</if>
+		order by CreateTime
+	</select>
+	<select id="findDocket" resultMap="BaseResultMap" parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List1"></include>
+		from dis_receipt r
+		left join sys_user u on u.userid=r.receipter
+		left
+		join sys_employee e on e.id =u.employeeid
+		where r.state =2
+		<if test="list !=null">
+			and r.id in(
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+		</if>
+	</select>
+	<select id="findEDEndList" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from (
+		select A.*,ROWNUM RN from(
+		select
+		r.ID as ID, r.DISPATCHTYPE as DISPATCHTYPE, r.WAY as WAY,
+		r.LAUNCHER as
+		LAUNCHER, r.LAUNCHTIME as LAUNCHTIME, r.ENDTIME as
+		ENDTIME,
+		r.RECEIPTER as RECEIPTER,
+		r.RECEIPTETIME as RECEIPTETIME,
+		r.STATE as
+		STATE,
+		r.CREATER as CREATER, r.CREATETIME as CREATETIME,
+		r.HANDLER as
+		HANDLER,e.name as ENAME,
+		r.HANDLETIME as HANDLETIME, r.CODE
+		as CODE, r.MEMO as
+		MEMO,u.username as RECEIPTER_NAME, 
+		u1.ename as HANDLER_NAME,
+		r.ADUITMEMO,
+		r.FILEADDRESS
+		from dis_receipt r
+		left join sys_user u on u.userid=r.receipter
+		left
+		join sys_employee e on e.id =u.employeeid
+		left join (select r.id as id,e.name as ename from dis_receipt r left join sys_user u on r.handler=u.userid
+                  left join sys_employee e on e.id=u.employeeid
+                  )u1 on u1.id=r.id
+		where 1=1 	
+		<if test="state=='2'.toString()">
+		and r.state=2
+		</if>
+		<if test="state=='3'.toString()">
+		and r.state&gt;=2
+		</if>
+		<if test="receipter!=null">
+		and e.name like '%'||#{receipter,jdbcType=VARCHAR}||'%'
+		</if>
+	    <if test="begintime != null">
+		and r.receiptetime &gt;=#{begintime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endtime != null">
+		and r.receiptetime &lt;=#{endtime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="receipts !=null">
+			and r.id in(
+			<foreach collection="receipts" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+		</if>
+		order by r.CREATETIME desc)A 
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;#{p1}
+	</select>
+	<select id="findEDEndCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select
+		count(*)
+		from dis_receipt r
+		left join sys_user u on u.userid=r.receipter
+		left
+		join sys_employee e on e.id =u.employeeid
+		where 1=1
+		<if test="state=='2'.toString()">
+		and r.state=2
+		</if>
+		<if test="state=='3'.toString()">
+		and r.state&gt;=2
+		</if>
+		<if test="receipter!=null">
+		and e.name like '%'||#{receipter,jdbcType=VARCHAR}||'%'
+		</if>
+	    <if test="begintime != null">
+		and r.receiptetime &gt;=#{begintime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endtime != null">
+		and r.receiptetime &lt;=#{endtime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="receipts !=null">
+			and r.id in(
+			<foreach collection="receipts" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+		</if>
+	</select>
+	<select id="findReceiptDocket" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List2"></include>
+		from dis_receipt r
+		left join sys_user u on u.userid=r.receipter
+		left
+		join dis_receipt_dispatch d on r.id=d.receiptid
+		left join sys_employee
+		e on e.id =u.employeeid
+		where r.id=#{id} and
+		d.id = #{reid} and 
+		 r.state=2
+	</select>
+	<select id="findByID" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		r.ID as ID, r.DISPATCHTYPE as DISPATCHTYPE, r.WAY as WAY,
+		r.LAUNCHER as
+		LAUNCHER, r.LAUNCHTIME as LAUNCHTIME, r.ENDTIME as
+		ENDTIME,
+		re.name as RECEIPTER,
+		r.RECEIPTETIME as RECEIPTETIME, r.STATE
+		as
+		STATE,
+		r.CREATER as CREATER, r.CREATETIME as CREATETIME, r.HANDLER as
+		HANDLER,
+		r.HANDLETIME as HANDLETIME, r.CODE as CODE, r.MEMO as
+		MEMO
+		from
+		dis_receipt r
+		join
+		(select userid,name from SYS_EMPLOYEE join SYS_USER
+		on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) re on r.RECEIPTER=re.userid
+		where state != 9 and id=#{id,jdbcType=VARCHAR}
+	</select>
+
+	<select id="findByTransmitID" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List1"></include>
+		from dis_receipt r left join sys_user u on r.receipter =u.userid
+		left join sys_employee e on e.id =u.employeeid where
+		r.state != 9 and
+		r.id=#{id,jdbcType=VARCHAR}
+	</select>
+	<insert id="insert" parameterType="com.benqzl.pojo.dispatch.Receipt">
+		insert into DIS_RECEIPT (ID,
+		DISPATCHTYPE, WAY,
+		LAUNCHER, LAUNCHTIME, ENDTIME,
+		RECEIPTER,
+		RECEIPTETIME, STATE,
+		CREATER, CREATETIME, HANDLER,
+		HANDLETIME, CODE,
+		MEMO,ADUITMEMO, FILEADDRESS
+		)
+		values (#{id,jdbcType=VARCHAR},
+		#{dispatchtype,jdbcType=DECIMAL},
+		#{way,jdbcType=DECIMAL},
+		#{launcher,jdbcType=VARCHAR},
+		#{launchtime,jdbcType=TIMESTAMP},
+		#{endtime,jdbcType=TIMESTAMP},
+		#{receipter,jdbcType=VARCHAR},
+		#{receiptetime,jdbcType=TIMESTAMP},
+		#{state,jdbcType=DECIMAL},
+		#{creater,jdbcType=VARCHAR},
+		#{createtime,jdbcType=TIMESTAMP},
+		#{handler,jdbcType=VARCHAR},
+		#{handletime,jdbcType=TIMESTAMP},
+		#{code,jdbcType=VARCHAR},
+		#{memo,jdbcType=VARCHAR},
+		#{aduitmemo,jdbcType=VARCHAR}, #{fileaddress,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.Receipt">
+		insert into DIS_RECEIPT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="dispatchtype != null">
+				DISPATCHTYPE,
+			</if>
+			<if test="way != null">
+				WAY,
+			</if>
+			<if test="launcher != null">
+				LAUNCHER,
+			</if>
+			<if test="launchtime != null">
+				LAUNCHTIME,
+			</if>
+			<if test="endtime != null">
+				ENDTIME,
+			</if>
+			<if test="receipter != null">
+				RECEIPTER,
+			</if>
+			<if test="receiptetime != null">
+				RECEIPTETIME,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="creater != null">
+				CREATER,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="handler != null">
+				HANDLER,
+			</if>
+			<if test="handletime != null">
+				HANDLETIME,
+			</if>
+			<if test="code != null">
+				CODE,
+			</if>
+			<if test="memo != null">
+				MEMO,
+			</if>
+			<if test="aduitmemo != null">
+				ADUITMEMO,
+			</if>
+			<if test="fileaddress != null">
+				FILEADDRESS,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="dispatchtype != null">
+				#{dispatchtype,jdbcType=DECIMAL},
+			</if>
+			<if test="way != null">
+				#{way,jdbcType=DECIMAL},
+			</if>
+			<if test="launcher != null">
+				#{launcher,jdbcType=VARCHAR},
+			</if>
+			<if test="launchtime != null">
+				#{launchtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="endtime != null">
+				#{endtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="receipter != null">
+				#{receipter,jdbcType=VARCHAR},
+			</if>
+			<if test="receiptetime != null">
+				#{receiptetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="creater != null">
+				#{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="handler != null">
+				#{handler,jdbcType=VARCHAR},
+			</if>
+			<if test="handletime != null">
+				#{handletime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="memo != null">
+				#{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="aduitmemo != null">
+				#{aduitmemo,jdbcType=VARCHAR},
+			</if>
+			<if test="fileaddress != null">
+				#{fileaddress,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.Receipt">
+		update DIS_RECEIPT
+		<set>
+			<if test="dispatchtype != null">
+				DISPATCHTYPE = #{dispatchtype,jdbcType=DECIMAL},
+			</if>
+			<if test="way != null">
+				WAY = #{way,jdbcType=DECIMAL},
+			</if>
+			<if test="launcher != null">
+				LAUNCHER = #{launcher,jdbcType=VARCHAR},
+			</if>
+			<if test="launchtime != null">
+				LAUNCHTIME = #{launchtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="endtime != null">
+				ENDTIME = #{endtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="receipter != null">
+				RECEIPTER = #{receipter,jdbcType=VARCHAR},
+			</if>
+			<if test="receiptetime != null">
+				RECEIPTETIME = #{receiptetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="creater != null">
+				CREATER = #{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="handler != null">
+				HANDLER = #{handler,jdbcType=VARCHAR},
+			</if>
+			<if test="handletime != null">
+				HANDLETIME = #{handletime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="code != null">
+				CODE = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="memo != null">
+				MEMO = #{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="aduitmemo != null">
+				ADUITMEMO = #{aduitmemo,jdbcType=VARCHAR},
+			</if>
+			<if test="fileaddress != null">
+				FILEADDRESS = #{fileaddress,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.Receipt">
+		update DIS_RECEIPT
+		set DISPATCHTYPE = #{dispatchtype,jdbcType=DECIMAL},
+		WAY =
+		#{way,jdbcType=DECIMAL},
+		LAUNCHER = #{launcher,jdbcType=VARCHAR},
+		LAUNCHTIME = #{launchtime,jdbcType=TIMESTAMP},
+		ENDTIME =
+		#{endtime,jdbcType=TIMESTAMP},
+		RECEIPTER =
+		#{receipter,jdbcType=VARCHAR},
+		RECEIPTETIME =
+		#{receiptetime,jdbcType=TIMESTAMP},
+		STATE = #{state,jdbcType=DECIMAL},
+		CREATER = #{creater,jdbcType=VARCHAR},
+		CREATETIME =
+		#{createtime,jdbcType=TIMESTAMP},
+		HANDLER =
+		#{handler,jdbcType=VARCHAR},
+		HANDLETIME =
+		#{handletime,jdbcType=TIMESTAMP},
+		CODE = #{code,jdbcType=VARCHAR},
+		MEMO
+		= #{memo,jdbcType=VARCHAR},
+		ADUITMEMO = #{aduitmemo,jdbcType=VARCHAR},
+		FILEADDRESS = #{fileaddress,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		r.*,u1.username as
+		RECEIPTER_NAME,u2.username as HANDLER_NAME
+		from dis_receipt r left join
+		(select u.userid,e.name as username from sys_user u left join
+		sys_employee e on u.employeeid = e.id) u1 on r.RECEIPTER = u1.userid
+		left join (select u.userid,e.name as username from sys_user u left
+		join sys_employee e on u.employeeid = e.id) u2 on
+		r.HANDLER = u2.userid
+		<where>
+			r.state != 9 and r.DispatchType = #{type}
+			<if test="rpid != null">
+				and r.id in(
+				<foreach collection="rpid" item="item" index="index"
+					separator="union all">
+					(select #{item,jdbcType=VARCHAR} from dual)
+				</foreach>
+				)
+			</if>
+			<if test="receipter != null">
+				and u1.username like '%${receipter}%'
+			</if>
+			<if test="code != null">
+				and r.code like '%${code}%'
+			</if>
+			<if test="name != null">
+				and r.memo like '%${name}%'
+			</if>
+			<if test="begintime != null">
+				and r.receiptetime &gt;=#{begintime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and r.receiptetime &lt;=#{endtime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="state == 1">
+				and r.state > 0
+			</if>
+			<if test="state == 2">
+				and r.state > 1
+			</if>
+		</where>
+		order by r.CREATETIME desc
+		) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from dis_receipt r left join (select u.userid,
+		e.name as username
+		from sys_user u
+		left join sys_employee e
+		on u.employeeid = e.id) u1
+		on r.RECEIPTER = u1.userid
+		left join (select u.userid, e.name as username
+		from sys_user u
+		left join sys_employee e
+		on u.employeeid = e.id) u2
+		on r.HANDLER = u2.userid  
+		<where>
+			r.state != 9 and r.DispatchType = #{type}
+			<if test="rpid != null">
+				and r.id in(
+				<foreach collection="rpid" item="item" index="index"
+					separator="union all">
+					(select #{item,jdbcType=VARCHAR} from dual)
+				</foreach>
+				)
+			</if>
+			<if test="receipter != null">
+				and u1.username like '%${receipter}%'
+			</if>
+			<if test="code != null">
+				and r.code like '%${code}%'
+			</if>
+			<if test="name != null">
+				and r.memo like '%${name}%'
+			</if>
+			<if test="begintime != null">
+				and r.receiptetime &gt;=#{begintime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and r.receiptetime &lt;=#{endtime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="state == 1">
+				and r.state > 0
+			</if>
+			<if test="state == 2">
+				and r.state > 1
+			</if>
+		</where>
+	</select>
+
+	<select id="userList" resultType="com.benqzl.pojo.system.User">
+		select userid,e.name as
+		username from
+		sys_user u left join sys_employee e on u.EmployeeId =
+		e.id 
+		left join sys_department d
+         on e.departmentid=d.id
+		where u.isdel=0
+		and e.isdel=0
+		and d.isdel=0
+		order by d.name desc
+	</select>
+
+	<update id="deleteState" parameterType="java.lang.String">
+		update dis_receipt set
+		STATE = 9 where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="aduitState" parameterType="java.util.Map">
+		update dis_receipt set
+		<if test="aduitmemo != null">
+			aduitmemo = #{aduitmemo},
+		</if>
+		<if test="handler != null">
+			handler = #{handler},
+		</if>
+		<if test="handletime != null">
+			handletime = #{handletime},
+		</if>
+		state = 2 where id=#{id}
+	</update>
+	<update id="commitState" parameterType="java.lang.String">
+		update dis_receipt set
+		STATE = 2 where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateState" parameterType="java.util.Map">
+		update dis_receipt set
+		STATE = #{state} where id = #{id,jdbcType=VARCHAR}
+	</update>
+	 <select id="selectCode"  resultType="java.lang.String" parameterType="java.util.Map">
+  		select  max(d.code) from dis_receipt d where d.code like '%${code}%'
+	</select>
+	
+</mapper>

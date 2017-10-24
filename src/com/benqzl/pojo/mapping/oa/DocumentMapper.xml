@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.DocumentMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.Document">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+		<result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+		<result column="EDITERID" property="editerid" jdbcType="VARCHAR" />
+		<result column="FILEADDRESS" property="fileaddress" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="ISPC" property="ispc" jdbcType="DECIMAL" />
+		<result column="ISPHONEMESS" property="isphonemess" jdbcType="DECIMAL" />
+		<result column="LEVELS" property="levels" jdbcType="DECIMAL" />
+		<association property="user" javaType="com.benqzl.pojo.system.User">
+			<id property="userid" column="USERID" />
+			<result property="username" column="UNAME" />
+			<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+				<result column="ENAME" property="name" jdbcType="VARCHAR" />
+				<result column="LEVE" property="leve" jdbcType="DECIMAL" />
+			</association>
+		</association>
+		<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<id property="id" column="ID" />
+			<result column="ENAME" property="name" jdbcType="VARCHAR" />
+		</association>
+		<collection property="documentReceiver" ofType="com.benqzl.pojo.oa.DocumentReceiver">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="DOCUMENTID" property="documentid" jdbcType="VARCHAR" />
+			<result column="RECEIVERID" property="receiverid" jdbcType="VARCHAR" />
+			<result column="RECEIPTDATE" property="receiptdate" jdbcType="TIMESTAMP" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+		</collection>
+		<collection property="findUser" ofType="com.benqzl.pojo.oa.DocumentReceiver">
+			<id property="id" column="DetaisId" />
+			<result column="documentid" property="RID" />
+			<result column="STATE" property="state" />
+			<result property="receiptdate" column="receiptdate" />
+			<result property="receiverid" column="RECEIVERID" />
+			<association property="user" javaType="com.benqzl.pojo.system.User">
+				<id column="receiverid" property="userid" />
+				<result column="UNAME" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+				<id property="id" column="ID" />
+				<result column="ENAME" property="name" jdbcType="VARCHAR" />
+			</association>
+		</collection>
+	</resultMap>
+	<resultMap type="com.benqzl.pojo.system.User" id="BaseResultMap1">
+		<id column="ID" jdbcType="VARCHAR" property="userid" />
+		<result column="USERNAME" jdbcType="VARCHAR" property="username" />
+		<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<result column="LEVE" property="leve" />
+			<result column="ENAME" property="name" />
+			<association property="department" javaType="com.benqzl.pojo.system.Department">
+				<result column="DNAME" property="name" jdbcType="VARCHAR" />
+
+			</association>
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		d.ID as ID, d.CREATETIME as CREATETIME, d.EDITTIME as
+		EDITTIME,
+		d.CREATERID as CREATERID, d.EDITERID as EDITERID,
+		d.FILEADDRESS as
+		FILEADDRESS, d.CODE as CODE, d.ISDEL as ISDEL, d.TITLE
+		as TITLE,
+		d.ISPC as ISPC,r.receiverid as RECEIVERID,
+		d.ISPHONEMESS as
+		ISPHONEMESS ,u.username as Uname,r.receiptdate as
+		RECEIPTDATE,r.documentid as RID,u.userid as USERID,r.state as
+		state,e.name as ENAME,r.id as DetaisId,e.leve as leve,d.levels as
+		LEVELS
+	</sql>
+
+	<sql id="Document">
+		distinct(d.ID) as ID, d.CREATETIME as CREATETIME,
+		d.EDITTIME as
+		EDITTIME,
+		d.CREATERID as CREATERID, d.EDITERID as
+		EDITERID,
+		d.FILEADDRESS as
+		FILEADDRESS, d.CODE as CODE, d.ISDEL as
+		ISDEL, d.TITLE
+		as TITLE,
+		d.ISPC as ISPC,r.receiverid as RECEIVERID,
+		d.ISPHONEMESS as
+		ISPHONEMESS ,u.username as Uname,r.receiptdate as
+		RECEIPTDATE,r.documentid as RID,u.userid as USERID,r.state as
+		state,r.id as DetaisId,d.levels as LEVELS,e.name as ENAME
+	</sql>
+
+	<sql id="Base_Column_List1">
+		u.USERID as ID, u.USERNAME as USERNAME, d.name as DNAME
+		,e.leve as LEVE,e.name as ENAME
+	</sql>
+	<select id="selectUserbyParentID" parameterType="java.lang.Integer"
+		resultMap="BaseResultMap1">
+		select
+		<include refid="Base_Column_List1" />
+		from SYS_USER u join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID
+		join
+		SYS_DEPARTMENT d on e.departmentid=d.id where 1=1
+		<if test="leve =='0'.toString()">
+			and e.leve &gt;=#{leve}
+		</if>
+		<if test="leve=='2'.toString() and leve !=null">
+			and e.leve in (0,2)
+		</if>
+		<if test="leve=='1'.toString() and leve !=null">
+			and e.leve in (0,1,2)
+		</if>
+		and u.isdel=0
+		order by d.name desc
+	</select>
+	<select id="selectLevel" parameterType="java.lang.String"
+		resultType="java.lang.Long">
+		select leve as LEVE
+		from SYS_EMPLOYEE WHERE ID=#{leve}
+	</select>
+	<select id="selectUserbyID" parameterType="java.lang.String"
+		resultMap="BaseResultMap1">
+		select
+		<include refid="Base_Column_List1" />
+		from SYS_USER u join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID
+		join
+		SYS_DEPARTMENT d on e.departmentid=d.id where u.isdel=0
+		and u.userid
+		in(select ReceiverId from oa_docunment_receiver where
+		documentId=#{id})
+	</select>
+	<select id="selectCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		OA_DOCUMENT d
+		join oa_docunment_receiver r on
+		r.documentId=d.ID
+		join
+		sys_user u on u.userid=r.receiverid
+		join
+		sys_employee e on
+		e.id=u.employeeid
+		where d.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="findByPages" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Document" />
+		from oa_document d
+		join oa_docunment_receiver r on d.ID=r.documentid
+		join SYS_USER u on u.userid=d.createrid
+		left join sys_employee e on e.id=u.employeeid
+		where 1=1
+		<if test="title != null and title !=''">
+			and d.TITLE like '%'||#{title}||'%'
+		</if>
+		<if test="code != null and code !=''">
+			and d.CODE like '%'||#{code}||'%'
+		</if>
+		and d.IsDel=0 order by d.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+
+	<select id="pageCounts" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from oa_document d
+		join oa_docunment_receiver r on d.ID=r.documentid
+		join SYS_USER u on
+		u.userid=d.createrid
+		left join sys_employee e on e.id=u.employeeid
+		where 1=1
+		<if test="title != null and title !=''">
+			and d.title like '%'||#{title}||'%'
+		</if>
+		<if test="code != null and code !=''">
+			and d.code like '%'||#{code}||'%'
+		</if>
+		and d.IsDel = 0
+	</select>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select B.*,S.USERNAME AS USERNAME from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from OA_DOCUMENT d
+		join oa_docunment_receiver r on r.documentId=d.ID
+		join sys_user u on u.userid=r.receiverid
+		join sys_employee e on
+		e.id=u.employeeid
+		where 1 = 1
+		<if test="title != null and title !=''">
+			and d.TITLE like '%'||#{title}||'%'
+		</if>
+		<if test="code != null and code !=''">
+			and d.CODE = #{code}
+		</if>
+		and d.ISDEL=0
+		and r.state &lt;&gt; 2
+		order by r.state ,d.CREATETIME
+		desc) A
+		where ROWNUM &lt;=#{p2}
+		) B
+		join sys_user s on s.userid
+		=B.createrid
+		where RN &gt;#{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		OA_DOCUMENT d
+		join oa_docunment_receiver r on r.documentId=d.ID
+		join sys_user u on u.userid=r.receiverid
+		join sys_employee e on
+		e.id=u.employeeid
+		where 1 = 1
+		<if test="title != null and title !=''">
+			and d.TITLE like '%'||#{title,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="code != null and code !=''">
+			and d.CODE = #{code}
+		</if>
+		and d.CreaterId=#{createid}
+		and d.ISDEL=0
+	</select>
+	<select id="findUser" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from OA_DOCUMENT d
+		join oa_docunment_receiver r on r.documentId=d.ID
+		join sys_user u on u.userid=r.receiverid
+		join sys_employee e on
+		e.id=u.employeeid
+		where d.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from OA_DOCUMENT d
+		join oa_docunment_receiver r on r.documentId=d.ID
+		join sys_user u on u.userid=r.receiverid
+		join sys_employee e on
+		e.id=u.employeeid
+		where d.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		update OA_DOCUMENT
+		set IsDel=1
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="insert" parameterType="com.benqzl.pojo.oa.Document">
+		insert
+		into OA_DOCUMENT (ID,
+		CREATETIME, EDITTIME,
+		CREATERID, EDITERID,
+		FILEADDRESS,
+		CODE, ISDEL,
+		TITLE,
+		ISPC, ISPHONEMESS)
+		values
+		(#{id,jdbcType=VARCHAR}, #{createtime},
+		#{edittime},
+		#{CREATERID,jdbcType=VARCHAR},
+		#{CREATERID,jdbcType=VARCHAR},
+		#{fileaddress,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{isdel,jdbcType=DECIMAL},
+		#{title,jdbcType=VARCHAR},
+		#{ispc,jdbcType=DECIMAL},
+		#{isphonemess,jdbcType=DECIMAL})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.oa.Document">
+		insert into OA_DOCUMENT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="edittime != null">
+				EDITTIME,
+			</if>
+			<if test="createrid != null">
+				CREATERID,
+			</if>
+			<if test="editerid != null">
+				EDITERID,
+			</if>
+			<if test="fileaddress != null">
+				FILEADDRESS,
+			</if>
+			<if test="code != null">
+				CODE,
+			</if>
+			<if test="isdel != null">
+				ISDEL,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="ispc != null">
+				ISPC,
+			</if>
+			<if test="isphonemess != null">
+				ISPHONEMESS,
+			</if>
+			<if test="levels != null">
+				LEVELS,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="edittime != null">
+				#{edittime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createrid != null">
+				#{createrid,jdbcType=VARCHAR},
+			</if>
+			<if test="editerid != null">
+				#{editerid,jdbcType=VARCHAR},
+			</if>
+			<if test="fileaddress != null">
+				#{fileaddress,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="isdel != null">
+				#{isdel,jdbcType=DECIMAL},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="ispc != null">
+				#{ispc,jdbcType=DECIMAL},
+			</if>
+			<if test="isphonemess != null">
+				#{isphonemess,jdbcType=DECIMAL},
+			</if>
+			<if test="levels != null">
+				#{levels,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.oa.Document">
+		update OA_DOCUMENT
+		<set>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=DATE},
+			</if>
+			<if test="edittime != null">
+				EDITTIME = #{edittime,jdbcType=DATE},
+			</if>
+			<if test="createrid != null">
+				CREATERID = #{createrid,jdbcType=VARCHAR},
+			</if>
+			<if test="editerid != null">
+				EDITERID = #{editerid,jdbcType=VARCHAR},
+			</if>
+			<if test="fileaddress != null">
+				FILEADDRESS = #{fileaddress,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				CODE = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="isdel != null">
+				ISDEL = #{isdel,jdbcType=DECIMAL},
+			</if>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="ispc != null">
+				ISPC = #{ispc,jdbcType=DECIMAL},
+			</if>
+			<if test="isphonemess != null">
+				ISPHONEMESS = #{isphonemess,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.oa.Document">
+		update OA_DOCUMENT
+		set
+		EDITTIME =
+		#{edittime,jdbcType=TIMESTAMP},
+		CODE = #{code,jdbcType=VARCHAR},
+		FILEADDRESS =#{fileaddress},
+
+		TITLE = #{title,jdbcType=VARCHAR}
+
+		where ID
+		= #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="exsitCode" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select count(*) from OA_DOCUMENT where isdel=0 and code
+		=#{code}
+	</select>
+	<update id="updateFilesAddress" parameterType="java.util.Map">
+		update OA_DOCUMENT
+		set FILEADDRESS =#{fileaddress} where id = #{id}
+	</update>
+</mapper>

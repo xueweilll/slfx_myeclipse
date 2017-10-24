@@ -1,0 +1,100 @@
+.accordion .accordion-header-selected {
+    background:#004075!important;
+}
+
+
+.panel-title
+{color:#fff;}
+
+.accordion .accordion-header {
+    background:#044C88!important;
+    filter: none;
+}
+
+.panel-title {
+    font-size: 12px;
+
+    color:#0369be!important
+    height: 16px;
+    line-height: 16px;
+    color:#fff!important;
+}
+
+.accordion-body
+{
+	  background-color:#0369BE;
+}
+
+.tabs-header {
+ background-color:#0369be!important;
+}
+
+.tabs-header, .tabs-scroller-left, .tabs-scroller-right, .tabs-tool, .tabs, .tabs-panels, .tabs li a.tabs-inner, .tabs li.tabs-selected a.tabs-inner, .tabs-header-bottom .tabs li.tabs-selected a.tabs-inner, .tabs-header-left .tabs li.tabs-selected a.tabs-inner, .tabs-header-right .tabs li.tabs-selected a.tabs-inner {
+       border-color:#047EE2;
+}
+
+a.tabs-inner{
+ border-bottom:1px solid #0369be;	
+	
+	
+}
+
+.tabs li.tabs-selected a.tabs-inner {
+    border-bottom: 1px solid #ffffff;
+}
+
+.panel-header {
+    background-color:#2B2B2B!important;
+    border-color:#00325D;
+   }
+    
+    
+    
+    
+    
+    .accordion-noborder .accordion-header {
+    border-width: 0 0 1;
+    border-color:#03457B;
+}
+
+.panel-header {
+    background-color:#0369be!important;
+    border-color:#0369be;
+}
+
+
+.panel-body{
+	
+ border-color:#0369BE!important;
+	
+	
+}
+.easyui-layout{ border:none}
+
+.datagrid-toolbar {
+   
+    padding:0px!important;
+  
+}
+.window .panel-header {
+    background-color: #FFFFFF!important;
+    border-color: #ccc;
+    color:#ccc;
+    
+}
+
+.window .panel-body {
+    border-color: #ccc!important;
+}
+
+.window .panel-title{
+	color:#222!important;
+	padding-left:10px;
+}
+.bqxx {height:16px;padding-right:10px;background-color:#0369be!important;color:#fff;}
+.bqxx div{font-weight:100!important; }
+.bqxx_span{height:27px;line-height:27px;}
+
+.span_left01{ float:left; margin-left:2px; padding-left:25px;background: url(../images/dqyh.png) no-repeat;}
+.span_left02{ float:left; margin-left:2px; padding-left:25px;background: url(../images/xtsj.png) no-repeat;}
+.span_right{ float:right}

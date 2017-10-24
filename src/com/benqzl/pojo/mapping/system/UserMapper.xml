@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.UserMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.system.User">
+		<id column="USERID" property="userid" jdbcType="VARCHAR" />
+		<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+		<result column="USERPWD" property="userpwd" jdbcType="VARCHAR" />
+		<result column="SEX" property="sex" jdbcType="DECIMAL" />
+		<result column="AGE" property="age" jdbcType="DECIMAL" />
+		<result column="EMAIL" property="email" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" />
+		<result column="EDITTIME" property="edittime" />
+		<result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+		<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<id property="id" column="EID" />
+			<result column="ENAME" property="name" jdbcType="VARCHAR" />
+		</association>
+		<association property="actor" javaType="com.benqzl.pojo.system.Actor">
+			<id property="id" column="AID" />
+			<result column="ANAME" property="name" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	<resultMap type="com.benqzl.pojo.system.User" id="BaseResultMap_Authority"></resultMap>
+	<resultMap type="com.benqzl.pojo.system.Employee" id="BaseResultMap1">
+		<id column="ID" jdbcType="VARCHAR" property="id" />
+		<result column="NAME" jdbcType="VARCHAR" property="name" />
+	</resultMap>
+
+	<resultMap type="com.benqzl.pojo.system.User" id="BaseResultMap2">
+		<id column="USERID" property="userid" jdbcType="VARCHAR" />
+		<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+		<result column="UserPwd" property="userpwd" jdbcType="VARCHAR" />
+		<association property="actor" javaType="com.benqzl.pojo.system.Actor">
+			<id property="id" column="ACTOOID" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	
+	<resultMap type="com.benqzl.pojo.system.User" id="BaseComboboxMap">
+		<id column="USERID" jdbcType="VARCHAR" property="userid" />
+		<result column="USERNAME" jdbcType="VARCHAR" property="username" />
+		<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<result column="NAME" property="name" />
+			<association property="department" javaType="com.benqzl.pojo.system.Department">
+				<result column="DNAME" property="name" jdbcType="VARCHAR" />
+			</association>
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List1">
+		ID, NAME
+	</sql>
+	<sql id="Base_Column_List">
+		u.USERID as USERID, u.USERNAME as USERNAME, u.USERPWD as USERPWD,
+		e.SEX as SEX , e.AGE as AGE , e.NAME as ENAME,e.ID as EID, a.NAME as
+		ANAME,a.ID as AID, u.EMAIL as EMAIL,
+		u.CREATETIME as CREATETIME, u.EDITTIME as EDITTIME,
+		u.ISDEL as ISDEL
+	</sql>
+	<select id="selectUserByName" parameterType="java.lang.String"
+		resultMap="BaseResultMap2">
+		select u.userid as USERID,u.UserPwd as UserPwd,u.username as
+		USERNAME,u.ActorId as ACTOOID from SYS_USER u where
+		u.username=#{username,jdbcType=VARCHAR}
+	</select>
+	<select id="selectEmployeebyParentID" parameterType="java.util.Map"
+		resultMap="BaseResultMap1">
+		select
+		<include refid="Base_Column_List1" />
+		from SYS_EMPLOYEE
+		where departmentid = #{id,jdbcType=VARCHAR} and isdel=0
+		and id not in (select employeeid from SYS_USER where isdel=0
+		<if test="empid !=null">and employeeid !=#{empid,jdbcType=VARCHAR}</if>
+		)
+	</select>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from SYS_USER u
+		join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID join SYS_ACTOR
+		a on u.ACTORID=a.ID
+		<where>
+			u.IsDel=0
+			<if test="actorid != null">
+				and u.ACTORID=#{actorid,jdbcType=VARCHAR}
+			</if>
+			<if test="name != null">
+				and u.USERNAME like '%'|| #{name,jdbcType=VARCHAR} ||'%'
+			</if>
+		</where>
+		order by u.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from SYS_USER u
+		join SYS_EMPLOYEE e on
+		u.EMPLOYEEID=e.ID join SYS_ACTOR a on u.ACTORID=a.ID
+		<where>
+			u.IsDel=0
+			<if test="actorid != null">
+				and u.ACTORID=#{actorid,jdbcType=VARCHAR}
+			</if>
+			<if test="name != null">
+				and u.USERNAME like '%'|| #{name,jdbcType=VARCHAR} ||'%'
+			</if>
+		</where>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_USER u
+		join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID join SYS_ACTOR a on
+		u.ACTORID=a.ID
+		where USERID = #{userid,jdbcType=VARCHAR}
+	</select>
+	<update id="deleteByPrimaryKey" parameterType="java.lang.String">
+		update SYS_USER set ISDEL = 1
+		where USERID = #{userid,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByEmployeeid" parameterType="java.lang.String">
+		update sys_user set isdel=1
+		where employeeid=#{id,jdbcType=VARCHAR}
+	</update>
+
+	<update id="update_reloadpwdbyid" parameterType="java.lang.String">
+		update SYS_USER set userpwd = '12345'
+		where USERID = #{userid,jdbcType=VARCHAR}
+	</update>
+	<insert id="insert" parameterType="com.benqzl.pojo.system.User">
+		insert into SYS_USER (USERID, USERNAME, USERPWD,
+		SEX, AGE, EMPLOYEEID,
+		ACTORID, EMAIL, CREATETIME,
+		EDITTIME, ISDEL)
+		values (#{userid,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR},
+		#{userpwd,jdbcType=VARCHAR},
+		#{sex,jdbcType=DECIMAL}, #{age,jdbcType=DECIMAL}, #{employee.id,jdbcType=VARCHAR},
+		#{actor.id,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR},
+		#{createtime},
+		#{edittime}, #{isdel,jdbcType=DECIMAL})
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.message.id,jdbcType=VARCHAR},
+			#{item.receiverid,jdbcType=VARCHAR},
+			#{item.receiptdate,jdbcType=DATE}, #{item.state,jdbcType=DECIMAL}
+			from dual)
+		</foreach>
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.system.User">
+		insert into SYS_USER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userid != null">
+				USERID,
+			</if>
+			<if test="username != null">
+				USERNAME,
+			</if>
+			<if test="userpwd != null">
+				USERPWD,
+			</if>
+			<if test="sex != null">
+				SEX,
+			</if>
+			<if test="age != null">
+				AGE,
+			</if>
+			<if test="employee.id != null">
+				EMPLOYEEID,
+			</if>
+			<if test="actor.id != null">
+				ACTORID,
+			</if>
+			<if test="email != null">
+				EMAIL,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="edittime != null">
+				EDITTIME,
+			</if>
+			<if test="isdel != null">
+				ISDEL,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userid != null">
+				#{userid,jdbcType=VARCHAR},
+			</if>
+			<if test="username != null">
+				#{username,jdbcType=VARCHAR},
+			</if>
+			<if test="userpwd != null">
+				#{userpwd,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				#{sex,jdbcType=DECIMAL},
+			</if>
+			<if test="age != null">
+				#{age,jdbcType=DECIMAL},
+			</if>
+			<if test="employee.id != null">
+				#{employee.id,jdbcType=VARCHAR},
+			</if>
+			<if test="actor.id != null">
+				#{actor.id,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				#{email,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime},
+			</if>
+			<if test="edittime != null">
+				#{edittime},
+			</if>
+			<if test="isdel != null">
+				#{isdel,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.User">
+		update SYS_USER
+		<set>
+			<if test="username != null">
+				USERNAME = #{username,jdbcType=VARCHAR},
+			</if>
+			<if test="userpwd != null">
+				USERPWD = #{userpwd,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				SEX = #{sex,jdbcType=DECIMAL},
+			</if>
+			<if test="age != null">
+				AGE = #{age,jdbcType=DECIMAL},
+			</if>
+			<if test="employee !=null">
+				<if test="employee.id != null">
+					EMPLOYEEID = #{employee.id,jdbcType=VARCHAR},
+				</if>
+			</if>
+			<if test="actor !=null">
+				<if test="actor.id != null">
+					ACTORID = #{actor.id,jdbcType=VARCHAR},
+				</if>
+			</if>
+			<if test="email != null">
+				EMAIL = #{email,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime},
+			</if>
+			<if test="edittime != null">
+				EDITTIME = #{edittime},
+			</if>
+			<if test="isdel != null">
+				ISDEL = #{isdel,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where USERID = #{userid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.User">
+		update SYS_USER
+		set USERNAME = #{username,jdbcType=VARCHAR},
+		USERPWD = #{userpwd,jdbcType=VARCHAR},
+		SEX = #{sex,jdbcType=DECIMAL},
+		AGE = #{age,jdbcType=DECIMAL},
+		EMPLOYEEID = #{employee.id,jdbcType=VARCHAR},
+		ACTORID = #{actor.id,jdbcType=VARCHAR},
+		EMAIL = #{email,jdbcType=VARCHAR},
+		CREATETIME = #{createtime},
+		EDITTIME = #{edittime},
+		ISDEL = #{isdel,jdbcType=DECIMAL}
+		where USERID = #{userid,jdbcType=VARCHAR}
+	</update>
+	<select id="selectUserList" resultMap="BaseResultMap">
+		select
+		u.USERID as USERID, u.USERNAME as USERNAME, u.USERPWD as USERPWD,
+		e.SEX as SEX , e.AGE as AGE , e.NAME as ENAME,e.ID as EID, u.EMAIL as
+		EMAIL,
+		u.CREATETIME as CREATETIME, u.EDITTIME as EDITTIME,
+		u.ISDEL as ISDEL
+		from SYS_USER u
+		join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID
+		where u.ISDEL = 0
+	</select>
+	<select id="selectbyMuiltCombox" resultMap="BaseComboboxMap" parameterType="java.util.Map">
+		select
+		u.USERID, u.USERNAME ,e.name ,d.name as dname
+		from SYS_USER u join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID
+		join
+		SYS_DEPARTMENT d on e.departmentid=d.id
+		where u.isdel = 0
+		<if test="departmentid != null ">
+			and e.departmentid=#{departmentid}
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.MaintenanceAduitMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.MaintenanceAduit" >
+   <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="MAINTENANCEID" property="maintenanceid" jdbcType="VARCHAR" />  
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="ADUITER" property="aduiter" jdbcType="VARCHAR" />
+    <result column="ADUITTIME" property="aduittime" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+     <result column="TYPE" property="type" jdbcType="DECIMAL" />
+  </resultMap>
+   <sql id="Base_Column_List" >
+    ID, MAINTENANCEID, STATE, ADUITER, ADUITTIME, MEMO, TYPE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_MAINTENANCE_ADUIT
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findMemo" resultMap="BaseResultMap" parameterType="java.lang.String">
+   select 
+    <include refid="Base_Column_List" />
+    from  (select <include refid="Base_Column_List" />
+     from pl_maintenance_aduit  where maintenanceid =#{id,jdbcType=VARCHAR}  and type=#{type,jdbcType=DECIMAL} order by aduittime desc  ) 
+    where rownum=1
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_MAINTENANCE_ADUIT
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.MaintenanceAduit" >
+    insert into PL_MAINTENANCE_ADUIT (MAINTENANCEID, ID, STATE, 
+      ADUITER, ADUITTIME, MEMO,TYPE
+      )
+    values (#{maintenanceid,jdbcType=VARCHAR}, #{id,jdbcType=VARCHAR}, #{state,jdbcType=DECIMAL}, 
+      #{aduiter,jdbcType=VARCHAR}, #{aduittime,jdbcType=TIMESTAMP}, #{memo,jdbcType=VARCHAR}, 
+      #{type,jdbcType=DECIMAL}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.MaintenanceAduit" >
+    insert into PL_MAINTENANCE_ADUIT
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="maintenanceid != null" >
+        MAINTENANCEID,
+      </if>
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="aduiter != null" >
+        ADUITER,
+      </if>
+      <if test="aduittime != null" >
+        ADUITTIME,
+      </if>
+      <if test="memo != null" >
+        MEMO,
+      </if>
+       <if test="type != null" >
+        TYPE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="maintenanceid != null" >
+        #{maintenanceid,jdbcType=VARCHAR},
+      </if>
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="aduiter != null" >
+        #{aduiter,jdbcType=VARCHAR},
+      </if>
+      <if test="aduittime != null" >
+        #{aduittime,jdbcType=DATE},
+      </if>
+      <if test="memo != null" >
+        #{memo,jdbcType=VARCHAR},
+      </if>
+       <if test="type != null" >
+        #{type,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+   <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.MaintenanceAduit" >
+    update PL_MAINTENANCE_ADUIT
+    <set >
+      <if test="maintenanceid != null" >
+        MAINTENANCEID = #{maintenanceid,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="aduiter != null" >
+        ADUITER = #{aduiter,jdbcType=VARCHAR},
+      </if>
+      <if test="aduittime != null" >
+        ADUITTIME = #{aduittime,jdbcType=DATE},
+      </if>
+      <if test="memo != null" >
+        MEMO = #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        TYPE = #{type,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.MaintenanceAduit" >
+    update PL_MAINTENANCE_ADUIT
+    set MAINTENANCEID = #{maintenanceid,jdbcType=VARCHAR},
+      STATE = #{state,jdbcType=DECIMAL},
+      ADUITER = #{aduiter,jdbcType=VARCHAR},
+      ADUITTIME = #{aduittime,jdbcType=DATE},
+      MEMO = #{memo,jdbcType=VARCHAR},
+      TYPE = #{type,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select m.*,d.name as
+		DEPARTMENTNAME,u.name as APPLYNAME
+		from PL_MAINTENANCE m left join
+		sys_department d on m.departmentid= d.id left join
+		(select
+		u.userid,e.name from sys_user u left join sys_employee e on e.id =
+		u.employeeid) u on u.userid = m.applyer
+		where m.state != 9
+		<if test="code != null">
+			and m.code like '%'||#{code}||'%'
+		</if>
+		<if test="projectname != null">
+			and m.PROJECTNAME like '%'||#{projectname}||'%'
+		</if>
+		<if test="units != null">
+			and m.CONSTRUCTIONUNITS like '%'||#{units}||'%'
+		</if>
+		<if test="begintime != null">
+			and m.APPLYDATE &gt;=#{begintime}
+		</if>
+		<if test="endtime != null">
+			and m.APPLYDATE &lt;= #{endtime}
+		</if>
+		<if test="state != null and state !=''">
+			and m.state =#{state,jdbcType=VARCHAR}
+		</if>
+		<if test="step !=null and step !=''">
+		    and m.step =#{step,jdbcType=VARCHAR}
+		</if>
+		<if test="total != null">
+			and m.id in
+			(select maintenanceid from pl_maintenance_details d where d.totalAmount
+			&gt;=#{total})
+		</if>
+        <if test="lc=='1'.toString()">
+             and m.id in 
+              <foreach item="item" index="index" collection="id" open="(" separator="," close=")">
+             #{item}
+             </foreach>
+        </if>
+		order by m.APPLYDATE desc ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*)
+		from PL_MAINTENANCE m left join
+		sys_department d on
+		m.departmentid= d.id left join
+		(select u.userid,e.name from sys_user u
+		left join sys_employee e on e.id =
+		u.employeeid) u on u.userid =
+		m.applyer
+		where m.state != 9
+		<if test="code != null">
+			and m.code like '%${code}%'
+		</if>
+		<if test="projectname != null">
+			and m.PROJECTNAME like '%${projectname}%'
+		</if>
+		<if test="units != null">
+			and m.CONSTRUCTIONUNITS like '%${units}%'
+		</if>
+		<if test="begintime != null">
+			and m.APPLYDATE &gt;=#{begintime}
+		</if>
+		<if test="endtime != null">
+			and m.APPLYDATE &lt;= #{endtime}
+		</if>
+		<if test="state != null and state !=''">
+			and m.state =#{state,jdbcType=VARCHAR}
+		</if>
+		<if test="total != null">
+			and m.id in
+			(select maintenanceid from pl_maintenance_details d where d.totalAmount
+			&gt;=#{total})
+		</if>
+		 <if test="lc=='1'.toString()">
+             and m.id in 
+              <foreach item="item" index="index" collection="id" open="(" separator="," close=")">
+             #{item}
+             </foreach>
+        </if>
+	</select>
+</mapper>

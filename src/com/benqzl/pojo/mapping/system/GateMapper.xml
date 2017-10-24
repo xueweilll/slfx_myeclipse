@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.GateMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Gate">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="ONOFFWAY" property="onoffway" jdbcType="DECIMAL" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+		<result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id property="id" column="Sid" />
+			<result property="code" column="SCODE" jdbcType="VARCHAR" />
+			<result property="name" column="SNAME" jdbcType="VARCHAR" />
+			<result property="levels" column="LEVELS" jdbcType="VARCHAR" />
+			    	 <result column="LAT" property="lat"  />
+    <result column="LON" property="lon"  />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, SID, CODE, NAME, ONOFFWAY, CREATETIME, EDITTIME, ISDEL
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_GATE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap" >
+		select
+		g.*, s.code  as scode ,s.name as sname,s.levels  ,s.lon,s.lat 
+		from SYS_GATE g left join sys_station s on g.sid = s.id
+		where g.ISDEL=0
+		order by s.levels,g.code 
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from SYS_GATE
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.system.Gate">
+		insert into SYS_GATE (ID, SID, CODE,
+		NAME, ONOFFWAY, CREATETIME,
+		EDITTIME, ISDEL)
+		values (#{id,jdbcType=VARCHAR}, #{sid,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR}, #{onoffway,jdbcType=DECIMAL}, #{createtime,jdbcType=TIMESTAMP},
+		#{edittime,jdbcType=TIMESTAMP}, #{isdel,jdbcType=DECIMAL})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.system.Gate">
+		insert into SYS_GATE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="sid != null">
+				SID,
+			</if>
+			<if test="code != null">
+				CODE,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="onoffway != null">
+				ONOFFWAY,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="edittime != null">
+				EDITTIME,
+			</if>
+			<if test="isdel != null">
+				ISDEL,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="onoffway != null">
+				#{onoffway,jdbcType=DECIMAL},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="edittime != null">
+				#{edittime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isdel != null">
+				#{isdel,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Gate">
+		update SYS_GATE
+		<set>
+			<if test="sid != null">
+				SID = #{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				CODE = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="onoffway != null">
+				ONOFFWAY = #{onoffway,jdbcType=DECIMAL},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="edittime != null">
+				EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isdel != null">
+				ISDEL = #{isdel,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Gate">
+		update SYS_GATE
+		set SID = #{sid,jdbcType=VARCHAR},
+		CODE = #{code,jdbcType=VARCHAR},
+		NAME = #{name,jdbcType=VARCHAR},
+		ONOFFWAY = #{onoffway,jdbcType=DECIMAL},
+		CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+		EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+		ISDEL = #{isdel,jdbcType=DECIMAL}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select g.*,s.name as SNAME,s.Levels
+		from SYS_GATE g left join sys_station s on s.id=g.sid where g.isdel=0
+		<if test="code != null" >
+	      and g.code like '%${code}%' 
+	    </if>
+	    <if test="name != null" >
+	      and g.name like '%${name}%' 
+	    </if>
+		order by s.Levels, g.NAME ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select
+		count(*) as num
+		from
+		SYS_GATE g left join sys_station s on s.id=g.sid where g.isdel=0 
+		<if test="code != null" >
+	      and g.code like '%${code}%' 
+	    </if>
+	    <if test="name != null" >
+	      and g.name like '%${name}%' 
+	    </if>
+	</select>
+	<select id="selectcount" resultType="java.lang.Integer" >
+		select
+		count(*) as num
+		from
+		SYS_GATE g  where g.isdel=0 
+
+	</select>
+	<update id="deleteIsdel" parameterType="java.lang.String">
+		update SYS_GATE set
+		ISDEL= 1 where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteBySid" parameterType="java.lang.String">
+		update SYS_GATE set
+		ISDEL= 1 where SID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="exsitCode" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) from sys_gate where isdel=0 and code =#{code}
+	</select>
+	  <select id="codeOnlyOne" parameterType="java.util.Map" resultType="java.lang.String">
+  		select count(*) from sys_gate where isdel='0' and code='${code}' and sid=#{sid}
+  		<if test="id !=null">
+  			and id !='${id}'
+  		</if>
+  </select>
+  <select id="nameOnlyOne" parameterType="java.util.Map" resultType="java.lang.String">
+  		select count(*) from sys_gate where isdel='0' and name='${name}' and sid=#{sid}
+  		<if test="id !=null">
+  			
+  			and id !='${id}'
+  		</if>
+  </select>
+	
+</mapper>

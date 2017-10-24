@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolNormalDetailsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolNormalDetails" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+    <result column="ENUMID" property="enumid" jdbcType="VARCHAR" />
+    <result column="HANDLETYPE" property="handletype" jdbcType="DECIMAL" />
+    <result column="HANDLECONTENTS" property="handlecontents" jdbcType="VARCHAR" />
+    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+    <result column="ISTYPE" property="istype" jdbcType="DECIMAL" />
+  </resultMap>
+    <resultMap id="BaseResultMap1" type="com.benqzl.pojo.patrol.PatrolNormalDetails" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+    <result column="DENUMID" property="enumid" jdbcType="VARCHAR" />
+    <result column="HANDLETYPE" property="handletype" jdbcType="DECIMAL" />
+    <result column="HANDLECONTENTS" property="handlecontents" jdbcType="VARCHAR" />
+    <result column="DCONTENTS" property="contents" jdbcType="VARCHAR" />
+    <result column="ISTYPE" property="istype" jdbcType="DECIMAL" />
+    <association property="patrolenumid" javaType="com.benqzl.pojo.patrol.PatrolEnumid">
+    <id column="ENUMID" property="enumid" jdbcType="VARCHAR" />
+   <result column="ENUMID" property="enumid" jdbcType="VARCHAR" /> 
+    <result column="TEXT" property="text" jdbcType="VARCHAR" />
+    <result column="ECONTENTS" property="contents" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+   <resultMap type="com.benqzl.pojo.patrol.PatrolNormalDetails" id="BaseListMap">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+		<result column="ENUMID" property="enumid" jdbcType="VARCHAR" />
+		<result column="HANDLETYPE" property="handletype" jdbcType="DECIMAL" />
+		<result column="HANDLECONTENTS" property="handlecontents"
+			jdbcType="VARCHAR" />
+		<result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+		<result column="ISTYPE" property="istype" jdbcType="DECIMAL" />
+		<association property="patrolenumid"
+			javaType="com.benqzl.pojo.patrol.PatrolEnumid">
+			<result column="TEXT" property="text" />
+		</association>
+		<association property="patrolnormal"
+			javaType="com.benqzl.pojo.patrol.PatrolNormal">
+			<id column="PID" property="id"></id>
+			<result column="SID" property="sid" />
+			<result column="DEGREE" property="degree" />
+			<association property="station" javaType="com.benqzl.pojo.system.Station">
+				<id column="SID" property="id" />
+				<result column="SNAME" property="name" />
+			</association>
+		</association>
+	</resultMap>
+  
+  <sql id="Base_Column_List" >
+    ID, PATROLID, ENUMID, HANDLETYPE, HANDLECONTENTS, CONTENTS, ISTYPE
+  </sql>
+   <sql id="Base_Column_List1" >
+    d.id as ID, 
+    d.patrolid as PATROLID, 
+    d.enumid as DENUMID, 
+    d.handletype as HANDLETYPE,
+    d.handlecontents as HANDLECONTENTS, 
+    d.contents as DCONTENTS, 
+    d.istype as ISTYPE,
+    e.text as TEXT,
+    e.contents as ECONTENTS,
+    e.enumid as ENUMID
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_NORMAL_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_NORMAL_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+    <delete id="deleteByNormalDetialKey" parameterType="java.lang.String" >
+    delete from PL_NORMAL_DETAILS
+    where PatrolID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolNormalDetails" >
+    insert into PL_NORMAL_DETAILS (ID, PATROLID, ENUMID, 
+      HANDLETYPE, HANDLECONTENTS, CONTENTS, 
+      ISTYPE)
+    values (#{id,jdbcType=VARCHAR}, #{patrolid,jdbcType=VARCHAR}, #{enumid,jdbcType=VARCHAR}, 
+      #{handletype,jdbcType=DECIMAL}, #{handlecontents,jdbcType=VARCHAR}, #{contents,jdbcType=VARCHAR}, 
+      #{istype,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolNormalDetails" >
+    insert into PL_NORMAL_DETAILS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="patrolid != null" >
+        PATROLID,
+      </if>
+      <if test="enumid != null" >
+        ENUMID,
+      </if>
+      <if test="handletype != null" >
+        HANDLETYPE,
+      </if>
+      <if test="handlecontents != null" >
+        HANDLECONTENTS,
+      </if>
+      <if test="contents != null" >
+        CONTENTS,
+      </if>
+      <if test="istype != null" >
+        ISTYPE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolid != null" >
+        #{patrolid,jdbcType=VARCHAR},
+      </if>
+      <if test="enumid != null" >
+        #{enumid,jdbcType=VARCHAR},
+      </if>
+      <if test="handletype != null" >
+        #{handletype,jdbcType=DECIMAL},
+      </if>
+      <if test="handlecontents != null" >
+        #{handlecontents,jdbcType=VARCHAR},
+      </if>
+      <if test="contents != null" >
+        #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="istype != null" >
+        #{istype,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolNormalDetails" >
+    update PL_NORMAL_DETAILS
+    <set >
+      <if test="patrolid != null" >
+        PATROLID = #{patrolid,jdbcType=VARCHAR},
+      </if>
+      <if test="enumid != null" >
+        ENUMID = #{enumid,jdbcType=VARCHAR},
+      </if>
+      <if test="handletype != null" >
+        HANDLETYPE = #{handletype,jdbcType=DECIMAL},
+      </if>
+      <if test="handlecontents != null" >
+        HANDLECONTENTS = #{handlecontents,jdbcType=VARCHAR},
+      </if>
+      <if test="contents != null" >
+        CONTENTS = #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="istype != null" >
+        ISTYPE = #{istype,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolNormalDetails" >
+    update PL_NORMAL_DETAILS
+    set PATROLID = #{patrolid,jdbcType=VARCHAR},
+      ENUMID = #{enumid,jdbcType=VARCHAR},
+      HANDLETYPE = #{handletype,jdbcType=DECIMAL},
+      HANDLECONTENTS = #{handlecontents,jdbcType=VARCHAR},
+      CONTENTS = #{contents,jdbcType=VARCHAR},
+      ISTYPE = #{istype,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="insertPatrolNormalDetails" parameterType="com.benqzl.pojo.patrol.PatrolNormalDetails">
+  		 insert into PL_NORMAL_DETAILS(id,PatrolID,Enumid,istype,Contents)
+  		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, 
+			#{item.patrolid,jdbcType=VARCHAR},
+			#{item.enumid,jdbcType=VARCHAR},
+			#{item.istype,jdbcType=VARCHAR},
+			#{item.contents,jdbcType=VARCHAR}
+			 from dual)
+		</foreach>
+
+	</insert>
+	<select id="selectByDepartment" parameterType="java.util.List" resultMap="BaseListMap">
+		select pn.id as pid,nd.id,pn.sid, pn.degree, nd.enumid, nd.contents,nd.patrolid,nd.id,
+		pe.text,s.name as sname,pn.degree
+		from pl_patrol_normal pn
+		left join pl_normal_details nd
+		on pn.id = nd.patrolid
+		left join pl_patrol_enumid pe
+		on nd.enumid = pe.enumid
+		left join sys_station s on s.id = pn.sid
+		where istype = 1 and  (Handletype is null or Handletype = 0) and pn.id in (
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+		)		
+	</select>
+	<select id="selectByDepartmentss" parameterType="java.util.List" resultMap="BaseListMap">
+		select pn.id as pid,nd.id,pn.sid, pn.degree, nd.enumid, nd.contents,nd.patrolid,nd.id,nd.handletype,
+		pe.text,s.name as sname,pn.degree
+		from pl_patrol_normal pn
+		left join pl_normal_details nd
+		on pn.id = nd.patrolid
+		left join pl_patrol_enumid pe
+		on nd.enumid = pe.enumid
+		left join sys_station s on s.id = pn.sid
+		where istype = 1 
+		 and pn.id in (
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+		)		
+		<if test="handletype == null">
+			<!-- and  (Handletype is null or Handletype = 1) -->
+		</if>
+		<if test="handletype == 1">
+			and Handletype = 1
+		</if>
+		order by s.levels, pe.enumid 
+	</select>
+	<update id="updateDetailsByList" parameterType="java.util.Map">
+		update PL_NORMAL_DETAILS
+		set Handletype = #{handletype,jdbcType=DECIMAL}
+		where 
+		<if test="type == null">
+			PatrolID in (
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+		</if>
+		<if test="type == 1">
+			ID   in (
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			) and istype = 1 
+		</if>
+	</update>
+  
+
+  <select id="selectByNormalDetails" parameterType="java.lang.String" resultMap="BaseResultMap1">
+   select 
+   <include refid="Base_Column_List1"/>
+    from pl_normal_details d
+    left join pl_patrol_enumid e on e.enumid =d.enumid  
+    where d.patrolid=#{id}
+    order by e.enumid asc
+  </select>
+</mapper>

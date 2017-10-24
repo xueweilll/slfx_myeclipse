@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolImplementMapper">
+   <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialImplement" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="ISID" property="isid" jdbcType="VARCHAR" />
+    <result column="PARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id" />
+			<result column="SNAME" property="name" />
+	</association>
+	<association property="issue" javaType="com.benqzl.pojo.patrol.PatrolSpecialIssue">
+			<id column="IID" property="id" />
+			<result column="CODE" property="code" />
+	</association>
+	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<id column="EID" property="id" />
+			<result column="ENAME" property="name" />
+	</association>
+  </resultMap>	
+	<select id="query" resultType="java.util.Map" >
+	select t.*,i.code ,to_char(t.createtime,&apos;yyyy-mm-dd
+	HH24:mi:ss&apos;) createtime1,to_char(t.parttime,&apos;yyyy-mm-dd
+	HH24:mi:ss&apos;) parttime1,t1.username,t2.name from
+	pl_special_implement t
+	left join pl_special_issue i on i.id = t.isid
+	left join sys_user t1 on t1.userid = t.creater
+	left join sys_station t2 on t2.id = t.sid
+	where 1=1
+	<if test="startTime != ''"> and to_char(t.parttime,&apos;yyyy-mm-dd HH24:mi:ss&apos;)
+		&gt;= #{startTime}  </if>
+	<if test="endTime != ''"> and to_char(t.parttime,&apos;yyyy-mm-dd HH24:mi:ss&apos;)
+		&lt;= #{endTime} </if>
+	</select>
+	<select id="findByPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+	select * from
+		(select A.*,ROWNUM RN from(
+		select
+		t.ID as ID, 
+		t.isid as  ISID, 
+		t.parttime as PARTTIME,
+		t.creater as CREATER, 
+		t.STATE as STATE, 
+		t.createtime as CREATETIME,
+		t.sid as SID,
+		i.code as CODE,
+		e.name as ENAME,
+		t2.name as SNAME
+		from pl_special_implement t
+	left join pl_special_issue i on i.id = t.isid
+	left join sys_user t1 on t1.userid = t.creater
+	left join sys_station t2 on t2.id = t.sid
+	 left join sys_employee e on e.id=t1.employeeid
+		<where>
+			<if test="startTime != null">
+				and t.parttime &gt;=#{startTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endTime != null">
+				and t.parttime &lt;= #{endTime,jdbcType=TIMESTAMP}
+			</if>
+			<!-- classes=3为应急巡检 -->
+			<if test="classes=='3'.toString()">
+			    and i.classes=3
+			</if>
+			<!-- classes=2为定期巡检 -->
+			<if test="classes=='2'.toString()">
+			    and i.classes&lt;3
+			</if>
+		</where>
+		order by t.parttime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+	select count(*) from
+		(select A.*,ROWNUM RN from(
+		select
+		t.ID as ID, 
+		t.isid as  ISID, 
+		t.parttime as PARTTIME,
+		t.creater as CREATER, 
+		t.STATE as STATE, 
+		t.createtime as CREATETIME,
+		t.sid as SID,
+		i.code as CODE,
+		e.name as ENAME,
+		t2.name as SNAME
+		from pl_special_implement t
+	left join pl_special_issue i on i.id = t.isid
+	left join sys_user t1 on t1.userid = t.creater
+	left join sys_station t2 on t2.id = t.sid
+	 left join sys_employee e on e.id=t1.employeeid
+		<where>
+			<if test="startTime != null">
+				and t.parttime &gt;=#{startTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endTime != null">
+				and t.parttime &lt;= #{endTime,jdbcType=TIMESTAMP}
+			</if>
+			<!-- classes=3为应急巡检 -->
+			<if test="classes=='3'.toString()">
+			    and i.classes=3
+			</if>
+			<!-- classes=2为定期巡检 -->
+			<if test="classes=='2'.toString()">
+			    and i.classes&lt;3
+			</if>
+		</where>
+		order by t.parttime desc) A)
+	</select>
+	<select id="getDemo" resultType="java.util.Map">
+		select t.* from (
+			select a.*,<![CDATA[b.id  projectid]]>,b.name from PL_IMPLEMENT_CLASS a
+			left join pl_implement_table b on a.id = b.classid
+		) t 
+		start with t.parentid = 0 connect by prior t.id = t.parentid
+		order siblings by t.id*1 <![CDATA[ asc]]>
+	</select>
+	<insert id="save">
+		insert into pl_implement_details
+		  (<![CDATA[id, implementid, classes, vals, examiner, examintime]]>)
+		values
+		  (#{id},#{implementid}, 0, #{info}, #{userid}, to_date(#{examintime},&apos;yyyy-MM-dd HH24:mi:ss&apos;))
+	</insert>
+	<select id="boobleisid" resultType="java.lang.Integer">
+	    select  count(*) as count from pl_special_execute e 
+	    left join pl_special_execute_details d
+	    on e.id=d.eid
+	    where d.sid not in(select i.sid from pl_special_implement i
+	    where i.isid=#{isid})
+	    and e.isid=#{isid}
+	</select>
+</mapper>

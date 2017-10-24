@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialImplementMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolSpecialImplement">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ISID" property="isid" jdbcType="VARCHAR" />
+		<result column="PARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id"></id>
+			<result column="NAME" property="name" />
+		</association>
+		<association property="flow"
+			javaType="com.benqzl.pojo.patrol.PatrolSpecialFolw">
+			<id column="ISID" property="isid"></id>
+			<result column="HZ" property="hz" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, ISID, PARTTIME, CREATER, STATE, CREATETIME, SID
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_SPECIAL_IMPLEMENT
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from PL_SPECIAL_IMPLEMENT
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialImplement">
+		insert into PL_SPECIAL_IMPLEMENT (ID, ISID, PARTTIME,
+		CREATER, STATE, CREATETIME,
+		SID)
+		values (#{id,jdbcType=VARCHAR}, #{isid,jdbcType=VARCHAR},
+		#{parttime,jdbcType=TIMESTAMP},
+		#{creater,jdbcType=VARCHAR}, #{state,jdbcType=DECIMAL}, #{createtime,jdbcType=TIMESTAMP},
+		#{sid,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialImplement">
+		insert into PL_SPECIAL_IMPLEMENT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="isid != null">
+				ISID,
+			</if>
+			<if test="parttime != null">
+				PARTTIME,
+			</if>
+			<if test="creater != null">
+				CREATER,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="sid != null">
+				SID,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="isid != null">
+				#{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="parttime != null">
+				#{parttime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="creater != null">
+				#{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialImplement">
+		update PL_SPECIAL_IMPLEMENT
+		<set>
+			<if test="isid != null">
+				ISID = #{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="parttime != null">
+				PARTTIME = #{parttime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="creater != null">
+				CREATER = #{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="sid != null">
+				SID = #{sid,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialImplement">
+		update PL_SPECIAL_IMPLEMENT
+		set ISID = #{isid,jdbcType=VARCHAR},
+		PARTTIME = #{parttime,jdbcType=TIMESTAMP},
+		CREATER = #{creater,jdbcType=VARCHAR},
+		STATE = #{state,jdbcType=DECIMAL},
+		CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+		SID = #{sid,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateState" parameterType="java.util.List">
+			update PL_SPECIAL_IMPLEMENT set STATE = 1 	where ID in
+			<!--  <foreach item="item" index="index" collection="list" open="(" separator="," close=")">  
+				#{item}  
+			 </foreach> -->
+			 (<foreach collection="list" item="item" index="index"
+			separator="union all">
+			select  #{item} from dual
+			</foreach>) 
+	</update>
+	<!-- 更新实施单状态  1为已汇总-->
+	<update id="updateStates" parameterType="java.lang.String">
+			update PL_SPECIAL_IMPLEMENT set STATE = 1 	where isid=#{isid,jdbcType=VARCHAR}
+	</update>
+</mapper>

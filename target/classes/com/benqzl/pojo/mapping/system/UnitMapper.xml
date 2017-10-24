@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.UnitMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Unit" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="TYPES" property="types" jdbcType="DECIMAL" />
+    <result column="POWER" property="power" jdbcType="VARCHAR" />
+    <result column="MOTERTYPE" property="motertype" jdbcType="VARCHAR" />
+    <result column="FEATURE" property="feature" jdbcType="DECIMAL" />
+    <result column="DESIGNDISCHARGE" property="designdischarge" jdbcType="DECIMAL" />
+    <result column="CREATETIME" property="createtime"/>
+    <result column="EDITTIME" property="edittime"/>
+    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+    <result column="STATES" property="states" jdbcType="DECIMAL" />
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+    	<id property="id" column="SID"/>
+   		<result property="code" column="SCODE" jdbcType="VARCHAR" />
+    	<result property="name" column="STATION_NAME"/>
+    	 <result column="LAT" property="lat"  />
+    	 <result property="levels" column="LEVELS" jdbcType="VARCHAR" />
+    <result column="LON" property="lon"  />
+    </association>
+  </resultMap>
+  <resultMap id="stationMap" type="com.benqzl.pojo.system.Station" >
+    <id column="ID" property="id" />
+    <result column="CODE" property="code" />
+    <result column="NAME" property="name" />
+    <result column="LAT" property="lat"  />
+    <result column="LON" property="lon"  />
+    <result column="LEVELS" property="levels"  />
+    <result column="CREATETIME" property="createtime"  />
+    <result column="EDITTIME" property="edittime"  />
+    <result column="ISDEL" property="isdel"  />
+    <result column="REMARK" property="remark" />
+  </resultMap>
+  	<resultMap id="RealTimeReportUnit" type="com.benqzl.pojo.util.RealTimeUnitReport">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="F_STATIONCODE" property="scode"
+			jdbcType="VARCHAR" />
+	    <result column="SNAME" property="sname" jdbcType="VARCHAR"/>
+		<result column="F_PUMPCODE" property="ucode" jdbcType="VARCHAR" />
+		<result column="DESIGNDISCHARGE" property="designdischarge" jdbcType="DECIMAL" />
+		<result column="COUNTUNIT" property="countunit" jdbcType="DECIMAL"/>
+	    <result column="UNAME" property="uname" jdbcType="VARCHAR"/>
+	</resultMap>
+  <sql id="Base_Column_List">
+  	ID, SID, CODE,NAME, TYPES, POWER,MOTERTYPE, FEATURE, DESIGNDISCHARGE,CREATETIME, EDITTIME, ISDEL
+  </sql>
+  <select id="selectAll" resultMap="BaseResultMap" >
+		select
+		u.* ,s.name as STATION_NAME,s.code as SCODE ,s.lon,s.lat ,s.Levels
+		from sys_unit u left join sys_station s on s.id = u.sid 
+		where u.ISDEL=0
+	</select>
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+  	select * from (select s.*,rownum rn from 
+  		(
+  	 select a.id,a.sid,a.code,a.name,a.types,a.power,a.motertype,
+	 a.feature,a.designdischarge,
+ 	 a.createtime,a.edittime,a.isdel,b.name as station_name,b.Levels ,b.code as socde 
+ 	 from sys_unit a 
+ 	 left join
+ 	 sys_station b 
+ 	 on a.sid=b.id 
+ 	 where a.isdel='0'
+ 	 	<if test="sid !=null">
+  			and sid ='${sid}'
+  		</if>
+  		<if test="name !=null">
+  			and a.name like '%${name}%'
+  		</if>
+  		order by b.Levels,a.NAME 
+ 	 ) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1} 
+  		
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+ 	select a.id,a.sid,a.code,a.name,a.types,a.power,a.motertype,
+	a.feature,a.designdischarge,a.createtime,a.edittime,a.isdel,b.name as station_name
+	from sys_unit a,sys_station b where a.sid=b.id and a.id = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="pageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+  		select count(*) from sys_unit where isdel='0'
+  		<if test="sid !=null">
+  			and sid ='${sid}'
+  		</if>
+  		<if test="name !=null">
+  			and name like '%${name}%' 
+  		</if>
+  </select>
+    <select id="selectcount" resultType="java.lang.Integer" >
+  		select count(*) from sys_unit where isdel='0'
+  </select>
+  <select id="selectCode" parameterType="java.util.Map" resultType="java.lang.String">
+  		select count(*) from sys_unit where isdel='0' and code='${code}' and sid=#{sid}
+  		<if test="id !=null">
+  			and id !='${id}'
+  		</if>
+  </select>
+  <select id="nameOnlyOne" parameterType="java.util.Map" resultType="java.lang.String">
+  		select count(*) from sys_unit where isdel='0' and name='${name}' and sid=#{sid}
+  		<if test="id !=null">
+  			and id !='${id}'
+  		</if>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update SYS_UNIT set isdel='1'
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteBySid" parameterType="java.lang.String" >
+    update SYS_UNIT set isdel='1'
+    where SID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Unit" >
+    insert into SYS_UNIT (ID, SID, CODE, 
+      NAME, TYPES, POWER, 
+      MOTERTYPE, FEATURE, DESIGNDISCHARGE, 
+      CREATETIME, EDITTIME, ISDEL
+      )
+    values (#{id,jdbcType=VARCHAR}, #{sid,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{types,jdbcType=DECIMAL}, #{power,jdbcType=VARCHAR}, 
+      #{motertype,jdbcType=VARCHAR}, #{feature,jdbcType=DECIMAL}, #{designdischarge,jdbcType=DECIMAL}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{edittime,jdbcType=TIMESTAMP}, #{isdel,jdbcType=DECIMAL}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Unit" >
+    insert into SYS_UNIT
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="sid != null" >
+        SID,
+      </if>
+      <if test="code != null" >
+        CODE,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="types != null" >
+        TYPES,
+      </if>
+      <if test="power != null" >
+        POWER,
+      </if>
+      <if test="motertype != null" >
+        MOTERTYPE,
+      </if>
+      <if test="feature != null" >
+        FEATURE,
+      </if>
+      <if test="designdischarge != null" >
+        DESIGNDISCHARGE,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="isdel != null" >
+        ISDEL,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="sid != null" >
+        #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="types != null" >
+        #{types,jdbcType=DECIMAL},
+      </if>
+      <if test="power != null" >
+        #{power,jdbcType=VARCHAR},
+      </if>
+      <if test="motertype != null" >
+        #{motertype,jdbcType=VARCHAR},
+      </if>
+      <if test="feature != null" >
+        #{feature,jdbcType=DECIMAL},
+      </if>
+      <if test="designdischarge != null" >
+        #{designdischarge,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isdel != null" >
+        #{isdel,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Unit" >
+    update SYS_UNIT
+    <set >
+      <if test="sid != null" >
+        SID = #{sid,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        CODE = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="types != null" >
+        TYPES = #{types,jdbcType=DECIMAL},
+      </if>
+      <if test="power != null" >
+        POWER = #{power,jdbcType=VARCHAR},
+      </if>
+      <if test="motertype != null" >
+        MOTERTYPE = #{motertype,jdbcType=VARCHAR},
+      </if>
+      <if test="feature != null" >
+        FEATURE = #{feature,jdbcType=DECIMAL},
+      </if>
+      <if test="designdischarge != null" >
+        DESIGNDISCHARGE = #{designdischarge,jdbcType=DECIMAL},
+      </if>
+      
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isdel != null" >
+        ISDEL = #{isdel,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Unit" >
+    update SYS_UNIT
+    set SID = #{sid,jdbcType=VARCHAR},
+      CODE = #{code,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      TYPES = #{types,jdbcType=DECIMAL},
+      POWER = #{power,jdbcType=VARCHAR},
+      MOTERTYPE = #{motertype,jdbcType=VARCHAR},
+      FEATURE = #{feature,jdbcType=DECIMAL},
+      DESIGNDISCHARGE = #{designdischarge,jdbcType=DECIMAL},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      ISDEL = #{isdel,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectStation" resultMap="stationMap">
+  	select * from sys_station where isdel='0'  order by levels 
+  </select>
+  <select id="findUnit" resultMap="BaseResultMap" parameterType="java.util.Map">
+    select u.ID as ID,u.CODE as CODE,u.NAME as NAME
+     from sys_unit u
+     left join sys_station s on s.id=u.sid and s.isdel=0
+     where u.sid in(
+     <foreach collection="sid" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>
+    <!--  #{sid,jdbcType=VARCHAR} -->)
+    and u.isdel=0
+    order by s.levels,u.name asc
+  </select>
+ <!-- 查询实时报表机组 -->
+  <select id="findRealTimeReportUnitList" resultMap="RealTimeReportUnit" parameterType="java.util.Map">
+    select u.id as ID,s.name as SNAME,s.code as F_STATIONCODE,
+      u.name as UNAME,u.code as F_PUMPCODE ,
+      u.DESIGNDISCHARGE as DESIGNDISCHARGE from sys_station s
+      left join sys_unit u on u.sid=s.id 
+      where s.isdel=0 and u.isdel=0
+     <if test="scode != null">
+				and s.code in(
+				<foreach collection="scode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+			</if>
+			<if test="ucode !=null">
+			    and u.code in(
+			    <foreach collection="ucode" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>)
+		</if>
+      order by s.levels,u.name asc
+  </select>
+  
+</mapper>

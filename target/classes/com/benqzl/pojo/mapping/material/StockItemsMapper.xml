@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.material.StockItemsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.material.StockItems" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="DATE" />
+    <result column="EDITTIME" property="edittime" jdbcType="DATE" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="MATERIALID" property="materialid" jdbcType="VARCHAR" />
+    <result column="STOCKID" property="stockid" jdbcType="VARCHAR" />
+    <result column="COUNT" property="count" jdbcType="DECIMAL" />
+    <result column="SURPLUSCOUNT" property="surpluscount" jdbcType="DECIMAL" />
+    <result column="SOURCE" property="source" jdbcType="VARCHAR" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="BaseResultMap1" type="com.benqzl.pojo.material.StockItems" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="MATERIALID" property="materialid" jdbcType="VARCHAR" />
+    <result column="STOCKID" property="stockid" jdbcType="VARCHAR" />
+    <result column="COUNT" property="count" jdbcType="DECIMAL" />
+    <result column="SURPLUSCOUNT" property="surpluscount" jdbcType="DECIMAL" />
+    <result column="SOURCE" property="source" jdbcType="VARCHAR" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <association property="material" javaType="com.benqzl.pojo.system.Material">
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SIZEID" property="sizeid" jdbcType="VARCHAR" />
+		<result column="PRICKLEID" property="prickleid" jdbcType="VARCHAR" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="DECIMAL" />
+    </association>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    ID, CREATETIME, EDITTIME, STATE, MATERIALID, STOCKID, COUNT, SURPLUSCOUNT, SOURCE, 
+    MEMO
+  </sql>
+  <select id="selectByStockId" resultMap="BaseResultMap1" parameterType="java.lang.String" >
+    select 
+    t.*,a.*
+    from MA_STOCK_ITEMS t join (select m.id as aid ,m.name as name,m.type as type, s.name as SIZEID ,p.name as PRICKLEID
+  	 from sys_material m join sys_size s on m.sizeid=s.id join sys_prickle p on m.prickleId=p.id) a on t.materialId=a.aid
+    where t.STOCKID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from MA_STOCK_ITEMS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from MA_STOCK_ITEMS
+    where stockid = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByPrimaryById" parameterType="java.util.List" >
+    delete from MA_STOCK_ITEMS
+    where id in(<foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item,jdbcType=VARCHAR}  from dual) 
+    </foreach>)
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into MA_STOCK_ITEMS (ID, CREATETIME, EDITTIME, 
+      STATE, MATERIALID, STOCKID, 
+      COUNT, SURPLUSCOUNT, SOURCE, 
+      MEMO)
+      <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.createtime,jdbcType=TIMESTAMP}, #{item.edittime,jdbcType=TIMESTAMP}, 
+      #{item.state,jdbcType=DECIMAL}, #{item.materialid,jdbcType=VARCHAR}, #{item.stockid,jdbcType=VARCHAR}, 
+      #{item.count,jdbcType=DECIMAL}, #{item.surpluscount,jdbcType=DECIMAL}, #{item.source,jdbcType=VARCHAR}, 
+      #{item.memo,jdbcType=VARCHAR}  from dual) 
+    </foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.material.StockItems" >
+    insert into MA_STOCK_ITEMS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="materialid != null" >
+        MATERIALID,
+      </if>
+      <if test="stockid != null" >
+        STOCKID,
+      </if>
+      <if test="count != null" >
+        COUNT,
+      </if>
+      <if test="surpluscount != null" >
+        SURPLUSCOUNT,
+      </if>
+      <if test="source != null" >
+        SOURCE,
+      </if>
+      <if test="memo != null" >
+        MEMO,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=DATE},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="materialid != null" >
+        #{materialid,jdbcType=VARCHAR},
+      </if>
+      <if test="stockid != null" >
+        #{stockid,jdbcType=VARCHAR},
+      </if>
+      <if test="count != null" >
+        #{count,jdbcType=DECIMAL},
+      </if>
+      <if test="surpluscount != null" >
+        #{surpluscount,jdbcType=DECIMAL},
+      </if>
+      <if test="source != null" >
+        #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null" >
+        #{memo,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.material.StockItems" >
+    update MA_STOCK_ITEMS
+    <set >
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=DATE},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="materialid != null" >
+        MATERIALID = #{materialid,jdbcType=VARCHAR},
+      </if>
+      <if test="stockid != null" >
+        STOCKID = #{stockid,jdbcType=VARCHAR},
+      </if>
+      <if test="count != null" >
+        COUNT = #{count,jdbcType=DECIMAL},
+      </if>
+      <if test="surpluscount != null" >
+        SURPLUSCOUNT = #{surpluscount,jdbcType=DECIMAL},
+      </if>
+      <if test="source != null" >
+        SOURCE = #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null" >
+        MEMO = #{memo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.material.StockItems" >
+    update MA_STOCK_ITEMS
+    set CREATETIME = #{createtime,jdbcType=DATE},
+      EDITTIME = #{edittime,jdbcType=DATE},
+      STATE = #{state,jdbcType=DECIMAL},
+      MATERIALID = #{materialid,jdbcType=VARCHAR},
+      STOCKID = #{stockid,jdbcType=VARCHAR},
+      COUNT = #{count,jdbcType=DECIMAL},
+      SURPLUSCOUNT = #{surpluscount,jdbcType=DECIMAL},
+      SOURCE = #{source,jdbcType=VARCHAR},
+      MEMO = #{memo,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

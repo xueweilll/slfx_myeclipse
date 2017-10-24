@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.MaintenanceMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.Maintenance">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="APPLYDATE" property="applydate" jdbcType="TIMESTAMP" />
+		<result column="PROJECTNAME" property="projectname" jdbcType="VARCHAR" />
+		<result column="CONSTRUCTIONUNITS" property="constructionunits"
+			jdbcType="VARCHAR" />
+		<result column="APPLYER" property="applyer" jdbcType="VARCHAR" />
+		<result column="CHECKER" property="checker" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="STEP" property="step" jdbcType="DECIMAL" />
+		<result column="STEPMEMO" property="stepmemo" jdbcType="VARCHAR" />
+		<association property="department" javaType="com.benqzl.pojo.system.Department">
+			<id property="id" column="DEPARTMENTID" />
+			<result property="name" column="DEPARTMENTNAME" jdbcType="VARCHAR" />
+		</association>
+		<association property="apply" javaType="com.benqzl.pojo.system.User">
+			<id property="userid" column="APPLYER" />
+			<result property="username" column="APPLYNAME" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, CREATERID, CODE, DEPARTMENTID, CREATETIME, APPLYDATE,
+		PROJECTNAME,
+		CONSTRUCTIONUNITS,
+		APPLYER, CHECKER, STATE, MEMO, STEP,
+		STEPMEMO
+	</sql>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_MAINTENANCE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_MAINTENANCE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		PL_MAINTENANCE
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.patrol.Maintenance">
+		insert into PL_MAINTENANCE
+		(ID, CREATERID, CODE,
+		DEPARTMENTID, CREATETIME, APPLYDATE,
+		PROJECTNAME,
+		CONSTRUCTIONUNITS, APPLYER,
+		CHECKER, STATE, MEMO,
+		STEP, STEPMEMO
+		)
+		values
+		(#{id,jdbcType=VARCHAR},
+		#{createrid,jdbcType=VARCHAR},
+		#{code,jdbcType=VARCHAR},
+		#{departmentid,jdbcType=VARCHAR},
+		#{createtime,jdbcType=TIMESTAMP},
+		#{applydate,jdbcType=TIMESTAMP},
+		#{projectname,jdbcType=VARCHAR},
+		#{constructionunits,jdbcType=VARCHAR}, #{applyer,jdbcType=VARCHAR},
+		#{checker,jdbcType=VARCHAR}, #{state,jdbcType=DECIMAL},
+		#{memo,jdbcType=VARCHAR},
+		#{step,jdbcType=DECIMAL},
+		#{stepmemo,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.Maintenance">
+		insert into PL_MAINTENANCE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="createrid != null">
+				CREATERID,
+			</if>
+			<if test="code != null">
+				CODE,
+			</if>
+			<if test="departmentid != null">
+				DEPARTMENTID,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="applydate != null">
+				APPLYDATE,
+			</if>
+			<if test="projectname != null">
+				PROJECTNAME,
+			</if>
+			<if test="constructionunits != null">
+				CONSTRUCTIONUNITS,
+			</if>
+			<if test="applyer != null">
+				APPLYER,
+			</if>
+			<if test="checker != null">
+				CHECKER,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="memo != null">
+				MEMO,
+			</if>
+			<if test="step != null">
+				STEP,
+			</if>
+			<if test="stepmemo != null">
+				STEPMEMO,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="createrid != null">
+				#{createrid,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="departmentid != null">
+				#{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="applydate != null">
+				#{applydate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="projectname != null">
+				#{projectname,jdbcType=VARCHAR},
+			</if>
+			<if test="constructionunits != null">
+				#{constructionunits,jdbcType=VARCHAR},
+			</if>
+			<if test="applyer != null">
+				#{applyer,jdbcType=VARCHAR},
+			</if>
+			<if test="checker != null">
+				#{checker,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="memo != null">
+				#{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="step != null">
+				#{step,jdbcType=DECIMAL},
+			</if>
+			<if test="stepmemo != null">
+				#{stepmemo,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateTenanceAuit" parameterType="java.lang.String">
+		update pl_maintenance
+		<set>
+			state = #{state,jdbcType=VARCHAR},
+			<if test="step !=null">
+				step=#{step,jdbcType=VARCHAR},
+			</if>
+			stepmemo=#{stepmemo,jdbcType=VARCHAR}
+		</set>
+		where id=#{id}
+	</update>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.Maintenance">
+		update PL_MAINTENANCE
+		<set>
+			<if test="createrid != null">
+				CREATERID = #{createrid,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				CODE = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="departmentid != null">
+				DEPARTMENTID = #{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="applydate != null">
+				APPLYDATE = #{applydate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="projectname != null">
+				PROJECTNAME = #{projectname,jdbcType=VARCHAR},
+			</if>
+			<if test="constructionunits != null">
+				CONSTRUCTIONUNITS =
+				#{constructionunits,jdbcType=VARCHAR},
+			</if>
+			<if test="applyer != null">
+				APPLYER = #{applyer,jdbcType=VARCHAR},
+			</if>
+			<if test="checker != null">
+				CHECKER = #{checker,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="memo != null">
+				MEMO = #{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="step != null">
+				STEP = #{step,jdbcType=DECIMAL},
+			</if>
+			<if test="stepmemo != null">
+				STEPMEMO = #{stepmemo,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.Maintenance">
+		update
+		PL_MAINTENANCE
+		set CREATERID = #{createrid,jdbcType=VARCHAR},
+		CODE =
+		#{code,jdbcType=VARCHAR},
+		DEPARTMENTID =
+		#{departmentid,jdbcType=VARCHAR},
+		CREATETIME =
+		#{createtime,jdbcType=TIMESTAMP},
+		APPLYDATE =
+		#{applydate,jdbcType=TIMESTAMP},
+		PROJECTNAME =
+		#{projectname,jdbcType=VARCHAR},
+		CONSTRUCTIONUNITS =
+		#{constructionunits,jdbcType=VARCHAR},
+		APPLYER =
+		#{applyer,jdbcType=VARCHAR},
+		CHECKER = #{checker,jdbcType=VARCHAR},
+		STATE = #{state,jdbcType=DECIMAL},
+		MEMO = #{memo,jdbcType=VARCHAR},
+		STEP = #{step,jdbcType=DECIMAL},
+		STEPMEMO =
+		#{stepmemo,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findStepMemo" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select stepMemo as STEPMEMO from PL_MAINTENANCE where
+		id=#{id,jdbcType=VARCHAR}
+		and step=#{step,jdbcType=VARCHAR}
+	</select>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select m.*,d.name as
+		DEPARTMENTNAME,u.name as APPLYNAME
+		from PL_MAINTENANCE m left join
+		sys_department d on m.departmentid= d.id left join
+		(select
+		u.userid,e.name from sys_user u left join sys_employee e on e.id =
+		u.employeeid) u on u.userid = m.applyer
+		where m.state != 9
+		<if test="code != null">
+			and m.code like '%'||#{code}||'%'
+		</if>
+		<if test="projectname != null">
+			and m.PROJECTNAME like '%'||#{projectname}||'%'
+		</if>
+		<if test="units != null">
+			and m.CONSTRUCTIONUNITS like '%'||#{units}||'%'
+		</if>
+		<if test="begintime != null">
+			and m.APPLYDATE &gt;=#{begintime}
+		</if>
+		<if test="endtime != null">
+			and m.APPLYDATE &lt;= #{endtime}
+		</if>
+		<if test="state != null and state !=''">
+			and m.state =#{state,jdbcType=VARCHAR}
+		</if>
+		<if test="step !=null and step !=''">
+			and m.step =#{step,jdbcType=VARCHAR}
+		</if>
+		<if test="total != null">
+			and m.id in
+			(select maintenanceid from
+			pl_maintenance_details d where d.totalAmount
+			&gt;=#{total})
+		</if>
+		<if test="lc=='1'.toString()">
+			and m.id in
+			<foreach item="item" index="index" collection="id" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="typeDate=='1'.toString()">
+		and m.id in
+			 (select distinct maintenanceid as MAINTENANCEID from
+			pl_maintenance_aduit where type=#{aduittype,jdbcType=VARCHAR}
+			union
+			select id from pl_maintenance
+			where id in
+			<foreach item="item" index="index" collection="id" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+		order by m.APPLYDATE desc ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*)
+		from PL_MAINTENANCE m left join
+		sys_department d on
+		m.departmentid= d.id left join
+		(select u.userid,e.name from sys_user u
+		left join sys_employee e on e.id =
+		u.employeeid) u on u.userid =
+		m.applyer
+		where m.state != 9
+		<if test="code != null">
+			and m.code like '%${code}%'
+		</if>
+		<if test="projectname != null">
+			and m.PROJECTNAME like '%${projectname}%'
+		</if>
+		<if test="units != null">
+			and m.CONSTRUCTIONUNITS like '%${units}%'
+		</if>
+		<if test="begintime != null">
+			and m.APPLYDATE &gt;=#{begintime}
+		</if>
+		<if test="endtime != null">
+			and m.APPLYDATE &lt;= #{endtime}
+		</if>
+		<if test="state != null and state !=''">
+			and m.state =#{state,jdbcType=VARCHAR}
+		</if>
+		<if test="total != null">
+			and m.id in
+			(select maintenanceid from
+			pl_maintenance_details d where d.totalAmount
+			&gt;=#{total})
+		</if>
+		<if test="lc=='1'.toString()">
+			and m.id in
+			<foreach item="item" index="index" collection="id" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="typeDate=='1'.toString()">
+		and m.id in
+			 (select distinct maintenanceid as MAINTENANCEID from
+			pl_maintenance_aduit where type=#{aduittype,jdbcType=VARCHAR}
+			union
+			select id from pl_maintenance
+			where id in
+			<foreach item="item" index="index" collection="id" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+			)
+		</if>
+	</select>
+</mapper>

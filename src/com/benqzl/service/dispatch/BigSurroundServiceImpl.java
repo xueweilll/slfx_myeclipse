@@ -1,0 +1,449 @@
+package com.benqzl.service.dispatch;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.benqzl.dao.dispatch.ReceiptDispatchDepartmentMapper;
+import com.benqzl.dao.dispatch.ReceiptDispatchInstructionsMapper;
+import com.benqzl.dao.dispatch.ReceiptDispatchMapper;
+import com.benqzl.dao.dispatch.ReceiptDispatchStationsMapper;
+import com.benqzl.dao.dispatch.ReceiptMapper;
+import com.benqzl.pojo.dispatch.Receipt;
+import com.benqzl.pojo.dispatch.ReceiptDispatch;
+import com.benqzl.pojo.dispatch.ReceiptDispatchDepartment;
+import com.benqzl.pojo.dispatch.ReceiptDispatchInstructions;
+import com.benqzl.pojo.dispatch.ReceiptDispatchStations;
+import com.benqzl.pojo.system.Station;
+import com.benqzl.pojo.util.ReceiptAndDispatch;
+
+@Service("bigSurroundService")
+public class BigSurroundServiceImpl implements BigSurroundService {
+	@Autowired
+	private ReceiptMapper receiptMapper;
+	@Autowired
+	private ReceiptDispatchInstructionsMapper dispatchInstructionsMapper;
+	@Autowired
+	private ReceiptDispatchStationsMapper stationsMapper;
+	@Autowired
+	private ReceiptDispatchMapper dispatchMapper;
+	@Autowired
+	private ReceiptDispatchDepartmentMapper rdd;
+	String id = UUID.randomUUID().toString();
+	@Override
+	public List<Receipt> findReceipts(List<String> strings) throws Exception {
+		/*List<String> list2 = dispatchMapper.findReceiptIds("1");
+		strings.removeAll(list2);*/
+		List<Receipt> receipts = new ArrayList<>();
+		if (strings.size() != 0 && strings != null) {
+			receipts = receiptMapper.findByIds(strings);
+		}
+		return receipts;
+	}
+
+	@Override
+	public List<String> findReceiptIds(List<String> strings, String type)
+			throws Exception {
+		//List<String> list2 = dispatchMapper.findReceiptIds(type);
+		//strings.retainAll(list2);
+		return strings;
+	}
+
+	@Override
+	public Receipt findReceiptById(String id) {
+		return receiptMapper.findByID(id);
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public boolean insert(ReceiptDispatch receiptDispatch) {
+		ReceiptDispatch rpid = new ReceiptDispatch();
+		rpid.setId(receiptDispatch.getId());
+		rpid.setCode(receiptDispatch.getCode());
+		rpid.setReceiptid(receiptDispatch.getReceiptid());
+		rpid.setCreatetime(new Date());
+		rpid.setDispatchtype("1");
+		rpid.setState(new Long(0));
+		rpid.setTrstate(new Long(0));
+		rpid.setCreater(receiptDispatch.getCreater());
+		rpid.setMemo(receiptDispatch.getMemo());
+		rpid.setTransmitcontents(receiptDispatch.getTransmitcontents());
+		List<ReceiptDispatchInstructions> dispatchInstructions = new ArrayList<ReceiptDispatchInstructions>();
+		for (ReceiptDispatchInstructions receiptDispatchInstructions : receiptDispatch
+				.getReceiptDispatchInstructions()) {
+			ReceiptDispatchInstructions instructions = new ReceiptDispatchInstructions();
+			instructions.setId(UUID.randomUUID().toString());
+			instructions.setRpid(rpid.getId());
+			instructions.setState(new Long(0));
+			String str = receiptDispatchInstructions.getGateoperatet().toString()+ receiptDispatchInstructions.getUnitoperate().toString();
+			if (str.equals("20")) {
+				instructions.setInstruction(new Long(0));
+				instructions.setGateoperatetime(receiptDispatchInstructions.getGateoperatetime());
+			} else if (str.equals("10")) {
+				instructions.setInstruction(new Long(1));
+				instructions.setGateoperatetime(receiptDispatchInstructions.getGateoperatetime());
+			} else if (str.equals("02")) {
+				instructions.setInstruction(new Long(3));
+				instructions.setUnitoperatetime(receiptDispatchInstructions
+						.getUnitoperatetime());
+			} else if (str.equals("01")) {
+				instructions.setInstruction(new Long(4));
+				instructions.setUnitoperatetime(receiptDispatchInstructions
+						.getUnitoperatetime());
+			} else if (str.equals("21")) {
+				instructions.setInstruction(new Long(5));
+				instructions.setGateoperatetime(receiptDispatchInstructions
+						.getGateoperatetime());
+				instructions.setUnitoperatetime(receiptDispatchInstructions
+						.getUnitoperatetime());
+			} else if (str.equals("22")) {
+				instructions.setInstruction(new Long(6));
+				instructions.setGateoperatetime(receiptDispatchInstructions
+						.getGateoperatetime());
+				instructions.setUnitoperatetime(receiptDispatchInstructions
+						.getUnitoperatetime());
+			} else if (str.equals("12")) {
+				instructions.setInstruction(new Long(7));
+				instructions.setGateoperatetime(receiptDispatchInstructions
+						.getGateoperatetime());
+				instructions.setUnitoperatetime(receiptDispatchInstructions
+						.getUnitoperatetime());
+			}
+			dispatchInstructions.add(instructions);
+		}
+		List<ReceiptDispatchStations> stations = new ArrayList<ReceiptDispatchStations>();
+		for (ReceiptDispatchStations stations3 : receiptDispatch
+				.getDispatchStations()) {
+			ReceiptDispatchStations stations2 = new ReceiptDispatchStations();
+			stations2.setId(UUID.randomUUID().toString());
+			stations2.setRdispatchid(rpid.getId());
+			stations2.setSid(stations3.getSid());
+			stations2.setState(new Long(0));
+			stations2.setRuncount(stations3.getRuncount());
+			stations2.setKeepcount(stations3.getKeepcount());
+			stations2.setGatetype(stations3.getGatetype());
+			stations.add(stations2);
+		}
+		List<ReceiptDispatchDepartment> rdDepartments = new ArrayList<ReceiptDispatchDepartment>();
+		for (ReceiptDispatchDepartment rdd : receiptDispatch.getRdDepartments()) {
+			ReceiptDispatchDepartment list2 = new ReceiptDispatchDepartment();
+			list2.setId(UUID.randomUUID().toString());
+			list2.setRdid(rpid.getId());
+			list2.setDepartmentid(rdd.getDepartmentid());
+			list2.setState(rdd.getState());
+			rdDepartments.add(list2);
+		}
+		if (!receiptDispatch.getId().equals("0")) {
+			rdd.deleteDepartment(receiptDispatch.getId());
+			stationsMapper.deleteByRPID(receiptDispatch.getId());
+			dispatchInstructionsMapper.deleteByRPID(receiptDispatch.getId());
+			dispatchMapper.deleteByPrimaryKey(receiptDispatch.getId());
+
+		}
+		if (receiptDispatch.getDispatchtype().equals("1")) {
+			rpid.setState(new Long(1));
+		}
+		dispatchMapper.insertSelective(rpid);
+		stationsMapper.insert(stations);
+		rdd.insertDepartment(rdDepartments);
+		if (dispatchInstructions == null) {
+			// 调度指令隐藏
+			dispatchInstructionsMapper.insert(dispatchInstructions);
+		}
+		return true;
+	}
+
+	@Override
+	public List<ReceiptAndDispatch> findByPage(Map<String, Object> map) {
+		return dispatchMapper.findByPage(map);
+	}
+
+	@Override
+	public int pageCount(Map<String, Object> map) {
+		return dispatchMapper.pageCount(map);
+	}
+
+	@Override
+	public ReceiptDispatch findDispatchById(String id) throws Exception {
+		return dispatchMapper.selectByPrimaryKey(id);
+	}
+
+	@Override
+	public List<Station> findStations(String id) throws Exception {
+		Map<String, String> map = new HashMap<>();
+		if (!id.trim().equals("0") && id.trim() != null) {
+			map.put("id", id);
+		} else {
+			map.put("id", "0");
+		}
+		return stationsMapper.findStationsId(map);
+	}
+
+	@Override
+	public List<Map<String, Object>> findInstructions(String id) {
+		List<ReceiptDispatchInstructions> dispatchInstructions = dispatchInstructionsMapper
+				.findInstructions(id);
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		for (ReceiptDispatchInstructions instructions : dispatchInstructions) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("id", instructions.getId());
+			SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			if (instructions.getInstruction().equals(new Long(0))) {
+				map.put("GateOperate", 2);
+				map.put("UnitOperate", 0);
+				map.put("GateOperateTime",
+						sf.format(instructions.getGateoperatetime()));
+			} else if (instructions.getInstruction().equals(new Long(1))) {
+				map.put("GateOperate", 1);
+				map.put("UnitOperate", 0);
+				map.put("GateOperateTime",
+						sf.format(instructions.getGateoperatetime()));
+			} else if (instructions.getInstruction().equals(new Long(3))) {
+				map.put("UnitOperate", 2);
+				map.put("GateOperate", 0);
+				map.put("UnitOperateTime",
+						sf.format(instructions.getUnitoperatetime()));
+			} else if (instructions.getInstruction().equals(new Long(4))) {
+				map.put("UnitOperate", 1);
+				map.put("GateOperate", 0);
+				map.put("UnitOperateTime",
+						sf.format(instructions.getUnitoperatetime()));
+			} else if (instructions.getInstruction().equals(new Long(5))) {
+				map.put("UnitOperate", 1);
+				map.put("UnitOperateTime",
+						sf.format(instructions.getUnitoperatetime()));
+				map.put("GateOperate", 2);
+				map.put("GateOperateTime",
+						sf.format(instructions.getGateoperatetime()));
+			} else if (instructions.getInstruction().equals(new Long(6))) {
+				map.put("UnitOperate", 2);
+				map.put("UnitOperateTime",
+						sf.format(instructions.getUnitoperatetime()));
+				map.put("GateOperate", 2);
+				map.put("GateOperateTime",
+						sf.format(instructions.getGateoperatetime()));
+			} else if (instructions.getInstruction().equals(new Long(7))) {
+				map.put("UnitOperate", 2);
+				map.put("UnitOperateTime",
+						sf.format(instructions.getUnitoperatetime()));
+				map.put("GateOperate", 1);
+				map.put("GateOperateTime",
+						sf.format(instructions.getGateoperatetime()));
+			}
+			list.add(map);
+		}
+		return list;
+	}
+
+	@Override
+	public void delete(String id) {
+		stationsMapper.deleteByRPID(id);
+		// dispatchInstructionsMapper.deleteByRPID(id);指令删除
+		rdd.deleteDepartment(id);
+		dispatchMapper.deleteByPrimaryKey(id);
+	}
+
+	@Override
+	public void insertSelective(ReceiptDispatch rd) {
+
+	}
+
+	@Override
+	public int updateByPrimaryKeyTransmit(Map<String, Object> map) {
+		return dispatchMapper.updateByPrimaryKeyTransmit(map);
+	}
+
+	@Override
+	public Receipt findByTransmitID(String id) {
+		return receiptMapper.findByTransmitID(id);
+	}
+
+	@Override
+	public void insertAreaInstruction(
+			List<ReceiptDispatchInstructions> receiptDispatchInstructions) {
+		List<ReceiptDispatchInstructions> receiptDispatchInstructions1 = new ArrayList<>();
+		for (ReceiptDispatchInstructions receiptDispatchInstructions2 : receiptDispatchInstructions) {
+			ReceiptDispatchInstructions instructions = new ReceiptDispatchInstructions();
+			instructions = receiptDispatchInstructions2;
+			instructions.setId(UUID.randomUUID().toString());
+			instructions.setRpid(id);
+			receiptDispatchInstructions1.add(instructions);
+		}
+		dispatchInstructionsMapper
+				.insertInstructions(receiptDispatchInstructions1);
+
+	}
+
+	@Override
+	public void insertAreaStation(List<ReceiptDispatchStations> list) {
+		List<ReceiptDispatchStations> stations = new ArrayList<>();
+		for (ReceiptDispatchStations station1 : list) {
+			ReceiptDispatchStations list1 = new ReceiptDispatchStations();
+			list1 = station1;
+			list1.setId(UUID.randomUUID().toString());
+			list1.setRdispatchid(id);
+			list1.setState(new Long(0));
+			stations.add(list1);
+		}
+		stationsMapper.insertStations(stations);
+
+	}
+
+	@Override
+	public void insertArea(ReceiptDispatch receipt, String stations) {
+
+		receipt.setId(id);
+		receipt.setDispatchtype("0");
+		receipt.setState(Long.valueOf(stations));
+		dispatchMapper.insertArea(receipt);
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public void insertAreaDispacth(ReceiptDispatch receipt, String stations) {
+	
+		receipt.setDispatchtype("0");
+		receipt.setState(Long.valueOf(stations));
+		List<ReceiptDispatchStations> station = new ArrayList<ReceiptDispatchStations>();
+
+		for (ReceiptDispatchStations station1 : receipt.getDispatchStations()) {
+			ReceiptDispatchStations list1 = new ReceiptDispatchStations();
+			list1 = station1;
+			list1.setId(UUID.randomUUID().toString());
+			list1.setRdispatchid(receipt.getId());
+			list1.setState(new Long(0));
+			station.add(list1);
+		}
+		List<ReceiptDispatchInstructions> receiptDispatchInstructions1 = new ArrayList<>();
+		for (ReceiptDispatchInstructions receiptDispatchInstructions2 : receipt
+				.getReceiptDispatchInstructions()) {
+			ReceiptDispatchInstructions instructions = new ReceiptDispatchInstructions();
+			instructions = receiptDispatchInstructions2;
+			instructions.setId(UUID.randomUUID().toString());
+			instructions.setRpid(receipt.getId());
+			receiptDispatchInstructions1.add(instructions);
+		}
+		dispatchMapper.insertArea(receipt);
+		if(receipt.getRdDepartments() != null){
+			rdd.insertDepartment(receipt.getRdDepartments());
+		}
+		if (receiptDispatchInstructions1 == null) {
+			dispatchInstructionsMapper
+					.insertInstructions(receiptDispatchInstructions1);
+		}
+		stationsMapper.insertStations(station);
+
+	}
+
+	@Override
+	public List<String> findStationsIds(String string) {
+		return stationsMapper.findStationsIds(string);
+	}
+
+	@Override
+	public void updateState(Map<String, Object> maps) {
+		dispatchMapper.updateState(maps);
+	}
+
+	@Override
+	public List<ReceiptDispatchInstructions> findReceiptInstructions(String id) {
+
+		return dispatchInstructionsMapper.findReceiptInstructions(id);
+	}
+
+	@Override
+	public List<ReceiptDispatchStations> findrestations(String id) {
+
+		return stationsMapper.findrestations(id);
+	}
+
+	@Override
+	public void updateArea(ReceiptDispatch receiptDispatch, String stations) {
+		receiptDispatch.setDispatchtype("0");
+		receiptDispatch.setState(Long.valueOf(stations));
+		dispatchMapper.updateArea(receiptDispatch);
+	}
+
+	@Override
+	public void deleteAreaInstruction(String reid) {
+
+		dispatchInstructionsMapper.deleteAreaInstruction(reid);
+	}
+
+	@Override
+	public void insertAreaInstructions(
+			List<ReceiptDispatchInstructions> receiptDispatchInstructions,
+			String reid) {
+		List<ReceiptDispatchInstructions> receiptDispatchInstructions1 = new ArrayList<>();
+		for (ReceiptDispatchInstructions receiptDispatchInstructions2 : receiptDispatchInstructions) {
+			ReceiptDispatchInstructions instructions = new ReceiptDispatchInstructions();
+			instructions = receiptDispatchInstructions2;
+			instructions.setId(UUID.randomUUID().toString());
+			instructions.setRpid(reid);
+			receiptDispatchInstructions1.add(instructions);
+		}
+		dispatchInstructionsMapper
+				.insertInstructions(receiptDispatchInstructions1);
+
+	}
+
+	@Override
+	public void deleteAreaStation(String reid) {
+		stationsMapper.deleteAreaStation(reid);
+		rdd.deleteDepartment(reid);
+
+	}
+
+	@Override
+	public void insertAreaStations(
+			List<ReceiptDispatchStations> dispatchStations, String reid) {
+		List<ReceiptDispatchStations> stations = new ArrayList<>();
+
+		for (ReceiptDispatchStations station1 : dispatchStations) {
+			ReceiptDispatchStations list1 = new ReceiptDispatchStations();
+		
+			list1 = station1;
+		
+			list1.setId(UUID.randomUUID().toString());
+			list1.setRdispatchid(reid);
+			list1.setState(new Long(0));
+			stations.add(list1);
+			
+		}
+		stationsMapper.insertStations(stations);
+
+	}
+
+	@Override
+	public void updateAreas(String reid) {
+		dispatchMapper.updateAreas(reid);
+	}
+
+	@Override
+	public void insertDepartment(List<ReceiptDispatchDepartment> rddepartment) {
+		rdd.insertDepartment(rddepartment);
+
+	}
+
+	@Override
+	public void deleteDepartment(String reid) {
+		rdd.deleteDepartment(reid);
+	}
+
+	@Override
+	public void updateAreasMap(Map<String, Object> maps) {
+		dispatchMapper.updateAreasMap(maps);		
+	}
+
+	@Override
+	public void updateStateByReceiptId(String id) {
+		dispatchMapper.updateStateByReceiptId(id);
+	}
+}

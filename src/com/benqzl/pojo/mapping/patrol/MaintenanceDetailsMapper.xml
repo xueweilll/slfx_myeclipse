@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.MaintenanceDetailsMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.MaintenanceDetails">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="MAINTENANCEID" property="maintenanceid"
+			jdbcType="VARCHAR" />
+		<result column="ITEMNAME" property="itemname" jdbcType="VARCHAR" />
+		<result column="MATERIALS" property="materials" jdbcType="VARCHAR" />
+		<result column="UNIT" property="unit" jdbcType="VARCHAR" />
+		<result column="QUANTITY" property="quantity" jdbcType="DECIMAL" />
+		<result column="PRICE" property="price" jdbcType="DECIMAL" />
+		<result column="TOTALAMOUNT" property="totalamount" jdbcType="DECIMAL" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, MAINTENANCEID, ITEMNAME, MATERIALS, UNIT, QUANTITY, PRICE,
+		TOTALAMOUNT, MEMO
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_MAINTENANCE_DETAILS
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="findDetailsById" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_MAINTENANCE_DETAILS
+		where MAINTENANCEID = #{id,jdbcType=VARCHAR}
+		<if test="total !=null">
+		and totalamount &gt;=#{total}
+         </if>
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from PL_MAINTENANCE_DETAILS
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="java.util.List">
+		insert into PL_MAINTENANCE_DETAILS (ID, MAINTENANCEID, ITEMNAME,
+		MATERIALS, UNIT, QUANTITY,
+		PRICE, TOTALAMOUNT, MEMO
+		)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.maintenanceid,jdbcType=VARCHAR},
+			#{item.itemname,jdbcType=VARCHAR},
+			#{item.materials,jdbcType=VARCHAR}, #{item.unit,jdbcType=VARCHAR},
+			#{item.quantity,jdbcType=DECIMAL},
+			#{item.price,jdbcType=DECIMAL}, #{item.totalamount,jdbcType=DECIMAL}, #{item.memo,jdbcType=VARCHAR}
+			from dual)
+		</foreach>
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.MaintenanceDetails">
+		insert into PL_MAINTENANCE_DETAILS
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="maintenanceid != null">
+				MAINTENANCEID,
+			</if>
+			<if test="itemname != null">
+				ITEMNAME,
+			</if>
+			<if test="materials != null">
+				MATERIALS,
+			</if>
+			<if test="unit != null">
+				UNIT,
+			</if>
+			<if test="quantity != null">
+				QUANTITY,
+			</if>
+			<if test="price != null">
+				PRICE,
+			</if>
+			<if test="totalamount != null">
+				TOTALAMOUNT,
+			</if>
+			<if test="memo != null">
+				MEMO,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="maintenanceid != null">
+				#{maintenanceid,jdbcType=VARCHAR},
+			</if>
+			<if test="itemname != null">
+				#{itemname,jdbcType=VARCHAR},
+			</if>
+			<if test="materials != null">
+				#{materials,jdbcType=VARCHAR},
+			</if>
+			<if test="unit != null">
+				#{unit,jdbcType=VARCHAR},
+			</if>
+			<if test="quantity != null">
+				#{quantity,jdbcType=DECIMAL},
+			</if>
+			<if test="price != null">
+				#{price,jdbcType=DECIMAL},
+			</if>
+			<if test="totalamount != null">
+				#{totalamount,jdbcType=DECIMAL},
+			</if>
+			<if test="memo != null">
+				#{memo,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.MaintenanceDetails">
+		update PL_MAINTENANCE_DETAILS
+		<set>
+			<if test="maintenanceid != null">
+				MAINTENANCEID = #{maintenanceid,jdbcType=VARCHAR},
+			</if>
+			<if test="itemname != null">
+				ITEMNAME = #{itemname,jdbcType=VARCHAR},
+			</if>
+			<if test="materials != null">
+				MATERIALS = #{materials,jdbcType=VARCHAR},
+			</if>
+			<if test="unit != null">
+				UNIT = #{unit,jdbcType=VARCHAR},
+			</if>
+			<if test="quantity != null">
+				QUANTITY = #{quantity,jdbcType=DECIMAL},
+			</if>
+			<if test="price != null">
+				PRICE = #{price,jdbcType=DECIMAL},
+			</if>
+			<if test="totalamount != null">
+				TOTALAMOUNT = #{totalamount,jdbcType=DECIMAL},
+			</if>
+			<if test="memo != null">
+				MEMO = #{memo,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.MaintenanceDetails">
+		update PL_MAINTENANCE_DETAILS
+		set MAINTENANCEID = #{maintenanceid,jdbcType=VARCHAR},
+		ITEMNAME = #{itemname,jdbcType=VARCHAR},
+		MATERIALS = #{materials,jdbcType=VARCHAR},
+		UNIT = #{unit,jdbcType=VARCHAR},
+		QUANTITY = #{quantity,jdbcType=DECIMAL},
+		PRICE = #{price,jdbcType=DECIMAL},
+		TOTALAMOUNT = #{totalamount,jdbcType=DECIMAL},
+		MEMO = #{memo,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteByMid" parameterType="java.lang.String">
+		delete from PL_MAINTENANCE_DETAILS where MAINTENANCEID = #{maintenanceid,jdbcType=VARCHAR}
+	</delete>
+	<select id="selectByMid" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select * from PL_MAINTENANCE_DETAILS where MAINTENANCEID=#{maintenanceid,jdbcType=VARCHAR}
+	</select>
+</mapper>

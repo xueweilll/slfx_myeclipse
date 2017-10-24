@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.SystemLoggerMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.SystemLogger" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="LEVELS" property="levels" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, CONTENTS, CREATETIME, LEVELS
+  </sql>
+    <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from SYS_SYSTEM_LOGGER 
+		where 1 = 1
+        <if test="contents != null and contents !=''" >
+		and CONTENTS like '%'||#{contents,jdbcType=VARCHAR}||'%'
+		</if> 
+		 <if test="levels != null and levels !=''" >
+		and LEVELS = #{levels,jdbcType=DECIMAL}
+		</if> 
+		<if test="createtime != null and createtime !=''" >
+		and CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime !=''" >
+		and CREATETIME  &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		order by CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		)
+		where RN &gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		SYS_SYSTEM_LOGGER 
+		where 1 = 1
+        <if test="contents != null and contents !=''" >
+		and CONTENTS like '%'||#{contents,jdbcType=VARCHAR}||'%'
+		</if> 
+		 <if test="levels != null and levels !=''" >
+		and LEVELS = #{levels,jdbcType=DECIMAL}
+		</if> 
+		<if test="createtime != null and createtime !=''" >
+		and CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime !=''" >
+		and CREATETIME  &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+	</select>
+  
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_SYSTEM_LOGGER
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from SYS_SYSTEM_LOGGER
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.SystemLogger" >
+    insert into SYS_SYSTEM_LOGGER (ID, CONTENTS, CREATETIME, 
+      LEVELS)
+    values (#{id,jdbcType=VARCHAR}, #{contents,jdbcType=VARCHAR}, #{createtime,jdbcType=DATE}, 
+      #{levels,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.SystemLogger" >
+    insert into SYS_SYSTEM_LOGGER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="contents != null" >
+        CONTENTS,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="levels != null" >
+        LEVELS,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="contents != null" >
+        #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=DATE},
+      </if>
+      <if test="levels != null" >
+        #{levels,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.SystemLogger" >
+    update SYS_SYSTEM_LOGGER
+    <set >
+      <if test="contents != null" >
+        CONTENTS = #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=DATE},
+      </if>
+      <if test="levels != null" >
+        LEVELS = #{levels,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.SystemLogger" >
+    update SYS_SYSTEM_LOGGER
+    set CONTENTS = #{contents,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=DATE},
+      LEVELS = #{levels,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

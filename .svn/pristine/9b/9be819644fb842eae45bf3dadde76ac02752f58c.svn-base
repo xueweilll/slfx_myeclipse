@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.material.MonthReportMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.material.MonthReport" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="STORAGE" property="storage" jdbcType="DECIMAL" />
+    <result column="INSTORAGE" property="instorage" jdbcType="DECIMAL" />
+    <result column="OUTSTORAGE" property="outstorage" jdbcType="DECIMAL" />
+    <result column="CHECKINSTORAGE" property="checkinstorage" jdbcType="DECIMAL" />
+    <result column="CHECKOUTSTORAGE" property="checkoutstorage" jdbcType="DECIMAL" />
+    <result column="SCRAPSTORAGE" property="scrapstorage" jdbcType="DECIMAL" />
+    <result column="MATERIALID" property="materialid" jdbcType="VARCHAR" />
+    <result column="ULTSTORAGE" property="ultstorage" jdbcType="DECIMAL" />
+    <result column="CREATETIME" property="createtime" jdbcType="DATE" />
+     <association property="material" javaType="com.benqzl.pojo.system.Material">
+    <id property="id" column="MATERIAL"/>
+    <result property="name" column="MNAME"/>
+    <association property="size" javaType="com.benqzl.pojo.system.Size">
+    <id property="id" column="SIZEID"/>
+    <result property="name" column="SNAME"/>
+    </association>
+    <association property="prickle" javaType="com.benqzl.pojo.system.Prickle">
+    <id property="id" column="PRICKLEID"/>
+    <result property="name" column="PNAME"/>
+    </association>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, STORAGE, INSTORAGE, OUTSTORAGE, CHECKINSTORAGE, CHECKOUTSTORAGE, SCRAPSTORAGE, 
+    MATERIALID, ULTSTORAGE, CREATETIME
+  </sql>
+  <sql id="Base_Column_List1" >
+    m.id as ID, m.storage as STORAGE, m.instorage as INSTORAGE, 
+    m.outstorage as OUTSTORAGE, m.checkinstorage as CHECKINSTORAGE, 
+    m.checkoutstorage as CHECKOUTSTORAGE, m.scrapstorage as SCRAPSTORAGE, 
+    m.materialid as MATERIALID, m.ultstorage as ULTSTORAGE, 
+    m.createtime as CREATETIME,sm.name as MNAME,sz.name as SNAME,sp.name as PNAME
+  </sql>
+    <select id="findMonthByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from MA_MONTHREPORT m  
+		left join sys_material  sm on sm.id=m.materialid
+        left join sys_size sz on sm.sizeid=sz.id
+        left join sys_prickle sp on sm.prickleid=sp.id
+        WHERE 1=1
+        <if test="month !='0'.toString() and month !=null">
+        and to_char(m.createtime,'MM')=#{month,jdbcType=VARCHAR}
+        </if>
+        <if test="year !='0'.toString() and year !=null">
+         and to_char(m.createtime,'YYYY')=#{year,jdbcType=VARCHAR}
+        </if>
+		order by m.CreateTime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+	</select>
+	<select id="findMonthCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from MA_MONTHREPORT m 
+	 WHERE 1=1
+        <if test="month !='0'.toString() and month !=null">
+        and to_char(m.createtime,'MM')=#{month,jdbcType=VARCHAR}
+        </if>
+        <if test="year !='0'.toString() and year !=null">
+         and to_char(m.createtime,'YYYY')=#{year,jdbcType=VARCHAR}
+        </if>
+	</select>
+	<select id="findYear" resultType="com.benqzl.pojo.material.MonthReport" >
+	select distinct to_char(createtime,'YYYY') as MATERIALID from MA_MONTHREPORT  order by MATERIALID desc
+	</select>
+	<select id="findYears" resultType="String" >
+	select distinct to_char(createtime,'YYYY') as MATERIALID from MA_MONTHREPORT  order by MATERIALID desc
+	</select>
+	 <select id="print" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select 
+		<include refid="Base_Column_List1" />
+		from MA_MONTHREPORT m  
+		left join sys_material  sm on sm.id=m.materialid
+        left join sys_size sz on sm.sizeid=sz.id
+        left join sys_prickle sp on sm.prickleid=sp.id
+		where 1=1
+		  <if test="month !='0'.toString() and month !=null">
+        and to_char(m.createtime,'MM')=#{month,jdbcType=VARCHAR}
+        </if>
+        <if test="year !='0'.toString() and year !=null">
+         and to_char(m.createtime,'YYYY')=#{year,jdbcType=VARCHAR}
+        </if>
+	</select>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into MA_MONTHREPORT (ID, STORAGE, INSTORAGE, 
+      OUTSTORAGE, CHECKINSTORAGE, CHECKOUTSTORAGE, 
+      SCRAPSTORAGE, MATERIALID, ULTSTORAGE, 
+       CREATETIME)
+     <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.storage,jdbcType=DECIMAL}, #{item.instorage,jdbcType=DECIMAL}, 
+      #{item.outstorage,jdbcType=DECIMAL}, #{item.checkinstorage,jdbcType=DECIMAL}, #{item.checkoutstorage,jdbcType=DECIMAL}, 
+      #{item.scrapstorage,jdbcType=DECIMAL}, #{item.materialid,jdbcType=VARCHAR}, #{item.ultstorage,jdbcType=DECIMAL}, 
+     #{item.createtime,jdbcType=DATE}  from dual) 
+    </foreach>
+  </insert>
+</mapper>

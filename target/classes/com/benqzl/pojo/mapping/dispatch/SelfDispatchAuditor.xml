@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.SelfDispatchAuditorMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.SelfDispatch">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PROMOTER" property="promoter" jdbcType="VARCHAR" />
+		<result column="PROMOTETIME" property="promotetime" jdbcType="TIMESTAMP" />
+		<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="COMPLETETIME" property="completetime" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<association property="user" javaType="com.benqzl.pojo.system.User">
+			<id column="PROMOTER" property="userid" />
+			<result column="PROMOTEUSERNAME" property="username" jdbcType="VARCHAR" />
+		</association>
+		<association property="CreateUser" javaType="com.benqzl.pojo.system.User">
+			<id column="CREATER" property="userid" />
+			<result column="createrName" property="username" jdbcType="VARCHAR" />
+		</association>
+		<association property="Auditor" javaType="com.benqzl.pojo.system.User">
+			<id column="DEPARTMENTAUDITOR" property="userid" />
+			<result column="auditName" property="username" jdbcType="VARCHAR" />
+		</association>
+		<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<id column="id" property="id" />
+			<result column="ENAME" property="name" />
+		</association>		
+		<collection property="instructions"
+			ofType="com.benqzl.pojo.dispatch.SelfDispatchInstructions">
+			<id column="INSTRUCTIONS_ID" property="id" />
+			<result column="ID" property="sdid" jdbcType="VARCHAR" />
+			<result column="INSTRUCTION" property="instruction" jdbcType="DECIMAL" />
+			<result column="GATEOPERATETIME" property="gateoperatetime"
+				jdbcType="TIMESTAMP" />
+			<result column="UNITOPERATETIME" property="unitoperatetime"
+				jdbcType="TIMESTAMP" />
+			<result column="ISTATE" property="state" jdbcType="DECIMAL" />
+		</collection>
+		<collection property="stations"
+			ofType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+			<id column="STATIONS_ID" property="id" />
+			<result column="ID" property="sdid" jdbcType="VARCHAR" />
+			<result column="SID" property="sid" jdbcType="VARCHAR" />
+			<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+			<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+			<result column="SSTATE" property="state" jdbcType="DECIMAL" />
+			<association property="station" javaType="com.benqzl.pojo.system.Station">
+				<result column="NAME" property="name" jdbcType="VARCHAR" />
+			</association>
+		</collection>
+	</resultMap>
+</mapper>

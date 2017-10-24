@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialDeaprtmentReportMapper">
+	<resultMap id="BaseResultMap"
+		type="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReport">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ISID" property="isid" jdbcType="VARCHAR" />
+		<result column="REPORTER" property="reporter" jdbcType="VARCHAR" />
+		<result column="REPORTTIME" property="reporttime" jdbcType="DATE" />
+	</resultMap>
+	<resultMap id="BaseListMap" type="com.benqzl.pojo.patrol.PatrolSpecialImplement">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ISID" property="isid" jdbcType="VARCHAR" />
+		<result column="PARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id"></id>
+			<result column="NAME" property="name" />
+		</association>
+		<association property="flow"
+			javaType="com.benqzl.pojo.patrol.PatrolSpecialFolw">
+			<id column="ISID" property="isid"></id>
+			<result column="HZ" property="hz" />
+		</association>
+		<association property="createUser" javaType="com.benqzl.pojo.system.User">
+			<id column="CREATER" property="userid"/>
+			<result column="ENAME" property="username"/>
+		</association>
+		<association property="issue"
+		javaType="com.benqzl.pojo.patrol.PatrolSpecialIssue">
+		<id column="IID" property="id"/>
+		<result column="CODE" property="code"/>
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, ISID, REPORTER, REPORTTIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_SPECIAL_DEPARTMENTREPORT
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from PL_SPECIAL_DEPARTMENTREPORT
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert"
+		parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReport">
+		insert into PL_SPECIAL_DEPARTMENTREPORT (ID, ISID, REPORTER,
+		REPORTTIME,DEPARTMENTID)
+		values (#{id,jdbcType=VARCHAR}, #{isid,jdbcType=VARCHAR},
+		#{reporter,jdbcType=VARCHAR},
+		#{reporttime,jdbcType=TIMESTAMP},#{departmentid,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective"
+		parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReport">
+		insert into PL_SPECIAL_DEPARTMENTREPORT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="isid != null">
+				ISID,
+			</if>
+			<if test="reporter != null">
+				REPORTER,
+			</if>
+			<if test="reporttime != null">
+				REPORTTIME,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="isid != null">
+				#{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="reporter != null">
+				#{reporter,jdbcType=VARCHAR},
+			</if>
+			<if test="reporttime != null">
+				#{reporttime,jdbcType=DATE},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective"
+		parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReport">
+		update PL_SPECIAL_DEPARTMENTREPORT
+		<set>
+			<if test="isid != null">
+				ISID = #{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="reporter != null">
+				REPORTER = #{reporter,jdbcType=VARCHAR},
+			</if>
+			<if test="reporttime != null">
+				REPORTTIME = #{reporttime,jdbcType=DATE},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey"
+		parameterType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReport">
+		update PL_SPECIAL_DEPARTMENTREPORT
+		set ISID = #{isid,jdbcType=VARCHAR},
+		REPORTER = #{reporter,jdbcType=VARCHAR},
+		REPORTTIME = #{reporttime,jdbcType=DATE}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findBypage" resultMap="BaseListMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(select i.*,si.code as CODE, s.name,t.ename,f.hz from
+		pl_special_implement i left join pl_special_flow f on
+		i.isid = f.isid
+		left join sys_station s on s.id = i.sid
+		left join (select userid,e.name as ename from sys_user u left join sys_employee e on u.employeeid = e.id) t on t.userid = i.creater
+		left join pl_special_issue si on si.id=i.isid
+		where s.departmentid=
+		#{departmentid}
+		<!-- <if test="state != null">
+			and f.hz != 1
+		</if> -->
+		<if test="mytask=='0'.toString()">
+		    and f.hz =0
+		    and f.ss=1
+		</if>
+		<if test="mytask=='1'.toString()">
+		    and f.ss=1
+		    and f.hz&lt;=1
+		</if>
+		 <if test="startTime != null">   
+                       and i.createtime &gt;=#{startTime,jdbcType=VARCHAR}
+                   </if> 
+                   <if test="endTime != null">  
+                       and i.createtime &lt;= #{endTime,jdbcType=VARCHAR}
+                   </if>
+		<if test="classes=='3'.toString()">
+		    and si.classes=3
+		</if>
+		<if test="classes=='2'.toString()">
+		    and si.classes&lt;3
+		</if>
+		order by i.createtime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from pl_special_implement i left join pl_special_flow f
+		on
+		i.isid = f.isid
+		left join sys_station s on s.id = i.sid
+		left join pl_special_issue si on si.id=i.isid
+		where
+		s.departmentid= #{departmentid}
+	<!-- 	<if test="state != null">
+			and f.hz != 1
+		</if> -->
+		<if test="mytask=='0'.toString()">
+		    and f.hz =0
+		    and f.ss=1
+		</if>
+		<if test="mytask=='1'.toString()">
+		    and f.ss=1
+		    and f.hz&lt;=1
+		</if>
+		 <if test="startTime != null">   
+                       and i.createtime &gt;=#{startTime,jdbcType=VARCHAR}
+                   </if> 
+                   <if test="endTime != null">  
+                       and i.createtime &lt;= #{endTime,jdbcType=VARCHAR}
+                   </if>
+		<if test="classes=='3'.toString()">
+		    and si.classes=3
+		</if>
+		<if test="classes=='2'.toString()">
+		    and si.classes&lt;3
+		</if>
+	</select>
+	
+	<select id="selectVal" resultType="java.util.Map" parameterType="java.lang.String">  
+	select f.isid,s.name,f.sid,t.vals,t.implementid from PL_IMPLEMENT_DETAILS t,PL_SPECIAL_IMPLEMENT f,SYS_STATION s where s.id =f.sid and f.id = t.implementid and  t.implementid in
+	 <!-- <foreach item="item" index="index" collection="list" open="(" separator="," close=")">   -->
+	 (<foreach collection="list" item="item" index="index"
+			separator="union all">
+  	  (select #{item} from dual) 
+ 	</foreach>) 
+   </select>  
+		<select id="selectVals" resultType="java.util.Map" parameterType="java.lang.String">  
+	select f.isid,s.name,f.sid,t.vals,t.implementid 
+	from PL_IMPLEMENT_DETAILS t,
+	PL_SPECIAL_IMPLEMENT f,
+	SYS_STATION s 
+	where s.id =f.sid and f.id = t.implementid and  
+	f.isid=#{isid,jdbcType=VARCHAR}
+   </select> 
+	<select id="selectTable" resultType="java.util.Map">  
+	select t.id,c.classes,t.name as tname from PL_IMPLEMENT_TABLE t,PL_IMPLEMENT_CLASS c  where t.classid = c.id and t.id in
+	<!--  <foreach item="item" index="index" collection="list" open="(" separator="," close=")">   -->
+  	 (<foreach collection="list" item="item" index="index"
+			separator="union all">	
+  		(select #{item} from dual)  
+ 	</foreach>)  
+   </select>  
+	
+</mapper>

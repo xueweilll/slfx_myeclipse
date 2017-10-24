@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="floodControlOperation" name="大包围调度" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <userTask id="leadertask" name="单位/分管领导签发" activiti:formKey="f7d7e5c7-4346-4a07-96e5-8a73a0b89090">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.benqzl.core.activiti.DispatchListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="leadertask"></sequenceFlow>
+    <endEvent id="districtEnd" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.benqzl.core.activiti.CompleteDispatchListener"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
+    <userTask id="bigOrder" name="工程科具体分解" activiti:formKey="5446167d-2fe3-4802-90b8-4c8a80ec973e">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.benqzl.core.activiti.DispatchListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow49" sourceRef="leadertask" targetRef="bigOrder"></sequenceFlow>
+    <sequenceFlow id="flow52" sourceRef="bigOrder" targetRef="districtEnd"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_floodControlOperation">
+    <bpmndi:BPMNPlane bpmnElement="floodControlOperation" id="BPMNPlane_floodControlOperation">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="40.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="leadertask" id="BPMNShape_leadertask">
+        <omgdc:Bounds height="55.0" width="105.0" x="85.0" y="120.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="districtEnd" id="BPMNShape_districtEnd">
+        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="331.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="bigOrder" id="BPMNShape_bigOrder">
+        <omgdc:Bounds height="55.0" width="105.0" x="85.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="137.0" y="75.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="120.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow49" id="BPMNEdge_flow49">
+        <omgdi:waypoint x="137.0" y="175.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="220.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow52" id="BPMNEdge_flow52">
+        <omgdi:waypoint x="137.0" y="275.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="331.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

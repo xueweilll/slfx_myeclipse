@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolNormalReportMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolNormalReport">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="REPORTER" property="reporter" jdbcType="VARCHAR" />
+		<result column="REPORTTIME" property="reporttime" jdbcType="TIMESTAMP" />
+		<result column="TYPE" property="type" jdbcType="INTEGER"></result>
+	</resultMap>
+	<resultMap type="com.benqzl.pojo.patrol.PatrolNormal" id="BaseListMap">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="DEGREE" property="degree" jdbcType="DECIMAL" />
+		<result column="PATROLUSERS" property="patrolusers" jdbcType="VARCHAR" />
+		<association property="createuser" javaType="com.benqzl.pojo.system.User">
+			<id column="CREATER" property="userid" />
+			<result column="USERNAME" property="username" />
+		</association>
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id" />
+			<result column="SNAME" property="name" />
+		</association>
+	</resultMap>
+	<!-- 工程科弹出页查询resultMap -->
+	<resultMap id="engineeringBaseResultMap" type="com.benqzl.pojo.patrol.PatrolNormalReport">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="REPORTER" property="reporter" jdbcType="VARCHAR" />
+		<result column="REPORTTIME" property="reporttime" jdbcType="TIMESTAMP" />
+		<result column="TYPE" property="type" jdbcType="INTEGER"></result>
+		<collection property="patrolNormalReportDetails"
+			ofType="com.benqzl.pojo.patrol.PatrolNormalReportDetails">
+			<id column="PNRDID" property="id" jdbcType="VARCHAR" />
+			<result column="PNRDREPORTID" property="reportid" jdbcType="VARCHAR" />
+			<result column="PNRDPATROLID" property="patrolid" jdbcType="VARCHAR" />
+			<result column="PNRDSTATE" property="state" jdbcType="DECIMAL" />
+			<association property="patrolNormal"
+				javaType="com.benqzl.pojo.patrol.PatrolNormal">
+				<id column="PNID" property="id" jdbcType="VARCHAR" />
+				<result column="PNPARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+				<result column="PNCREATER" property="creater" jdbcType="VARCHAR" />
+				<result column="PNSTATE" property="state" jdbcType="DECIMAL" />
+				<result column="PNCREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+				<result column="PNSID" property="sid" jdbcType="VARCHAR" />
+				<result column="PNDEGREE" property="degree" jdbcType="DECIMAL" />
+				<collection property="pds"
+					ofType="com.benqzl.pojo.patrol.PatrolNormalDetails">
+					<id column="PNDID" property="id" jdbcType="VARCHAR" />
+					<result column="PNDPATROLID" property="patrolid" jdbcType="VARCHAR" />
+					<result column="PNDHANDLETYPE" property="handletype"
+						jdbcType="DECIMAL" />
+					<result column="PNDHANDLECONTENTS" property="handlecontents"
+						jdbcType="VARCHAR" />
+					<result column="PNDCONTENTS" property="contents" jdbcType="VARCHAR" />
+					<result column="PNDISTYPE" property="istype" jdbcType="DECIMAL" />
+					<result column="PNDENUMID" property="enumid" jdbcType="VARCHAR" />
+					<association property="patrolenumid"
+						javaType="com.benqzl.pojo.patrol.PatrolEnumid">
+						<result column="PPEENUMID" property="enumid" jdbcType="VARCHAR" />
+						<result column="PPETEXT" property="text" jdbcType="VARCHAR" />
+						<result column="PPECONTENTS" property="contents" jdbcType="VARCHAR" />
+					</association>
+				</collection>
+			</association>
+		</collection>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID, STATE, DEPARTMENTID, REPORTER, REPORTTIME
+	</sql>
+	<!-- 工程科弹出页查询sql -->
+	<sql id="Base_Column_List_Engineering">
+		<!--PatrolNormalReport as pnr -->
+		pnr.ID as ID, pnr.STATE as STATE, sd.name as DEPARTMENTID,
+		pnr.REPORTER as REPORTER, pnr.REPORTTIME as REPORTTIME,
+		<!--PatrolNormalReportDetails as pnrd -->
+		pnrd.ID as PNRDID, pnrd.REPORTID as PNRDREPORTID, pnrd.PATROLID as
+		PNRDPATROLID, pnrd.STATE as PNRDSTATE,
+		<!--PatrolNormal as pn -->
+		pn.ID as PNID, pn.PARTTIME as PNPARTTIME, pn.CREATER as PNCREATER,
+		pn.STATE as PNSTATE,
+		pn.CREATETIME as PNCREATETIME, ss.name as PNSID,
+		pn.DEGREE as PNDEGREE,
+		<!--PatrolNormalDetails as pnd -->
+		pnd.ID as PNDID, pnd.PATROLID as PNDPATROLID, pnd.ENUMID as PNDENUMID,
+		pnd.HANDLETYPE as PNDHANDLETYPE,
+		pnd.HANDLECONTENTS as
+		PNDHANDLECONTENTS, pnd.CONTENTS as PNDCONTENTS, pnd.ISTYPE as
+		PNDISTYPE,
+		ppe.ENUMID as PPEENUMID,ppe.TEXT as PPETEXT,ppe.CONTENTS as
+		PPECONTENTS
+	</sql>
+	<!-- 工程科弹出页查询语句 -->
+	<select id="selectReportDetailsList" resultMap="engineeringBaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List_Engineering" />
+		from PL_NORMAL_REPORT pnr
+		left join pl_nr_details pnrd on pnr.id =
+		pnrd.reportid
+		left join pl_patrol_normal pn on pnrd.patrolid=pn.id
+		left
+		join pl_normal_details pnd on pnd.PatrolID=pn.id
+		left join
+		sys_department sd on sd.id=pnr.DEPARTMENTID
+		left join sys_station ss on
+		ss.id=pn.SID
+		left join pl_patrol_enumId ppe on pnd.Enumid=ppe.enumid
+		<where>
+			pnr.id in (
+			<foreach collection="list" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+			and pnd.Handletype=#{pndtype,jdbcType=INTEGER}
+			and
+			pnd.IsType=#{pndIsType,jdbcType=INTEGER}
+		</where>
+	</select>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		pnr.ID as ID, pnr.STATE
+		as STATE, sd.name as DEPARTMENTID, r.name as REPORTER, pnr.REPORTTIME
+		as REPORTTIME
+		from PL_NORMAL_REPORT pnr
+		left join sys_department sd on
+		sd.id=pnr.departmentid
+		left join
+		(select userid,name from SYS_EMPLOYEE
+		join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) r on
+		r.userid=pnr.REPORTER
+		<where>
+			<if test="startTime != null">
+				and pnr.reporttime &gt;=#{startTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endTime != null">
+				and pnr.reporttime &lt;= #{endTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="pnrtype !=null">
+				and pnr.type = #{pnrtype,jdbcType=INTEGER}
+			</if>
+			<if test="pnrtypes !=null">
+				and pnr.id in(select distinct  pnd.reportid from pl_nr_details pnd left join pl_normal_details plnd on pnd.patrolid=plnd.PatrolID
+				where plnd.Handletype=2 and plnd.IsType=1 )
+			</if>
+		</where>
+		order by pnr.reporttime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt;
+		#{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		<!-- select count(*) as num from PL_NORMAL_REPORT pnr <where> <if test="starttime 
+			!= null"> and pnr.reporttime &gt;=#{startTime,jdbcType=TIMESTAMP} </if> <if 
+			test="endtime != null"> and pnr.reporttime &lt;= #{endTime,jdbcType=TIMESTAMP} 
+			</if> <if test="pnrtype !=null"> and pnr.type = #{pnrtype,jdbcType=INTEGER} 
+			</if> </where> -->
+		select count(*)
+		from PL_NORMAL_REPORT pnr
+		left join sys_department sd on
+		sd.id=pnr.departmentid
+		left join
+		(select userid,name from SYS_EMPLOYEE
+		join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) r on
+		r.userid=pnr.REPORTER
+		<where>
+			<if test="startTime != null">
+				and pnr.reporttime &gt;=#{startTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endTime != null">
+				and pnr.reporttime &lt;= #{endTime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="pnrtype !=null">
+				and pnr.type = #{pnrtype,jdbcType=INTEGER}
+			</if>
+			<if test="pnrtypes !=null">
+				and pnr.id in(select distinct  pnd.reportid from pl_nr_details pnd left join pl_normal_details plnd on pnd.patrolid=plnd.PatrolID
+				where plnd.Handletype=2 and plnd.IsType=1 )
+			</if>
+		</where>
+	</select>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_NORMAL_REPORT
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		PL_NORMAL_REPORT
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolNormalReport">
+		insert into PL_NORMAL_REPORT
+		(ID, STATE, DEPARTMENTID,
+		REPORTER, REPORTTIME,type)
+		values
+		(#{id,jdbcType=VARCHAR}, #{state,jdbcType=DECIMAL},
+		#{departmentid,jdbcType=VARCHAR},
+		#{reporter,jdbcType=VARCHAR},
+		#{reporttime,jdbcType=TIMESTAMP},#{type,jdbcType=INTEGER})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolNormalReport">
+		insert into PL_NORMAL_REPORT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="departmentid != null">
+				DEPARTMENTID,
+			</if>
+			<if test="reporter != null">
+				REPORTER,
+			</if>
+			<if test="reporttime != null">
+				REPORTTIME,
+			</if>
+			<if test="type != null">
+				TYPE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="departmentid != null">
+				#{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="reporter != null">
+				#{reporter,jdbcType=VARCHAR},
+			</if>
+			<if test="reporttime != null">
+				#{reporttime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolNormalReport">
+		update PL_NORMAL_REPORT
+		<set>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="departmentid != null">
+				DEPARTMENTID = #{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="reporter != null">
+				REPORTER = #{reporter,jdbcType=VARCHAR},
+			</if>
+			<if test="reporttime != null">
+				REPORTTIME = #{reporttime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="type != null">
+				TYPE = #{type,jdbcType=INTEGER}
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolNormalReport">
+		update
+		PL_NORMAL_REPORT
+		set STATE = #{state,jdbcType=DECIMAL},
+		DEPARTMENTID =
+		#{departmentid,jdbcType=VARCHAR},
+		REPORTER =
+		#{reporter,jdbcType=VARCHAR},
+		REPORTTIME =
+		#{reporttime,jdbcType=TIMESTAMP},
+		TYPE = #{type,jdbcType=INTEGER}
+		where
+		ID = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<resultMap type="com.benqzl.pojo.patrol.PatrolNormalDepartmentSearch"
+		id="BaseDPageMap">
+		<result column="DNAME" property="dname" jdbcType="VARCHAR" />
+		<result column="DID" property="did" jdbcType="VARCHAR" />
+		<result column="IDS" property="ids" jdbcType="VARCHAR" />
+		<result column="DEGREE" property="degree" jdbcType="INTEGER" />
+		<result column="CREATETIME" property="createtime" jdbcType="VARCHAR" />
+		<result column="SNAMES" property="snames" jdbcType="VARCHAR" />
+	</resultMap>
+	<select id="findByDepartmentPage" parameterType="java.util.Map"
+		resultMap="BaseDPageMap">
+		select * from
+		(select A.*,ROWNUM RN from (
+		select t.dname,t.degree,t.did,wmsys.wm_concat(t.id) as ids ,t.createtime,
+		wmsys.wm_concat(t.sname) as snames from (
+		select d.name as dname,p.degree,s.name as sname,p.id,d.id as did,
+		to_char(p.parttime,'yyyy-MM') as createtime
+		from pl_patrol_normal p
+		inner join sys_station s on p.sid = s.id
+		inner join sys_department d on d.id = s.departmentid
+		where state > 0 and state != 9
+		<if test="departmentid != null">
+			and s.DEPARTMENTID = #{departmentid}
+		</if>
+		<if test="begin != null">
+			and p.PARTTIME &gt;=#{begin,jdbcType=VARCHAR}
+		</if>
+		<if test="end != null">
+			and p.PARTTIME &lt;= #{end,jdbcType=VARCHAR}
+		</if>
+		<if test="type=='0'.toString()">
+			and p.STATE=1
+		</if>
+		<if test="type=='1'.toString()">
+			and p.STATE&gt;=1
+		</if>
+		) t
+		group by t.dname,t.degree,t.did,t.createtime
+		) A
+		where ROWNUM &lt;=#{p2}
+		 order by A.CREATETIME DESC)
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="findByDepartmentCount" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+		select count(*) from (select
+		t.dname,t.degree,t.did,wmsys.wm_concat(t.id) as ids ,t.createtime,
+		wmsys.wm_concat(t.sname) as snames from (
+		select d.name as dname,p.degree,s.name as sname,p.id,d.id as did,
+		to_char(p.createtime,'yyyy-MM') as createtime
+		from pl_patrol_normal p
+		inner join sys_station s on p.sid = s.id
+		inner join sys_department d on d.id = s.departmentid
+		where state > 0 and state != 9
+		<if test="departmentid != null">
+			and s.DEPARTMENTID = #{departmentid}
+		</if>
+		<if test="begin != null">
+			and p.PARTTIME &gt;=#{begin,jdbcType=VARCHAR}
+		</if>
+		<if test="end != null">
+			and p.PARTTIME &lt;= #{end,jdbcType=VARCHAR}
+		</if>
+		<if test="type=='0'.toString()">
+			and p.STATE=1
+		</if>
+		<if test="type=='1'.toString()">
+			and p.STATE&gt;=1
+		</if>
+		) t
+		group by t.dname,t.degree,t.did,t.createtime) A
+	</select>
+	<select id="findByDepartment" parameterType="java.util.Map"
+		resultMap="BaseListMap">
+		select * from
+		(select A.*,ROWNUM RN from (select pn.*, s.name
+		as sname,
+		u.name as username,t.names as
+		patrolusers
+		from
+		pl_patrol_normal pn
+		left
+		join sys_station s
+		on pn.sid = s.id
+		left join
+		(select u.userid, e.name
+		from sys_user u
+		left join sys_employee e
+		on e.id
+		= u.employeeid) u
+		on
+		pn.creater = u.userid
+		left join (select t.id,
+		wmsys.wm_concat(name)
+		names
+		from (select sde.id, sdp.Handler, e.name
+		from pl_patrol_normal sde
+		inner join pl_normal_people sdp
+		on sde.id =
+		sdp.PatrolID
+		left join
+		sys_user u
+		on u.userid = sdp.Handler
+		left join
+		sys_employee e
+		on e.id =
+		u.employeeid) t
+		group by t.id) t
+		on t.id = pn.id
+		<where>
+			<if test="departmentid != null">
+				s.DEPARTMENTID = #{departmentid}
+			</if>
+			<if test="begin != null">
+				and pn.PARTTIME &gt;=#{begin,jdbcType=VARCHAR}
+			</if>
+			<if test="end != null">
+				and pn.PARTTIME &lt;= #{end,jdbcType=VARCHAR}
+			</if>
+			<if test="type=='0'.toString()">
+				and pn.STATE=1
+			</if>
+			<if test="type=='1'.toString()">
+				and pn.STATE&gt;=1
+			</if>
+		</where>
+		and pn.state!=9
+		order by pn.createtime desc ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="countByDepartment" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+		select Count(*)
+		from (
+		
+		select t.dname,t.degree,t.did,wmsys.wm_concat(t.id) as ids ,t.createtime,
+		wmsys.wm_concat(t.sname) as snames from (
+		select d.name as dname,p.degree,s.name as sname,p.id,d.id as did,
+		to_char(p.parttime,'yyyy-MM') as createtime
+		from pl_patrol_normal p
+		inner join sys_station s on p.sid = s.id
+		inner join sys_department d on d.id = s.departmentid
+		where state > 0 and state != 9
+		<if test="departmentid != null">
+			and s.DEPARTMENTID = #{departmentid}
+		</if>
+		<if test="begin != null">
+			and p.PARTTIME &gt;=#{begin,jdbcType=VARCHAR}
+		</if>
+		<if test="end != null">
+			and p.PARTTIME &lt;= #{end,jdbcType=VARCHAR}
+		</if>
+		<if test="type=='0'.toString()">
+			and p.STATE=1
+		</if>
+		<if test="type=='1'.toString()">
+			and p.STATE&gt;=1
+		</if>
+		) t
+		group by t.dname,t.degree,t.did,t.createtime
+		
+		)
+
+	</select>
+
+</mapper>

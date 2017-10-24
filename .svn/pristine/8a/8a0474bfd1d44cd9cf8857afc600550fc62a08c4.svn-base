@@ -1,0 +1,82 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<base href="<%=basePath%>">
+
+<%@include file="../header.jsp"%>
+<title>水利信息化综合管理系统</title>
+
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+<meta http-equiv="description" content="This is my page">
+<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript">
+$(function(){
+	if("${password}" == "12345"){
+		$.messager.alert("操作提示", "密码不符合安全评估要求，请及时更改密码！", "info");
+	}	
+	$("#menu a").click(function(){
+		var menu = $(this).attr("id");
+		if(menu=="oa"){
+			var username = "${username}";
+			var password = "${password}";
+			username = myEncoder(username);
+			var url="http://10.32.222.116:8001/login_out_port.php?UNAME="+username+"&PASSWORD="+"";
+			//alert(url);
+			window.open(url,"blank");
+		}else{
+			window.open(menu+".html","_self");
+		}
+	});
+});
+</script>
+</head>
+
+<body class="easyui-layout">
+	<div data-options="region:'center'" class="bg">
+	<!-- <input id="username" type="hidden" value=${username}/>
+		<input id="password" type="hidden" value=${password}/> -->
+		<div
+			style=" height:60px; text-align:center; margin-top:40px; margin-bottom:30px;padding-left:85px;">
+			<img src="images/class_logo.png" /> <a href="javascript:void(0)" onclick="loginout()" class="menu_logout"></a>
+			&nbsp;&nbsp;
+		</div>
+		<center id="menu" class="main_div">
+			<table class="main_table" cellpadding="0" cellspacing="0">
+				<tr>
+				    <td style="width:33%"><a id="floodctl" href="javascript:void(0)" class="class class_img03"></a></td>
+				    	<td style="width:34%"><a id="inspection" href="javascript:void(0)" class="class class_img05"></a></td>
+						<td style="width:33%;"><a id="material" href="javascript:void(0)" class="class class_img04"></a></td>
+					
+					
+				</tr>
+				<tr>
+				<td style="width:33%"><a id="oa" href="javascript:void(0)" class="class class_img02"></a></td>
+						<td style="width:34%"><a href="javascript:void(0)" class="class class_img06"></a></td>
+				<td style="width:33%;"><a id="system" href="javascript:void(0)" class="class class_img01"></a></td>
+			
+				</tr>
+
+			</table>
+		</center>
+		<center>
+		<div class="main_div"
+			style="height:30px; line-height:30px; text-align: center; margin-top:30px; color:#000">
+			Copyright © 2015 All Rights Reserved. 南水科技 版权所有</div>
+			</center>
+	</div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+package com.benqzl.service.water;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+/*import com.benqzl.dao.system.StationMapper;*/
+import com.benqzl.dao.water.StPumprMapper;
+import com.benqzl.pojo.water.StPumpr;
+
+@Service("WaterRegimeService")
+public class WaterRegimeServiceImpl implements WaterRegimeService {
+	@Autowired
+	private StPumprMapper stpump;
+/*	@Autowired
+	private StationMapper station;*/
+
+	@Override
+	public List<StPumpr> findRegimeByPage(Map<String, Object> map) {
+		return stpump.findRegimeByPage(map);
+	}
+
+	@Override
+	public int pageRegimeCount(Map<String, Object> map) {
+		return stpump.pageRegimeCount(map);
+	}
+
+	@Override
+	public List<Map<String, Object>> findHistoryWater(Map<String, Object> map1) {
+       // List<Station> stations=station.findStation();
+		List<StPumpr> stpumpr = stpump.findHistoryWater(map1);
+		//List<StPumpr> stationS=stpump.findWaterStation(map1);
+		List<Map<String,Object>> list= new ArrayList<Map<String,Object>>();
+		/*SimpleDateFormat dateFormat = new SimpleDateFormat(
+				"yyyy-MM-dd hh:mm:ss");*/
+		//for(int i=0;i<stationS.size();i++){
+			Map<String, Object> map2 = new HashMap<>();
+			Map<String,Object> map4=new HashMap<>();
+			List<String> temp = new ArrayList<>();
+			List<BigDecimal> outs = new ArrayList<>();
+			List<BigDecimal> ins = new ArrayList<>();
+			//List<String> sname =new ArrayList<>();					
+			for(int a=0;a<stpumpr.size();a++){					   
+				//if(stationS.get(i).getSname().equals(stpumpr.get(a).getStation().getName())){
+			    	temp.add(stpumpr.get(a).getStcd());
+			    	  if(stpumpr.get(a).getSname().equals("zg")){
+			    			ins.add(stpumpr.get(a).getPpupz());
+							outs.add(stpumpr.get(a).getPpdwz());
+			    	  }else{
+			    			ins.add(stpumpr.get(a).getPpdwz());
+							outs.add(stpumpr.get(a).getPpupz()); 
+			    	  }
+					
+						//sname.add(stpumpr.get(a).getStation().getName());							
+						map2.put("month", temp);
+						map2.put("outs", outs);
+						map2.put("ints", ins);
+						//map2.put("sname", sname);
+						map4.put("st", map2);
+				//}
+			}
+			list.add(map4);
+			//System.out.println(list);
+		//}
+		
+		return  list;
+	}
+
+	@Override
+	public int insert(List<StPumpr> record) {
+		return stpump.insert(record);
+	}
+
+	@Override
+	public List<Map<String, Object>> findHistoryMobileWater(
+			Map<String, Object> map1) {
+			List<StPumpr> stpumpr = stpump.findHistoryWater(map1);
+			List<Map<String,Object>> list= new ArrayList<Map<String,Object>>();
+				Map<String, Object> map2 = new HashMap<>();
+				List<String> temp = new ArrayList<>();
+				List<BigDecimal> outs = new ArrayList<>();
+				List<BigDecimal> ins = new ArrayList<>();
+				for(int a=0;a<stpumpr.size();a++){					   
+				    	temp.add(stpumpr.get(a).getStcd());
+				    	    if(stpumpr.get(a).getSname().equals("zg")){
+				    	    	ins.add(stpumpr.get(a).getPpupz());
+								outs.add(stpumpr.get(a).getPpdwz());
+				    	    }else{
+				    	    	ins.add(stpumpr.get(a).getPpdwz());
+								outs.add(stpumpr.get(a).getPpupz());
+				    	    }
+							map2.put("hours", temp);
+							map2.put("outs", outs);
+							map2.put("ints", ins);
+				}
+				list.add(map2);
+			return  list;
+	}
+
+}

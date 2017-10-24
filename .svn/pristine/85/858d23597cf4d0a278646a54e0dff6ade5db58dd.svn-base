@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.water.StPptnRMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.water.StPptnR">
+		<id column="PID" property="id" jdbcType="VARCHAR" />
+		<result column="STCD" property="stcd" jdbcType="VARCHAR" />
+		<result column="TM" property="tm" jdbcType="TIMESTAMP" />
+		<result column="DPR" property="dpr" jdbcType="DECIMAL" />
+		<result column="INTV" property="intv" jdbcType="DECIMAL" />
+		<result column="PDR" property="pdr" jdbcType="DECIMAL" />
+		<result column="DYP" property="dyp" jdbcType="DECIMAL" />
+		<result column="WTH" property="wth" jdbcType="VARCHAR" />
+		<result column="HISRAIN" property="hisrain" jdbcType="DECIMAL" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="ID" property="id" />
+			<result column="STCDNAME" property="name" jdbcType="VARCHAR" />
+			<result column="STCD" property="code" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		 ID,STCD, TM, DPR, INTV, PDR, DYP, WTH,FID
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from ST_PPTN_R
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		ST_PPTN_R
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.water.StPptnR">
+		insert into ST_PPTN_R (ID,FID,STCD, TM, DPR, INTV,
+		PDR, DYP, WTH,HISRAIN)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select sys_guid(),#{item.id,jdbcType=VARCHAR},#{item.stcd,jdbcType=VARCHAR}, #{item.tm,jdbcType=TIMESTAMP},
+			#{item.dpr,jdbcType=DECIMAL}, #{item.intv,jdbcType=DECIMAL},
+			#{item.pdr,jdbcType=DECIMAL}, #{item.dyp,jdbcType=DECIMAL},
+			#{item.wth,jdbcType=VARCHAR}, #{item.hisrain,jdbcType=DECIMAL} from dual)
+		</foreach>
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.water.StPptnR">
+		insert into ST_PPTN_R
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="stcd != null">
+				STCD,
+			</if>
+			<if test="tm != null">
+				TM,
+			</if>
+			<if test="dpr != null">
+				DPR,
+			</if>
+			<if test="intv != null">
+				INTV,
+			</if>
+			<if test="pdr != null">
+				PDR,
+			</if>
+			<if test="dyp != null">
+				DYP,
+			</if>
+			<if test="wth != null">
+				WTH,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="stcd != null">
+				#{stcd,jdbcType=VARCHAR},
+			</if>
+			<if test="tm != null">
+				#{tm,jdbcType=TIMESTAMP},
+			</if>
+			<if test="dpr != null">
+				#{dpr,jdbcType=DECIMAL},
+			</if>
+			<if test="intv != null">
+				#{intv,jdbcType=DECIMAL},
+			</if>
+			<if test="pdr != null">
+				#{pdr,jdbcType=DECIMAL},
+			</if>
+			<if test="dyp != null">
+				#{dyp,jdbcType=DECIMAL},
+			</if>
+			<if test="wth != null">
+				#{wth,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.water.StPptnR">
+		update ST_PPTN_R
+		<set>
+			<if test="dpr != null">
+				DPR = #{dpr,jdbcType=DECIMAL},
+			</if>
+			<if test="intv != null">
+				INTV = #{intv,jdbcType=DECIMAL},
+			</if>
+			<if test="pdr != null">
+				PDR = #{pdr,jdbcType=DECIMAL},
+			</if>
+			<if test="dyp != null">
+				DYP = #{dyp,jdbcType=DECIMAL},
+			</if>
+			<if test="wth != null">
+				WTH = #{wth,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where  ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.water.StPptnR">
+		update ST_PPTN_R
+		set DPR = #{dpr,jdbcType=DECIMAL},
+		INTV = #{intv,jdbcType=DECIMAL},
+		PDR
+		= #{pdr,jdbcType=DECIMAL},
+		DYP = #{dyp,jdbcType=DECIMAL},
+		WTH =
+		#{wth,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		    select  p.id as pid,p.stcd,p.tm,p.dpr,p.dyp,p.hisrain,s.id,s.name as
+    stcdname  from (
+    select max(tm) tm ,stcd from st_pptn_r group by stcd, to_char(tm,'yyyy-mm-dd') ) t left join st_pptn_r p on p.stcd = t.stcd and p.tm = t.tm 
+    left join sys_station s on p.stcd = s.code
+		where 1=1
+		<if test="stcd != null">
+			and p.stcd = #{stcd} 
+		</if>
+		<if test="starttime != null">
+			and p.tm &gt;= #{starttime} 
+		</if>
+		<if test="endtime != null">
+			and p.tm &lt;= #{endtime} 
+		</if>
+		order by tm desc ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+    <select id="findRainWater" resultType="com.benqzl.pojo.water.StPptnR" parameterType="java.util.Map">
+		select  to_char(p.tm,'yyyy-MM-dd') as STCD,sum(p.dpr) as DPR from 
+		st_pptn_r p 
+		left join sys_station s on p.stcd = s.code
+		where 1=1
+		<if test="stcd != null">
+			and p.stcd = #{stcd,jdbcType=VARCHAR} 
+		</if>
+		<if test="month != null">
+			and to_char(p.tm,'yyyy-MM')= #{month,jdbcType=VARCHAR} 
+		</if>
+		group by to_char(p.tm,'yyyy-MM-dd')
+		order by to_char(p.tm,'yyyy-MM-dd') asc
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		 select  count(*) from (
+    select max(tm) tm ,stcd from st_pptn_r group by stcd, to_char(tm,'yyyy-mm-dd') ) t left join st_pptn_r p on p.stcd = t.stcd and p.tm = t.tm 
+    left join sys_station s on p.stcd = s.code
+		where 1=1
+		<if test="stcd != null">
+			and p.stcd = #{stcd} 
+		</if>
+		<if test="starttime != null">
+			and p.tm &gt;= #{starttime} 
+		</if>
+		<if test="endtime != null">
+			and p.tm &lt;= #{endtime} 
+		</if>
+	</select>
+	<select id="selectByFid" resultType="com.benqzl.pojo.water.StPptnR" parameterType="java.lang.String">
+		select * from st_pptn_r where fid=#{fid}		
+	</select>
+</mapper>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchStationsMapper">
+	<resultMap id="BaseResultMap"
+		type="com.benqzl.pojo.dispatch.ReceiptDispatchStations">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="RDISPATCHID" property="rdispatchid" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+		<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="CONTROLWATERLEVEL" jdbcType="DECIMAL" property="controlwaterlevel" />
+		<result column="TRUEWATERLEVEL" jdbcType="DECIMAL" property="truewaterlevel" />
+		<result column="RUNCOUNT" jdbcType="DECIMAL" property="runcount" />
+		<result column="KEEPCOUNT" jdbcType="DECIMAL" property="keepcount" />
+		<result column="GATETYPE" jdbcType="DECIMAL" property="gatetype" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id" />
+			<result column="STATIONNAME" property="name" />
+			<result column="DEPARTMENTID" property="departmentid" />
+		</association>
+	</resultMap>
+	<resultMap id="BaseResultMapByStation" type="com.benqzl.pojo.system.Station">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SID" property="code" jdbcType="VARCHAR" />
+		<result column="SID" property="remark" jdbcType="VARCHAR" />
+		<result column="SID" property="nvrusername" jdbcType="VARCHAR" />
+		<result column="SID" property="nvrpassword" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, RDISPATCHID, SID, RECEIPTER, RECEIPTTIME, STATE
+	</sql>
+	<sql id="Base_Column_List1">
+		r.ID as ID, r.RDISPATCHID as RDISPATCHID, r.SID as SID,
+		r.RECEIPTER as
+		RECEIPTER, r.RECEIPTTIME as RECEIPTTIME, r.STATE as
+		STATE,s.name as
+		STATIONNAME,s.departmentid as DEPARTMENTID,r.runcount
+		as RUNCOUNT,r.keepcount as KEEPCOUNT,r.gatetype as GATETYPE
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_RD_STATIONS
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="findStationsId" resultMap="BaseResultMapByStation"
+		parameterType="java.util.Map">
+		select s.id as id ,s.name as name ,r.sid as code
+		,runcount as remark,keepcount as nvrusername,gatetype as nvrpassword
+		from (select * from sys_station where isDel=0) s
+		left join (select
+		sid,runcount,keepcount,gatetype from DIS_RD_STATIONS where RDispatchID
+		=
+		#{id,jdbcType=VARCHAR}) r
+		on r.sid=s.id
+		order by s.levels
+	</select>
+	<select id="findStationsIds" resultType="java.lang.String"
+		parameterType="java.lang.String">
+		select sid
+		from DIS_RD_STATIONS
+		where RDispatchID =(select
+		Id from dis_receipt_dispatch where
+		ReceiptId=#{id,jdbcType=VARCHAR} )
+	</select>
+	<select id="findrestations" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List1" />
+		from DIS_RD_STATIONS r
+		left join sys_station s on r.sid=s.id
+		where
+		r.RDispatchID=#{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectStationByUserid" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select ss.*
+		from dis_rd_stations ss
+		inner join sys_station t
+		on ss.sid = t.id
+		where ss.RDispatchID = #{sdid}
+		and t.departmentid = #{departmentid}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		DIS_RD_STATIONS
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="deleteByRPID" parameterType="java.lang.String">
+		delete from
+		DIS_RD_STATIONS
+		where RDispatchID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="deleteAreaStation" parameterType="java.lang.String">
+		delete from
+		DIS_RD_STATIONS
+		where RDispatchID =#{reid,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchStations">
+		insert into DIS_RD_STATIONS (ID, RDISPATCHID, SID,
+		RECEIPTER,
+		RECEIPTTIME, STATE,CONTROLWATERLEVEL,
+		TRUEWATERLEVEL,RUNCOUNT,KEEPCOUNT,GATETYPE
+		)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR},
+			#{item.rdispatchid,jdbcType=VARCHAR},
+			#{item.sid,jdbcType=VARCHAR},
+			#{item.receipter,jdbcType=VARCHAR},
+			#{item.receipttime,jdbcType=DATE}, #{item.state,jdbcType=DECIMAL},
+			#{item.controlwaterlevel,jdbcType=DECIMAL},
+			#{item.truewaterlevel,jdbcType=DECIMAL},#{item.runcount,jdbcType=DECIMAL},#{item.keepcount,jdbcType=DECIMAL},
+			#{item.gatetype,jdbcType=DECIMAL}
+			from dual)
+		</foreach>
+	</insert>
+	<insert id="insertStations" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchStations">
+		insert into DIS_RD_STATIONS (ID, RDISPATCHID, SID,
+		STATE,RUNCOUNT,KEEPCOUNT,GATETYPE
+		)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR},
+			#{item.rdispatchid,jdbcType=VARCHAR},
+			#{item.sid,jdbcType=VARCHAR},
+			#{item.state,jdbcType=DECIMAL},#{item.runcount,jdbcType=DECIMAL},#{item.keepcount,jdbcType=DECIMAL},
+			#{item.gatetype,jdbcType=DECIMAL} from dual)
+		</foreach>
+
+	</insert>
+	<select id="selectByRDID" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select sd.*,s.name as stationname from dis_rd_stations sd
+		left join
+		sys_station s on s.id = sd.sid
+		where sd.RDISPATCHID=#{id}
+		<if test="departmentid !=null">
+			and s.departmentid =#{departmentid}
+		</if>
+	</select>
+
+	<sql id="Base_Column_List_1">
+		r.ID as ID, r.RDISPATCHID as RDISPATCHID, r.SID as SID,
+		r.RECEIPTER as
+		RECEIPTER, r.RECEIPTTIME as RECEIPTTIME, r.STATE as
+		STATE,s.id as
+		SID,s.name as STATIONNAME
+	</sql>
+	<select id="selectByRDIDAndSId" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List_1" />
+		from dis_rd_stations r
+		left join sys_station s
+		on r.sid = s.id
+		<where>
+			<if test="rdid != null">
+				and r.RDISPATCHID=#{rdid,jdbcType=VARCHAR}
+			</if>
+			<if test="sid != null">
+				and r.sid=#{sid,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<select id="findUnit" resultType="com.benqzl.pojo.system.Unit"
+		parameterType="java.lang.String">
+		select * from sys_unit a
+		left join sys_station b
+		on a.sid
+		= b.id
+		where a.isdel='0'and b.id = #{sid,jdbcType=VARCHAR}
+	</select>
+
+	<select id="findGate" resultType="com.benqzl.pojo.system.Unit"
+		parameterType="java.lang.String">
+		select * from sys_gate a
+		left join sys_station b
+		on a.sid
+		= b.id
+		where a.isdel='0' and b.id = #{sid,jdbcType=VARCHAR}
+	</select>
+
+	<select id="selectUnitByNameAndSID" resultType="com.benqzl.pojo.system.Unit"
+		parameterType="java.util.Map">
+		select * from sys_unit a
+		<where>
+			isdel = 0
+			<if test="unitName != null">
+				and a.name=#{unitName,jdbcType=VARCHAR}
+			</if>
+			<if test="sid != null">
+				and a.sid=#{sid,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectGateByNameAndSID" resultType="com.benqzl.pojo.system.Gate"
+		parameterType="java.util.Map">
+		select * from sys_gate a
+		<where>
+			<if test="gateName != null">
+				and a.name=#{gateName,jdbcType=VARCHAR}
+			</if>
+			<if test="sid != null">
+				and a.sid=#{sid,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchStations">
+		update DIS_RD_STATIONS
+		<set>
+			<if test="rdispatchid != null">
+				RDISPATCHID = #{rdispatchid,jdbcType=VARCHAR},
+			</if>
+			<if test="sid != null">
+				SID = #{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="receipter != null">
+				RECEIPTER = #{receipter,jdbcType=VARCHAR},
+			</if>
+			<if test="receipttime != null">
+				RECEIPTTIME = #{receipttime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="getKeepCountList" parameterType="java.util.Map"
+		resultMap="BaseResultMap">
+		select s.sid, s.runcount,s.id from (select max(code) as code,  receiptid
+        from dis_receipt_dispatch  group by  receiptid
+             having max(code) is not null) t
+  inner join dis_receipt_dispatch rd on rd.receiptid = t.receiptid and t.code = rd.code
+  inner join dis_rd_stations s on s.rdispatchid = rd.id
+		where t.receiptid = #{receiptid}
+		<foreach collection="sids" item="sid" open="and s.sid in ("
+			close=")" separator=",">
+			'${sid}'
+		</foreach>
+	</select>
+</mapper>

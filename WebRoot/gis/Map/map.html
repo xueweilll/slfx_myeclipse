@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=7, IE=9, IE=10">
+<!--The viewport meta tag is used to improve the presentation and behavior of the samples  
+      on iOS devices-->
+<meta name="viewport"
+	content="initial-scale=1, maximum-scale=1,user-scalable=no">
+<title>Shapes and Symbols</title>
+
+<link rel="stylesheet"
+	href="js/arcgis/js/dojo/dijit/themes/claro/claro.css">
+<link rel="stylesheet" href="js/arcgis/js/esri/css/esri.css">
+
+<script src="js/arcgis/init.js"></script>
+
+<script>
+	dojo.require("esri.map");
+	dojo.require("esri.layers.graphics");
+	var map;
+	var sr;
+/* 	var graphicLayer; */
+	function init() {
+		sr = new esri.SpatialReference({
+			wkid : 2437
+		});
+		map = new esri.Map("map",
+				{
+					center : new esri.geometry.Point(496741.870339,
+							3515105.862128, sr),
+					zoom : 1,
+					maxZoom : 10,
+					logo : false
+				});
+
+		//var mapurl="http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer";
+		//var tiledLayer = new esri.layers.ArcGISTiledMapServiceLayer(mapurl); 
+		//var mapurl="http://218.93.114.86:8080/arcgis/rest/services/SLBJMap/MapServer";
+		var mapurl = "http://www.czmap.com.cn:8399/arcgis/rest/services/CZSjtlyMap/MapServer";
+		var tiledLayer = new esri.layers.ArcGISTiledMapServiceLayer(mapurl);
+		//var tiledLayer = new esri.layers.ArcGISDynamicMapServiceLayer(mapurl); 
+		map.addLayer(tiledLayer);
+
+		dojo.connect(map, "onLoad", initGraphics);
+	}
+
+	function initGraphics() {
+		dojo.connect(map.graphics, "onMouseOver", showWindow);
+		dojo.connect(map, "onClick", function(evt) {
+			prompt('', evt.mapPoint.x + ';' + evt.mapPoint.y);
+			//map.infoWindow.setContent('x='+evt.mapPoint.x+'<br>y='+evt.mapPoint.y); 
+			//map.infoWindow.show(evt.mapPoint,map.getInfoWindowAnchor(evt.screenPoint));
+		});
+
+		/* //创建图层
+		graphicLayer = new esri.layers.GraphicsLayer();
+		//把图层添加到地图上
+		map.addLayer(graphicLayer); */
+
+		for(var i=0;i<5;i++)
+		{
+			createMarker((496741.870339+i*1000),(3515105.862128+i*1000),"images/flickr.png",25,25);
+		}
+	}
+
+	function showMsg() {
+		alert('FKU');
+	}
+
+	
+	function showWindow(){
+		alert("fuck you");
+	}
+
+	//新增marker（标注）
+	//x横坐标
+	//y纵坐标
+	//icon图片路径
+	//width图片宽
+	//height图片高
+	//backFun回调函数
+	function createMarker(x, y, icon, width, height) {
+		//设置标注的经纬度
+		//方法一
+		var pt = new esri.geometry.Point(x, y, map.spatialReference);
+		//设置标注显示的图标
+		//var symbol = new esri.symbol.SimpleMarkerSymbol();
+		var symbol = new esri.symbol.PictureMarkerSymbol(icon, width, height);
+
+		//要在模版中显示的参数
+		//var attr = { "address": "山东省淄博市张店区" };
+
+		/* //创建模版
+		var infoTemplate = new esri.InfoTemplate("标题",
+				"<a href='javascript:void(0)' onclick='showMsg()'>详细信息</a>");
+		//创建图像
+		var graphic = new esri.Graphic(pt, symbol, null, infoTemplate); */
+		//图像添加点击事件
+		//graphic.addEventListener(MouseEvent.CLICK,backFun);
+		//把图像添加到刚才创建的图层上
+		/* graphicLayer.add(graphic); */
+		var graphic = new esri.Graphic(pt, symbol);
+		map.graphics.add(graphic);
+	}
+
+	dojo.ready(init);
+</script>
+<style>
+html,body,#map {
+	padding: 0;
+	margin: 0;
+	height: 100%;
+}
+</style>
+<body class="claro">
+	<div id="map"></div>
+</body>
+</html>

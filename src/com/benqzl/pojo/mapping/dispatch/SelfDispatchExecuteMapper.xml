@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.SelfDispatchExecuteMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="DISPATCHSTATIONID" property="dispatchstationid"
+			jdbcType="VARCHAR" />
+		<result column="EXECUTETIME" property="executetime" jdbcType="DATE" />
+		<result column="UNITEXECUTETIME" property="unitexecutetime"
+			jdbcType="DATE" />
+		<result column="STARTOUTERLEVEL" jdbcType="VARCHAR" property="startouterlevel" />
+		<result column="STARTINLANDLEVEL" jdbcType="VARCHAR" property="startinlandlevel" />
+		<result column="STOPPUTERLEVEL" jdbcType="VARCHAR" property="stopouterlevel" />
+		<result column="STOPINLANDLEVEL" jdbcType="VARCHAR" property="stopinlandlevel" />
+	</resultMap>
+	
+	<resultMap id="userStatistics" type="com.benqzl.pojo.util.UserStatistics">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="BEGINTIME" property="begintime" jdbcType="VARCHAR" />
+		<result column="ENDTIME" property="endtime" jdbcType="VARCHAR" />
+		<result column="COUNTS" property="count" jdbcType="VARCHAR" />
+		<result column="KJTIME" property="kjtime" jdbcType="VARCHAR" />
+		<result column="RUNTIME" property="runtime" jdbcType="VARCHAR"/>
+		<result column="CSCHARGE" property="cscharge" jdbcType="VARCHAR" />
+		<result column="DCSCHARGE" property="dcscharge" jdbcType="VARCHAR" />
+		<result column="DESIGNDISCHARGE" property="designdischarge"
+			jdbcType="VARCHAR" />
+		<result column="MOTERTYPE" property="motertype" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="NAME" property="sname" jdbcType="VARCHAR" />
+		<result column="RDSTATE" property="rdstate" jdbcType="DECIMAL"/>
+		<result column="DISPATCHTYPE" property="dispatchtype" jdbcType="DECIMAL" />
+		<association property="selfDispatchExecute"
+			javaType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="SID" property="sid" jdbcType="VARCHAR" />
+			<result column="RDSTATIONID" property="rdstationid" jdbcType="VARCHAR" />
+			<result column="GATEEXECUTETIME" property="gateexecutetime"
+				jdbcType="VARCHAR" />
+			<result column="UNITEXECUTETIME" property="unitexecutetime"
+				jdbcType="VARCHAR" />
+			<result column="STARTOUTERLEVEL" property="startouterlevel" jdbcType="VARCHAR" />
+			<result column="STARTINLANDLEVEL" property="startinlandlevel" jdbcType="VARCHAR" />
+			<result column="STOPOUTERLEVEL" property="stopouterlevel" jdbcType="VARCHAR" />
+			<result column="STOPINLANDLEVEL" property="stopinlandlevel" jdbcType="VARCHAR" />
+			<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		</association>
+		<association property="selfDispatchExecuteUnits"
+			javaType="com.benqzl.pojo.dispatch.SelfDispatchExecuteUnits">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="UNITID" property="unitid" jdbcType="VARCHAR" />
+			<result column="BEGINTIME" property="begintime" jdbcType="TIMESTAMP" />
+			<result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+			<result column="EXECUTEID" property="executeid" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, SID, DISPATCHSTATIONID, EXECUTETIME, UNITEXECUTETIME,MEMO
+	</sql>
+	<sql id="Base_Column_List1">
+		a.id as ID, d.begintime as BEGINTIME,d.endtime as
+		ENDTIME,
+		round((d.endtime-d.begintime)*24,2) as RUNTIME,
+		c.counts as COUNTS,
+		round(to_number(d.times1/3600),2) as KJTIME, a.sid as
+		SID,a.dispatchstationid as RDSTATIONIN,st.name as name,
+		 st.levels as LEVELS,
+		<!-- round(d.cscharge/10000,2) as
+		CSCHARGE, -->
+		<!-- round(decode(d.times1,0,0,round((d.cscharge/d.times1),2))*d.times1/10000,2) as CSCHARGE, -->
+		decode(d.times1,0,0,round((d.cscharge/d.times1),2)) as
+		DCSCHARGE,
+		 rds.state as RDSTATE,
+		drd.code as CODE,
+		a.startouterlevel as STARTOUTERLEVEL,
+        a.startinlandlevel as STARTINLANDLEVEL,
+        a.stopputerlevel as STOPOUTERLEVEL,
+        a.stopinlandlevel as STOPINLANDLEVEL
+	</sql>
+	<sql id="Base_Column_List2">
+		a.id as ID, d.begintime as BEGINTIME,
+		<!-- d.endtime as ENDTIME,
+		round((d.endtime-d.begintime)*24,2) as RUNTIME, -->
+		<if test="deadlines!=null">
+		decode(d.endtime,'',#{deadlines},to_char(d.endtime,'yyyy-MM-dd HH24:mi:ss')) as ENDTIME,
+		decode(d.endtime,'',
+		decode(		
+		sign(to_date(#{deadlines},'yyyy-MM-dd HH24:mi:ss')-(d.begintime)),-1,'',round((to_date(#{deadlines},'yyyy-MM-dd HH24:mi:ss')-(d.begintime))*24,2)),round((d.endtime-d.begintime)*24,2)) 
+		as RUNTIME,
+		</if>
+		<if test="deadlines==null">
+		d.endtime as ENDTIME,
+		round((d.endtime-d.begintime)*24,2) as RUNTIME,
+		</if>
+		c.counts as COUNTS,
+		round(to_number(d.times1/3600),2) as KJTIME, a.sid as
+		SID,a.dispatchstationid as RDSTATIONIN,st.name as name,
+		 st.levels as LEVELS,
+		<!-- round(d.cscharge/10000,2) as
+		CSCHARGE, -->
+		<!-- round(decode(d.times1,0,0,round((d.cscharge/d.times1),2))*d.times1/10000,2) as CSCHARGE, -->
+		decode(d.times1,0,0,round((d.cscharge/d.times1),2)) as
+		DCSCHARGE,
+		 rds.state as RDSTATE,
+		drd.code as CODE,
+		a.startouterlevel as STARTOUTERLEVEL,
+        a.startinlandlevel as STARTINLANDLEVEL,
+        a.stopputerlevel as STOPOUTERLEVEL,
+        a.stopinlandlevel as STOPINLANDLEVEL
+	</sql>
+	
+	
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_SD_EXECUTE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectBySid" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_SD_EXECUTE
+		where SID = #{sid,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from DIS_SD_EXECUTE
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		insert into DIS_SD_EXECUTE (ID, SID, DISPATCHSTATIONID,
+		EXECUTETIME, UNITEXECUTETIME,MEMO,STARTOUTERLEVEL,
+		STARTINLANDLEVEL,STOPPUTERLEVEL,STOPINLANDLEVEL)
+		values (#{id,jdbcType=VARCHAR}, #{sid,jdbcType=VARCHAR},
+		#{dispatchstationid,jdbcType=VARCHAR},
+		#{executetime,jdbcType=DATE}, #{unitexecutetime,jdbcType=DATE},#{memo,jdbcType=VARCHAR},
+		#{startouterlevel,jdbcType=VARCHAR},
+		#{startinlandlevel,jdbcType=VARCHAR},
+		#{stopouterlevel,jdbcType=VARCHAR},
+		#{stopinlandlevel,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		insert into DIS_SD_EXECUTE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="sid != null">
+				SID,
+			</if>
+			<if test="dispatchstationid != null">
+				DISPATCHSTATIONID,
+			</if>
+			<if test="executetime != null">
+				EXECUTETIME,
+			</if>
+			<if test="unitexecutetime != null">
+				UNITEXECUTETIME,
+			</if>
+			<if test="memo != null">
+				MEMO,
+			</if>
+			<if test="startouterlevel != null">
+				STARTOUTERLEVEL,
+			</if>
+			<if test="startinlandlevel != null">
+				STARTINLANDLEVEL,
+			</if>
+			<if test="stopouterlevel != null">
+				STOPPUTERLEVEL,
+			</if>
+			<if test="stopinlandlevel != null">
+				STOPINLANDLEVEL,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="dispatchstationid != null">
+				#{dispatchstationid,jdbcType=VARCHAR},
+			</if>
+			<if test="executetime != null">
+				#{executetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="unitexecutetime != null">
+				#{unitexecutetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="memo != null">
+				#{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="startouterlevel != null">
+				#{startouterlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="startinlandlevel != null">
+				#{startinlandlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="stopouterlevel != null">
+				#{stopouterlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="stopinlandlevel != null">
+				#{stopinlandlevel,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		update DIS_SD_EXECUTE
+		<set>
+			<if test="sid != null">
+				SID = #{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="dispatchstationid != null">
+				DISPATCHSTATIONID = #{dispatchstationid,jdbcType=VARCHAR},
+			</if>
+			<if test="executetime != null">
+				EXECUTETIME = #{executetime,jdbcType=DATE},
+			</if>
+			<if test="unitexecutetime != null">
+				UNITEXECUTETIME = #{unitexecutetime,jdbcType=DATE},
+			</if>
+			<if test="memo != null">
+				MEMO = #{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="startouterlevel != null">
+				STARTOUTERLEVEL = #{startouterlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="startinlandlevel != null">
+				STARTINLANDLEVEL = #{startinlandlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="stopouterlevel != null">
+				STOPPUTERLEVEL = #{stopouterlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="stopinlandlevel != null">
+				STOPINLANDLEVEL =#{stopinlandlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="startouterlevel == null">
+				STARTOUTERLEVEL = NULL,
+			</if>
+			<if test="startinlandlevel == null">
+				STARTINLANDLEVEL = NULL,
+			</if>
+			<if test="stopouterlevel == null">
+				STOPPUTERLEVEL = NULL,
+			</if>
+			<if test="stopinlandlevel == null">
+				STOPINLANDLEVEL = NULL,
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		update DIS_SD_EXECUTE
+		set SID = #{sid,jdbcType=VARCHAR},
+		DISPATCHSTATIONID = #{dispatchstationid,jdbcType=VARCHAR},
+		EXECUTETIME = #{executetime,jdbcType=DATE},
+		UNITEXECUTETIME = #{unitexecutetime,jdbcType=DATE},
+		MEMO = #{memo,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="selectExecuteByDispatchstationId" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_SD_EXECUTE
+		where DISPATCHSTATIONID = #{dispatchstationid,jdbcType=VARCHAR}
+	</select>
+	<update id="updateExecuteByDispatchstationid" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		update DIS_SD_EXECUTE
+		set SID = #{sid,jdbcType=VARCHAR},
+		DISPATCHSTATIONID = #{dispatchstationid,jdbcType=VARCHAR},
+		EXECUTETIME = #{executetime,jdbcType=DATE},
+		UNITEXECUTETIME = #{unitexecutetime,jdbcType=DATE},
+		MEMO = #{memo,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+  <select id="findSelfStatisticsByPage" resultMap="userStatistics"
+		parameterType="java.util.Map">
+		select F.*, ROUND(F.KJTIME*F.DCSCHARGE*3600/10000,2) AS CSCHARGE from
+		(select E.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List2" />
+		from DIS_sd_EXECUTE a
+		left join (select b.*
+		from (select sum(t.times) as times1,
+		max(t.endtime) as endtime,
+		min(t.begintime) as begintime,
+		sum(t.cscharge) as cscharge,
+		executeid
+		from (select cs.id as id,
+		 cs.unitid as unitid,
+		 cs.begintime as begintime,
+		 cs.endtime as endtime,
+		 cs.executeid as executeid,
+		 cs.designdischarge as designdischarge,
+		 decode(sign(cs.times),-1,0,cs.times) as times,
+		cs.designdischarge *decode(sign(cs.times),-1,0,cs.times) as cscharge
+		from (select u.*,
+		su.designdischarge as designdischarge,
+		<if test="deadlines!=null">
+		   decode(u.endtime,'',(to_date(#{deadlines},'yyyy-MM-dd HH24:mi:ss')-(u.begintime)) * 24 * 60 * 60 ,((u.endtime)-(u.begintime)) * 24 * 60 * 60 )as times
+		</if>
+		<if test="deadlines==null">
+		((u.endtime) -
+		(u.begintime)) * 24*60*60 as times
+		</if>
+		from dis_sd_execute_units u
+		left join sys_unit su
+		on su.id = u.unitid 
+		order by executeid) cs) t
+		group by executeid) b) d
+		on d.executeid = a.id
+		inner join (select count(unitid) as counts, executeid
+		from dis_sd_execute_units
+		group by executeid) c
+		on c.executeid = a.id
+		left join sys_station st
+		on st.id = a.sid
+		left join dis_sd_stations rds on
+		rds.id=a.dispatchstationid 
+		left join dis_selfdispatch drd
+		on drd.id=rds.sdid
+		where 1=1
+		and rds.state &gt;=2
+		<if test="ssid !=null">
+					and st.id in 
+        (<foreach collection="ssid" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>)
+		</if>
+		<if test="dcode !=null and dcode!=''">
+			and drd.code like '%'||#{dcode,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="begintime !=null">
+			and d.begintime &gt;=#{begintime}
+		</if>
+		<if test="endtime !=null">
+			and d.begintime &lt;=#{endtime}
+		</if>
+		) E
+		where ROWNUM &lt;=#{p2}
+		order by E.LEVELS,E.begintime desc)F
+		where RN
+		&gt; #{p1}
+	</select> 
+	<select id="findSelfStatisticsByExport" resultMap="userStatistics"
+		parameterType="java.util.Map">
+		select F.*, ROUND(F.KJTIME*F.DCSCHARGE*3600/10000,2) AS CSCHARGE from
+		(select E.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from DIS_sd_EXECUTE a
+		left join (select b.*
+		from (select sum(t.times) as times1,
+		max(t.endtime) as endtime,
+		min(t.begintime) as begintime,
+		sum(t.cscharge) as cscharge,
+		executeid
+		from (select cs.*,
+		cs.designdischarge *
+		cs.times as cscharge
+		from (select u.*,
+		su.designdischarge as designdischarge,
+		((u.endtime) -
+		(u.begintime)) * 24*60*60 as times
+		from dis_sd_execute_units u
+		left join sys_unit su
+		on su.id = u.unitid 
+		order by executeid) cs) t
+		group by executeid) b) d
+		on d.executeid = a.id
+		inner join (select count(unitid) as counts, executeid
+		from dis_sd_execute_units
+		group by executeid) c
+		on c.executeid = a.id
+		left join sys_station st
+		on st.id = a.sid
+		left join dis_sd_stations rds on
+		rds.id=a.dispatchstationid 
+		left join dis_selfdispatch drd
+		on drd.id=rds.sdid
+		where 1=1
+		and rds.state &gt;=2
+		<if test="ssid !=null">
+					and st.id in 
+        (<foreach collection="ssid" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>)
+		</if>
+		<if test="dcode !=null and dcode!=''">
+			and drd.code like '%'||#{dcode,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="begintime !=null">
+			and d.begintime &gt;=#{begintime}
+		</if>
+		<if test="endtime !=null">
+			and d.begintime &lt;=#{endtime}
+		</if>
+		) E
+		order by E.LEVELS,E.begintime desc)F
+	</select>
+	<select id="findSelfStatisticsPrint" resultMap="userStatistics"
+			parameterType="java.util.Map">	
+		select E.* from (select a.id as ID,
+		d.begintime as BEGINTIME,
+		d.endtime as ENDTIME,
+		round((d.endtime - d.begintime) * 24, 2) as RUNTIME,
+		c.counts as COUNTS,
+		round(d.times1 / 3600, 2) as KJTIME,
+		a.sid as SID,
+		a.dispatchstationid as RDSTATIONIN,
+		st.name as name,
+	     st.levels as LEVELS,
+		decode(d.times1, 0, 0, round((d.cscharge / d.times1), 2)) as DCSCHARGE,
+		rds.state as RDSTATE,
+		drd.code as CODE,
+		a.startouterlevel as STARTOUTERLEVEL,
+		a.startinlandlevel as STARTINLANDLEVEL,
+		a.stopputerlevel as STOPOUTERLEVEL,
+		a.stopinlandlevel as STOPINLANDLEVEL,
+		ROUND(round(d.times1 / 3600, 2) *
+		decode(d.times1, 0, 0, round((d.cscharge / d.times1), 2)) * 3600 /
+		10000,
+		2) AS CSCHARGE
+		from DIS_sd_EXECUTE a
+		left join (select b.*
+		from (select sum(t.times) as times1,
+		max(t.endtime) as endtime,
+		min(t.begintime) as begintime,
+		sum(t.cscharge) as cscharge,
+		executeid
+		from (select cs.*,
+		cs.designdischarge * cs.times as cscharge
+		from (select u.*,
+		su.designdischarge as designdischarge,
+		((u.endtime) - (u.begintime)) * 24 * 60 * 60 as times
+		from dis_sd_execute_units u
+		left join sys_unit su
+		on su.id = u.unitid
+		order by executeid) cs) t
+		group by executeid) b) d
+		on d.executeid = a.id
+		inner join (select count(unitid) as counts, executeid
+		from dis_sd_execute_units
+		group by executeid) c
+		on c.executeid = a.id
+		left join sys_station st
+		on st.id = a.sid
+		left join dis_sd_stations rds
+		on rds.id = a.dispatchstationid
+		left join dis_selfdispatch drd
+		on drd.id = rds.sdid
+		where 1 = 1
+		and rds.state &gt;= 2
+		<if test="ssid !=null">
+				and st.id in 
+        (<foreach collection="ssid" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>)
+		</if>
+		<if test="dcode !=null and dcode!=''">
+			and drd.code like '%'||#{dcode,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="begintime !=null">
+			and d.begintime &gt;=#{begintime}
+		</if>
+		<if test="endtime !=null">
+			and d.begintime &lt;=#{endtime}
+		</if>)E
+		order by E.LEVELS,E.begintime desc
+	</select>
+	 <select id="findSelfStatisticsCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) as num
+		 from
+		(select E.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from DIS_sd_EXECUTE a
+		left join (select b.*
+		from (select sum(t.times) as times1,
+		max(t.endtime) as endtime,
+		min(t.begintime) as begintime,
+		sum(t.cscharge) as cscharge,
+		executeid
+		from (select cs.*,
+		cs.designdischarge *
+		cs.times as cscharge
+		from (select u.*,
+		su.designdischarge as designdischarge,
+		((u.endtime) -
+		(u.begintime)) * 24*60*60 as times
+		from dis_sd_execute_units u
+		left join sys_unit su
+		on su.id = u.unitid 
+		order by executeid) cs) t
+		group by executeid) b) d
+		on d.executeid = a.id
+		inner join (select count(unitid) as counts, executeid
+		from dis_sd_execute_units
+		group by executeid) c
+		on c.executeid = a.id
+		left join sys_station st
+		on st.id = a.sid
+		left join dis_sd_stations rds on
+		rds.id=a.dispatchstationid 
+		left join dis_selfdispatch drd
+		on drd.id=rds.sdid
+		where 1=1
+		<!-- 状态为已实施未完成和完成的 -->
+		and rds.state&gt;=2
+		<if test="ssid !=null">
+					and st.id in 
+        (<foreach collection="ssid" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>)
+		</if>
+		<if test="dcode !=null and dcode!=''">
+			and drd.code like '%'||#{dcode,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="begintime !=null">
+			and d.begintime &gt;=#{begintime}
+		</if>
+		<if test="endtime !=null">
+			and d.begintime &lt;=#{endtime}
+		</if>
+		) E
+		where ROWNUM &lt;=#{p2}
+		order by begintime desc)
+		where RN
+		&gt; #{p1}
+	</select> 
+</mapper>

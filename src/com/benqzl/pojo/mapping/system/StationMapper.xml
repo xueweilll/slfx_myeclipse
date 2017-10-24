@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.StationMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Station">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="LAT" property="lat" jdbcType="DECIMAL" />
+		<result column="LON" property="lon" jdbcType="DECIMAL" />
+		<result column="LEVELS" property="levels" jdbcType="DECIMAL" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+		<result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		<result column="NVRUSERNAME" property="nvrusername" jdbcType="VARCHAR" />
+		<result column="NVRPASSWORD" property="nvrpassword" jdbcType="VARCHAR" />
+		<result column="NVRPROT" property="nvrprot" jdbcType="VARCHAR" />
+		<result column="NVRURL" property="nvrurl" jdbcType="VARCHAR" />
+		<result column="IMGURL" property="imgurl" jdbcType="VARCHAR" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="CONTROLWATERLEVEL" jdbcType="DECIMAL" property="controlwaterlevel" />
+		<result column="INWATERTOP" jdbcType="DECIMAL" property="inwatertop" />
+		<result column="INWATERDOWN" jdbcType="DECIMAL" property="inwaterdown" />
+		<result column="OUTWATERTOP" jdbcType="DECIMAL" property="outwatertop" />
+		<result column="OUTWATERDOWN" jdbcType="DECIMAL" property="outwaterdown" />
+		<result column="ADDRESS" property="address" jdbcType="VARCHAR" />
+		<result column="SERVICEPORT" property="serviceport" jdbcType="VARCHAR"/>
+		<collection property="department" ofType="com.benqzl.pojo.system.Department">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="DNAME" property="name" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+	<resultMap id="BaseResultMap1" type="com.benqzl.pojo.system.Station">
+		<id column="SID" property="id" jdbcType="VARCHAR" />
+		<result column="SCODE" property="code" jdbcType="VARCHAR" />
+		<result column="SNAME" property="name" jdbcType="VARCHAR" />
+		<result column="SLAT" property="lat" jdbcType="DECIMAL" />
+		<result column="SLON" property="lon" jdbcType="DECIMAL" />
+		<result column="NVRUSERNAME" property="nvrusername" jdbcType="VARCHAR" />
+		<result column="NVRPASSWORD" property="nvrpassword" jdbcType="VARCHAR" />
+		<result column="NVRPROT" property="nvrprot" jdbcType="VARCHAR" />
+		<result column="NVRURL" property="nvrurl" jdbcType="VARCHAR" />
+		<result column="SERVICEPORT" property="serviceport" jdbcType="VARCHAR"/>
+		<collection property="gates" ofType="com.benqzl.pojo.system.Gate">
+			<result column="GCODE" property="code" jdbcType="VARCHAR" />
+			<result column="GNAME" property="name" jdbcType="VARCHAR" />
+		</collection>
+		<collection property="units" ofType="com.benqzl.pojo.system.Unit">
+			<result column="UCODE" property="code" jdbcType="VARCHAR" />
+			<result column="UNAME" property="name" jdbcType="VARCHAR" />
+		</collection>
+		<collection property="cameras" ofType="com.benqzl.pojo.system.Camera">
+			<id column="CID" property="id"></id>
+			<result column="CCODE" property="code" jdbcType="VARCHAR" />
+			<result column="CNAME" property="name" jdbcType="VARCHAR" />
+			 <result column="CHANNEL" property="channel" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+	<sql id="Base_Column_List_GATE_UNIT">
+		s.ID as SID, s.CODE as SCODE, s.NAME as SNAME, s.LAT as SLAT, s.LON as
+		SLON,
+		g.code as GCODE,g.name as gname,u.name as uname,u.code as ucode
+	</sql>
+	<sql id="Base_Column_List">
+		ID, CODE, NAME, LAT, LON, LEVELS, CREATETIME, EDITTIME, ISDEL, REMARK,
+		NVRUSERNAME, SERVICEPORT,
+		NVRPASSWORD, NVRPROT, NVRURL,DEPARTMENTID,CONTROLWATERLEVEL,
+		INWATERTOP,INWATERDOWN,OUTWATERTOP,OUTWATERDOWN,IMGURL,ADDRESS
+	</sql>
+	<sql id="Base_Column_List1">
+		s.name as NAME, s.remark as REMARK, s.code as CODE,
+		a.NVRPROT as NVRPROT,b.NVRURL as NVRURL,s.IMGURL as IMGURL,s.ADDRESS as ADDRESS 
+	</sql>
+	<sql id="Base_Column_List2">
+		s.name as NAME, s.remark as REMARK, s.code as CODE,
+	</sql>
+	<select id="findStationByPAndB" resultMap="BaseResultMap1">
+		select
+		<include refid="Base_Column_List_GATE_UNIT" />
+		from SYS_GATE g join sys_unit u on 1=1 right join SYS_STATION s on
+		s.id=g.sid and s.id=u.sid
+		WHERE s.isdel=0
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_STATION
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByDepartment" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List"/>
+		from sys_station
+		where departmentid=#{sid,jdbcType=VARCHAR}
+		and isdel=0
+	</select>
+	<select id="selectSpecialByDepartment" resultMap="BaseResultMap"
+	    parameterType="java.lang.String">
+	    select 
+	    <include refid="Base_Column_List"/>
+	    from 
+	    sys_station
+		where departmentid=#{did,jdbcType=VARCHAR}
+		and isdel=0
+	    and id in(select ed.sid as sid from pl_special_execute_details ed
+	    left join pl_special_execute e on e.id=ed.eid
+	    where 1=1
+	    <if test="isid!=null">
+	   and  e.isid=#{isid}
+	    </if>
+	    and ed.sid not in(
+	    (select sid from pl_special_implement where 
+	     1=1 
+	    <if test="isid!=null">
+	     and  isid=#{isid}
+	    </if>
+	   ))
+	    )
+	</select>
+	<select id="findSelStation" parameterType="java.util.Map"
+		resultMap="BaseResultMap">
+		select
+		*
+		from sys_station s
+		left join sys_employee e on
+		e.departmentid=s.departmentid
+		left join sys_user u on u.employeeid
+		=e.id
+		where u.userid=#{userid}
+	</select>
+	<select id="findDepartmentIdsBySids" parameterType="java.util.List"
+		resultType="java.lang.String">
+		select * from (select
+		departmentid
+		from SYS_STATION
+		WHERE isdel=0 and id in(
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>
+		) ) t group by t.departmentid
+	</select>
+	<select id="findStation" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_STATION
+		WHERE isdel=0 order by levels 
+	</select>
+	<select id="findStations" parameterType="java.util.Map"
+		resultType="com.benqzl.pojo.system.Station">
+		select
+		<include refid="Base_Column_List" />
+		from sys_station
+		where isdel=0
+
+		and departmentid=#{id,jdbcType=VARCHAR}
+
+	</select>
+	<select id="findStationInformation" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List1" />
+		from sys_station s
+		left join (select count(g.sid) as NVRPROT,g.sid as sid from sys_gate g
+		where g.isdel=0 and g.sid=(select id from sys_station where
+		code=#{code,jdbcType=VARCHAR}) group by g.sid)a
+		on a.sid=s.id
+		left join(select count(u.sid) as NVRURL,u.sid as sid from sys_unit u
+		where u.isdel=0 and u.sid=(select id from sys_station where
+		code=#{code,jdbcType=VARCHAR}) group by u.sid)b
+		on b.sid=s.id
+		where 1=1 and
+		s.code=#{code,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from SYS_STATION
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.system.Station">
+		insert into SYS_STATION (ID, CODE, NAME,
+		LAT, LON, LEVELS, CREATETIME,
+		EDITTIME, ISDEL, REMARK,
+		NVRUSERNAME, NVRPASSWORD, NVRPROT,
+		NVRURL,departmentid,CONTROLWATERLEVEL,ADDRESS,SERVICEPORT
+		)
+		values (#{id,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{lat,jdbcType=DECIMAL}, #{lon,jdbcType=DECIMAL}, #{levels,jdbcType=DECIMAL},
+		#{createtime,jdbcType=TIMESTAMP},
+		#{edittime,jdbcType=TIMESTAMP}, #{isdel,jdbcType=DECIMAL}, #{remark,jdbcType=VARCHAR},
+		#{nvrusername,jdbcType=VARCHAR}, #{nvrpassword,jdbcType=VARCHAR},
+		#{nvrprot,jdbcType=VARCHAR},
+		#{nvrurl,jdbcType=VARCHAR},#{departmentid,jdbcType=VARCHAR},
+		#{controlwaterlevel,jdbcType=DECIMAL},
+		#{inwatertop,jdbcType=DECIMAL},#{inwaterdown,jdbcType=DECIMAL},
+		#{outwatertop,jdbcType=DECIMAL},#{outwaterdown,jdbcType=DECIMAL},
+		#{ADDRESS,jdbcType=VARCHAR},#{serviceport,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.system.Station">
+		insert into SYS_STATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="code != null">
+				CODE,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="lat != null">
+				LAT,
+			</if>
+			<if test="lon != null">
+				LON,
+			</if>
+			<if test="levels != null">
+				LEVELS,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="edittime != null">
+				EDITTIME,
+			</if>
+			<if test="isdel != null">
+				ISDEL,
+			</if>
+			<if test="remark != null">
+				REMARK,
+			</if>
+			<if test="nvrusername != null">
+				NVRUSERNAME,
+			</if>
+			<if test="nvrpassword != null">
+				NVRPASSWORD,
+			</if>
+			<if test="nvrprot != null">
+				NVRPROT,
+			</if>
+			<if test="nvrurl != null">
+				NVRURL,
+			</if>
+			<if test="controlwaterlevel != null">
+				CONTROLWATERLEVEL,
+			</if>
+			<if test="inwatertop != null">
+				INWATERTOP,
+			</if>
+			<if test="inwaterdown != null">
+				INWATERDOWN,
+			</if>
+			<if test="outwatertop != null">
+				OUTWATERTOP,
+			</if>
+			<if test="outwaterdown != null">
+				OUTWATERDOWN,
+			</if>
+			<if test="imgurl != null">
+				IMGURL,
+			</if>
+			<if test="departmentid !=null">
+				DEPARTMENTID,
+			</if>
+			<if test="address !=null">
+				ADDRESS,
+			</if>
+			<if test="serviceport !=null">
+			    SERVICEPORT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="lat != null">
+				#{lat,jdbcType=DECIMAL},
+			</if>
+			<if test="lon != null">
+				#{lon,jdbcType=DECIMAL},
+			</if>
+			<if test="levels != null">
+				#{levels,jdbcType=DECIMAL},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="edittime != null">
+				#{edittime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isdel != null">
+				#{isdel,jdbcType=DECIMAL},
+			</if>
+			<if test="remark != null">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrusername != null">
+				#{nvrusername,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrpassword != null">
+				#{nvrpassword,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrprot != null">
+				#{nvrprot,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrurl != null">
+				#{nvrurl,jdbcType=VARCHAR},
+			</if>
+			<if test="controlwaterlevel != null">
+				#{controlwaterlevel,jdbcType=VARCHAR},
+			</if>
+			<if test="inwatertop != null">
+				#{inwatertop,jdbcType=DECIMAL},
+			</if>
+			<if test="inwaterdown != null">
+				#{inwaterdown,jdbcType=DECIMAL},
+			</if>
+			<if test="outwatertop != null">
+				#{outwatertop,jdbcType=DECIMAL},
+			</if>
+			<if test="outwaterdown != null">
+				 #{outwaterdown,jdbcType=DECIMAL},
+			</if>
+			<if test="imgurl != null">
+				#{imgurl,jdbcType=VARCHAR},
+			</if>
+			<if test="departmentid !=null">
+				#{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test="serviceport != null">
+				#{serviceport,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Station">
+		update SYS_STATION
+		<set>
+			<if test="code != null">
+				CODE = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="lat != null">
+				LAT = #{lat,jdbcType=DECIMAL},
+			</if>
+			<if test="lon != null">
+				LON = #{lon,jdbcType=DECIMAL},
+			</if>
+			<if test="levels != null">
+				LEVELS = #{levels,jdbcType=DECIMAL},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="edittime != null">
+				EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isdel != null">
+				ISDEL = #{isdel,jdbcType=DECIMAL},
+			</if>
+			<if test="remark != null">
+				REMARK = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrusername != null">
+				NVRUSERNAME = #{nvrusername,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrpassword != null">
+				NVRPASSWORD = #{nvrpassword,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrprot != null">
+				NVRPROT = #{nvrprot,jdbcType=VARCHAR},
+			</if>
+			<if test="nvrurl != null">
+				NVRURL = #{nvrurl,jdbcType=VARCHAR},
+			</if>
+			<if test="departmentid !=null">
+				DEPARTMENTID=#{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="controlwaterlevel != null">
+				CONTROLWATERLEVEL = #{controlwaterlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="inwatertop != null">
+				INWATERTOP = #{inwatertop,jdbcType=DECIMAL},
+			</if>
+			<if test="inwaterdown != null">
+				INWATERDOWN = #{inwaterdown,jdbcType=DECIMAL},
+			</if>
+			<if test="outwatertop != null">
+				OUTWATERTOP = #{outwatertop,jdbcType=DECIMAL},
+			</if>
+			<if test="outwaterdown != null">
+				OUTWATERDOWN = #{outwaterdown,jdbcType=DECIMAL},
+			</if>
+			<if test="imgurl != null">
+				IMGURL = #{imgurl,jdbcType=VARCHAR},
+			</if>
+			<if test="address != null">
+				ADDRESS = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test="serviceport !=null">
+			    SERVICEPORT=#{serviceport,jdbcType=VARCHAR}
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Station">
+		update SYS_STATION
+		set CODE = #{code,jdbcType=VARCHAR},
+		NAME = #{name,jdbcType=VARCHAR},
+		LAT = #{lat,jdbcType=DECIMAL},
+		LON = #{lon,jdbcType=DECIMAL},
+		LEVELS = #{levels,jdbcType=DECIMAL},
+		CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+		EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+		ISDEL = #{isdel,jdbcType=DECIMAL},
+		REMARK = #{remark,jdbcType=VARCHAR},
+		NVRUSERNAME = #{nvrusername,jdbcType=VARCHAR},
+		NVRPASSWORD = #{nvrpassword,jdbcType=VARCHAR},
+		NVRPROT = #{nvrprot,jdbcType=VARCHAR},
+		NVRURL = #{nvrurl,jdbcType=VARCHAR},
+		CONTROLWATERLEVEL = #{controlwaterlevel,jdbcType=DECIMAL},
+		INWATERTOP = #{inwatertop,jdbcType=DECIMAL},
+		INWATERDOWN = #{inwaterdown,jdbcType=DECIMAL},
+		OUTWATERTOP = #{outwatertop,jdbcType=DECIMAL},
+		OUTWATERDOWN = #{outwaterdown,jdbcType=DECIMAL},
+		ADDRESS = #{address,jdbcType=VARCHAR},
+		SERVICEPORT=#{serviceport,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		s.*, d.name as DNAME
+		from sys_station s
+		left join sys_department d on d.id=s.departmentid
+		where s.isdel= 0
+		<if test="code != null">
+			and s.code like '%${code}%'
+		</if>
+		<if test="name != null">
+			and s.name like '%${name}%'
+		</if>
+		order by d.CreateTime ,s.levels ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from sys_station
+		where isdel=0
+		<if test="code != null">
+			and code like '%${code}%'
+		</if>
+		<if test="name != null">
+			and name like '%${name}%'
+		</if>
+	</select>
+		<select id="selectcount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from sys_station
+		where isdel=0
+	</select>
+	<update id="deleteIsdel" parameterType="java.lang.String">
+		update SYS_STATION set
+		ISDEL= 1 where ID = #{id,jdbcType=VARCHAR}
+		
+	</update>
+	<select id="stationByFk" resultMap="BaseResultMap">
+		select id,name from
+		sys_station where isdel=0 order by levels
+	</select>
+	<select id="patrolnormalstation" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select s.id as ID,s.name as NAME from
+		sys_station s 
+		left join sys_department d on
+		s.departmentid =d.id 
+		left join sys_employee e
+		on e.departmentid=d.id
+		left join sys_user u on u.employeeid=e.id
+		where s.isdel=0 
+		and u.userid=#{useid}
+		order by s.levels
+	</select>
+	
+	<select id="exsitCode" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select count(*) from sys_station where isdel=0 and code
+		=#{code}
+	</select>
+	<select id="exsitName" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select count(*) from sys_station where isdel=0 and name
+		=#{name}
+	</select>
+	<select id="selectByAll" resultMap="BaseResultMap">
+		select * from sys_station
+		where isdel=0 order by levels
+	</select>
+	<select id="selectBYCode" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from sys_station where isdel=0
+		<if test="code != null">
+			and code = #{code}
+		</if>
+		<if test="departmentid != null">
+			and departmentid=#{departmentid}
+		</if>
+		order by levels 
+	</select>
+	<select id="findStationName" resultMap="BaseResultMap">
+		select s.name as NAME from sys_station s where
+		rownum=1
+	</select>
+	<select id="findstationlist" resultMap="BaseResultMap" parameterType="java.lang.String">
+	     select 
+	     <include refid="Base_Column_List" />
+	     from sys_station s
+	     where s.departmentid=#{did,jdbcType=VARCHAR}
+	     and s.isdel=0
+	</select>
+	<select id="selectByAppCamera" resultMap="BaseResultMap1">
+	select s.code as scode ,s.name as sname,s.id as sid,    s.nvrusername,
+       s.nvrpassword,s.nvrurl,s.nvrprot,c.id as cide,c.code as ccode, c.name as cname,c.channel from sys_station s left join 
+	sys_camera c on s.id = c.sid 
+	where s.isdel = 0  and c.isdel = 0 
+	</select>
+</mapper>

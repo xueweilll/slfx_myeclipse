@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.FolerMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.Foler" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="CREATERID" property="createrid" jdbcType="VARCHAR" />
+    <result column="PARENTID" property="parentid" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, NAME, CREATERID, PARENTID
+  </sql>
+  <select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List"></include>
+		from OA_FOLDER
+		order by NAME asc
+	</select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from OA_FOLDER
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from OA_FOLDER
+    where ID = #{id,jdbcType=VARCHAR} or PARENTID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.oa.Foler" >
+    insert into OA_FOLDER (ID, NAME, CREATERID, 
+      PARENTID)
+    values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{createrid,jdbcType=VARCHAR}, 
+      #{parentid,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.oa.Foler" >
+    insert into OA_FOLDER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="createrid != null" >
+        CREATERID,
+      </if>
+      <if test="parentid != null" >
+        PARENTID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="createrid != null" >
+        #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null" >
+        #{parentid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.oa.Foler" >
+    update OA_FOLDER
+    <set >
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="createrid != null" >
+        CREATERID = #{createrid,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null" >
+        PARENTID = #{parentid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.oa.Foler" >
+    update OA_FOLDER
+    set NAME = #{name,jdbcType=VARCHAR},
+      CREATERID = #{createrid,jdbcType=VARCHAR},
+      PARENTID = #{parentid,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

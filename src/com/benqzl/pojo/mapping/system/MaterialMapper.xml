@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.MaterialMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Material" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="SIZEID" property="sizeid" jdbcType="VARCHAR" />
+    <result column="PRICKLEID" property="prickleid" jdbcType="VARCHAR" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="HANDLER" property="handler" jdbcType="VARCHAR" />
+    <result column="HANDLERTIME" property="handlertime" jdbcType="TIMESTAMP" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+    <association property="user" javaType="com.benqzl.pojo.system.User">
+    <id property="id" column="USERID"/>
+    <result property="username" column="UNAME"/>
+    <result property="email" column="ENAME"/>
+    </association>
+    <association property="size" javaType="com.benqzl.pojo.system.Size">
+    <id property="id" column="SIZEID"/>
+    <result property="name" column="SNAME"/>
+    </association>
+    <association property="prickle" javaType="com.benqzl.pojo.system.Prickle">
+    <id property="id" column="PRICKLEID"/>
+    <result property="name" column="PNAME"/>
+    </association>
+    <association property="employee" javaType="com.benqzl.pojo.system.Employee">
+    <id property="id" column="ID"/>
+    <result property="name" column="ENAMES"/>
+    <result property="phone" column="HENAMES"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, NAME, SIZEID,PRICKLEID,  MEMO, CREATER, CREATETIME, HANDLER, 
+   HANDLERTIME,STATE
+  </sql>
+    <sql id="Base_Column_List2" >
+     m.ID as ID, m.NAME as NAME, 
+     m.TYPE as TYPE,
+     m.SIZEID as SIZEID, m.PRICKLEID as PRICKLEID, m.MEMO as MEMO, m.CREATER as CREATER, m.CREATETIME as CREATETIME, m.HANDLER as HANDLER, 
+    m.HANDLERTIME as HANDLERTIME, m.STATE as STATE,p.name as PNAME,s.name as SNAME
+  </sql>
+   <sql id="Base_Column_List1" >
+    m.ID as ID, m.NAME as NAME, m.SIZEID as SIZEID, m.PRICKLEID as PRICKLEID, m.MEMO as MEMO, m.CREATER as CREATER, m.CREATETIME as CREATETIME, m.HANDLER as HANDLER, 
+    m.HANDLERTIME as HANDLERTIME, 
+    m.TYPE AS TYPE,
+    m.STATE as STATE,p.name as PNAME,s.name as SNAME,u.username as UNAME,
+    e.name as ENAMES,e.name as HENAMES
+  </sql>
+      <select id="findByPage" resultMap="BaseResultMap" parameterType="java.lang.String">
+     select B.*,u.username as ENAME,e.name as HENAMES from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from SYS_MATERIAL m
+		left join SYS_USER u on u.USERID=m.creater
+		left join SYS_EMPLOYEE e on e.id=u.employeeid
+		left join SYS_PRICKLE p on p.id=m.prickleid
+		left join SYS_SIZE s on s.id=m.sizeid
+		where 1 = 1
+		 <if test="creater != null and creater !='' and creater !='0'.toString()" >
+		and m.creater = #{creater,jdbcType=VARCHAR}
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and m.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and m.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		and m.state != 9
+		order by m.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		) B 
+		left join sys_user u on u.userid=B.handler
+		left join sys_employee e on e.id=u.employeeid
+		where RN &gt; #{p1}
+  </select>
+  <select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		SYS_MATERIAL m
+		left join SYS_USER u on m.creater=u.USERID
+		left join SYS_PRICKLE p on p.id=m.prickleid
+		left join SYS_SIZE s on s.id=m.sizeid
+		where 1 = 1
+		 <if test="creater != null and creater !=''and creater !='0'.toString()" >
+		and m.creater = #{createrid,jdbcType=VARCHAR}
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and m.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and m.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		and m.state !=9
+	</select>
+	
+	  <select id="selectcount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		SYS_MATERIAL m
+
+		where 1 = 1
+
+		and m.state !=9
+	</select>
+<select id="selectMaterialByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+    select 
+    <include refid="Base_Column_List2" />
+    from SYS_MATERIAL m
+    left join SYS_SIZE s on s.id=m.sizeid
+    left join SYS_PRICKLE p on p.id=m.prickleid 
+    where m.id = #{id,jdbcType=VARCHAR}
+</select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List1" />
+    from SYS_MATERIAL
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update SYS_MATERIAL set state=9
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Material" >
+    insert into SYS_MATERIAL (ID, NAME, SIZEID, 
+      PRICKLEID, MEMO, CREATER, 
+      CREATETIME, HANDLER, HANDLERTIME, 
+      STATE,TYPE)
+    values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{sizeid,jdbcType=VARCHAR}, 
+      #{prickleid,jdbcType=VARCHAR}, #{memo,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{handler,jdbcType=VARCHAR}, #{handlertime,jdbcType=TIMESTAMP}, 
+      #{state,jdbcType=DECIMAL},#{type,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Material" >
+    insert into SYS_MATERIAL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="sizeid != null" >
+        SIZEID,
+      </if>
+      <if test="prickleid != null" >
+        PRICKLEID,
+      </if>
+      <if test="memo != null" >
+        MEMO,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="handler != null" >
+        HANDLER,
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sizeid != null" >
+        #{sizeid,jdbcType=VARCHAR},
+      </if>
+      <if test="prickleid != null" >
+        #{prickleid,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null" >
+        #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="handler != null" >
+        #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        #{handlertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Material" >
+    update SYS_MATERIAL
+    <set >
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sizeid != null" >
+        SIZEID = #{sizeid,jdbcType=VARCHAR},
+      </if>
+      <if test="prickleid != null" >
+        PRICKLEID = #{prickleid,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null" >
+        MEMO = #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if> 
+      <if test="handler != null" >
+        HANDLER = #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME = #{handlertime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Material" >
+    update SYS_MATERIAL
+    set NAME = #{name,jdbcType=VARCHAR},
+      SIZEID = #{sizeid,jdbcType=VARCHAR},
+      PRICKLEID = #{prickleid,jdbcType=VARCHAR},
+      MEMO = #{memo,jdbcType=VARCHAR},
+      CREATER = #{creater,jdbcType=VARCHAR},
+     <!--  CREATETIME = #{createtime,jdbcType=TIMESTAMP}, -->
+      HANDLER = #{handler,jdbcType=VARCHAR},
+      HANDLERTIME = #{handlertime,jdbcType=TIMESTAMP},
+      STATE = #{state,jdbcType=DECIMAL},
+      TYPE=#{type,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

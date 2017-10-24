@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchSuperviseMapper">
+	<resultMap id="BaseResultMap"
+		type="com.benqzl.pojo.dispatch.ReceiptDispatchSupervise">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="RDID" property="rdid" jdbcType="VARCHAR" />
+		<result column="SUPERVISE" property="supervise" jdbcType="VARCHAR" />
+		<result column="SUPERVISEUNIT" property="superviseunit"
+			jdbcType="VARCHAR" />
+		<result column="SUPERVISEPEOPLE" property="supervisepeople"
+			jdbcType="VARCHAR" />
+		<result column="SUPERVISETIME" property="supervisetime"
+			jdbcType="TIMESTAMP" />
+		<result column="OPERATER" property="operater" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<association property="operateUser" javaType="com.benqzl.pojo.system.User">
+			<id column="OPERATER" property="userid" />
+			<result column="OPERATENAME" property="username" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, CREATETIME, RDID, SUPERVISE, SUPERVISEUNIT, SUPERVISEPEOPLE,
+		SUPERVISETIME, OPERATER,
+		CREATER
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_RD_SUPERVISE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from DIS_RD_SUPERVISE
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchSupervise">
+		insert into DIS_RD_SUPERVISE (ID, CREATETIME, RDID,
+		SUPERVISE, SUPERVISEUNIT, SUPERVISEPEOPLE,
+		SUPERVISETIME, OPERATER, CREATER
+		)
+		values (#{id,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP},
+		#{rdid,jdbcType=VARCHAR},
+		#{supervise,jdbcType=VARCHAR}, #{superviseunit,jdbcType=VARCHAR},
+		#{supervisepeople,jdbcType=VARCHAR},
+		#{supervisetime,jdbcType=TIMESTAMP}, #{operater,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchSupervise">
+		insert into DIS_RD_SUPERVISE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="rdid != null">
+				RDID,
+			</if>
+			<if test="supervise != null">
+				SUPERVISE,
+			</if>
+			<if test="superviseunit != null">
+				SUPERVISEUNIT,
+			</if>
+			<if test="supervisepeople != null">
+				SUPERVISEPEOPLE,
+			</if>
+			<if test="supervisetime != null">
+				SUPERVISETIME,
+			</if>
+			<if test="operater != null">
+				OPERATER,
+			</if>
+			<if test="creater != null">
+				CREATER,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="rdid != null">
+				#{rdid,jdbcType=VARCHAR},
+			</if>
+			<if test="supervise != null">
+				#{supervise,jdbcType=VARCHAR},
+			</if>
+			<if test="superviseunit != null">
+				#{superviseunit,jdbcType=VARCHAR},
+			</if>
+			<if test="supervisepeople != null">
+				#{supervisepeople,jdbcType=VARCHAR},
+			</if>
+			<if test="supervisetime != null">
+				#{supervisetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="operater != null">
+				#{operater,jdbcType=VARCHAR},
+			</if>
+			<if test="creater != null">
+				#{creater,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchSupervise">
+		update DIS_RD_SUPERVISE
+		<set>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="rdid != null">
+				RDID = #{rdid,jdbcType=VARCHAR},
+			</if>
+			<if test="supervise != null">
+				SUPERVISE = #{supervise,jdbcType=VARCHAR},
+			</if>
+			<if test="superviseunit != null">
+				SUPERVISEUNIT = #{superviseunit,jdbcType=VARCHAR},
+			</if>
+			<if test="supervisepeople != null">
+				SUPERVISEPEOPLE = #{supervisepeople,jdbcType=VARCHAR},
+			</if>
+			<if test="supervisetime != null">
+				SUPERVISETIME = #{supervisetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="operater != null">
+				OPERATER = #{operater,jdbcType=VARCHAR},
+			</if>
+			<if test="creater != null">
+				CREATER = #{creater,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchSupervise">
+		update DIS_RD_SUPERVISE
+		set CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+		RDID = #{rdid,jdbcType=VARCHAR},
+		SUPERVISE = #{supervise,jdbcType=VARCHAR},
+		SUPERVISEUNIT = #{superviseunit,jdbcType=VARCHAR},
+		SUPERVISEPEOPLE = #{supervisepeople,jdbcType=VARCHAR},
+		SUPERVISETIME = #{supervisetime,jdbcType=TIMESTAMP},
+		OPERATER = #{operater,jdbcType=VARCHAR},
+		CREATER = #{creater,jdbcType=VARCHAR}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="selectByRDID" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select c.*,t.name as OPERATENAME from DIS_RD_SUPERVISE c
+		left join
+		(select u.userid,e.name from sys_user u left join
+		sys_employee e on
+		u.employeeid = e.id) t on c.operater = t.userid
+		where
+		c.rdid = #{rdid}
+	</select>
+</mapper>

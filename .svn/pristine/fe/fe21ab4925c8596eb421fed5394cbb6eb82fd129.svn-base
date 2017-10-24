@@ -1,0 +1,989 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolApprovalMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolPlanDetails" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLPLANID" property="patrolplanid" jdbcType="VARCHAR" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+<!--     <result column="STATE" property="state" jdbcType="DECIMAL" /> -->
+    <result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+    <result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+    <association property="patrolplan" javaType="com.benqzl.pojo.patrol.PatrolPlan">
+    	<id column="PATROLPLANID" property="id" jdbcType="VARCHAR" />
+	    <result column="CODE" property="code" jdbcType="VARCHAR" />
+	    <result column="EXCEPTTIME" property="excepttime" jdbcType="TIMESTAMP" />
+	    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+	<!--     <result column="STATE" property="state" jdbcType="DECIMAL" /> -->
+	    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+	    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+	    <result column="SENDER" property="sender" jdbcType="VARCHAR" />
+	    <result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+    </association>
+    <association property="patrol" javaType="com.benqzl.pojo.patrol.Patrol">
+    	<id column="ID" property="id" jdbcType="VARCHAR" />
+	    <result column="PATROLPLANDETAILSID" property="patrolplandetailsid" jdbcType="VARCHAR" />
+	    <result column="PATROLTIME" property="patroltime" jdbcType="TIMESTAMP" />
+	    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+	    <result column="STATE" property="state" jdbcType="VARCHAR" />
+	    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+	    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+	    <result column="ADUITER" property="aduiter" jdbcType="VARCHAR" />
+	    <result column="ADUITTIME" property="aduittime" jdbcType="TIMESTAMP" />
+	    <association property="create" javaType="com.benqzl.pojo.system.User" >
+	    	<id column="CREATER" property="userid" jdbcType="VARCHAR" />	    
+		    <result column="CREATERNAME" property="username" jdbcType="TIMESTAMP" />
+		    <result column="EMPLOYEEID" property="employeeid" jdbcType="TIMESTAMP" />
+		    <association property="employee" javaType="com.benqzl.pojo.system.Employee" >
+		    	<id column="EMPLOYEEID" property="id" jdbcType="VARCHAR" />	    
+			    <result column="NAME" property="name" jdbcType="TIMESTAMP" />
+	    	</association>
+	    </association>
+    </association>
+    <association property="station" javaType="com.benqzl.pojo.system.Station">
+    	<id column="SID" property="id"/>
+    	<result column="STATIONNAME" property="name"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, CODE, EXCEPTTIME, MEMO, STATE, CREATER, CREATETIME, SENDER, SENDTIME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_PATROLPLAN
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findByPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+  select * from (select s.*,rownum rn from 
+  		(
+  	select a.id as patrolplanid ,a.code,b.id,
+    c.id as patrolid,c.patroltime,c.creater,d.username as creatername,c.createtime,
+    b.id as plandetailsid,c.state,d.employeeid,e.name ,b.sid,f.name as stationname
+    from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c ,
+    sys_user d,sys_employee e,sys_station f
+  	where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.creater=d.userid
+  	and d.employeeid=e.id and b.sid=f.id and (c.state='2' or c.state='3')
+  	<if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if> 	
+  	<if test="sql !=null">
+  		and b.id in(
+		<foreach collection="sql" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>
+		)
+  	</if>
+  	order by c.patroltime desc
+  	) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  		
+  </select>
+  <select id="pageCount" parameterType="java.util.Map" resultType="java.lang.Integer" >
+  	 select count(*) from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c ,
+    sys_user d where a.id=b.patrolplanid and b.id=c.patrolplandetailsid 
+    and c.creater=d.userid and (c.state='2' or c.state='3')
+    <if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+ 	<if test="sql!=null">
+  		and b.id in(
+		<foreach collection="sql" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>
+		)
+  	</if>
+  </select>
+  
+  <select id="findPatrolByppdid" parameterType="java.lang.String" resultType="com.benqzl.pojo.patrol.Patrol">
+  	select * from pl_patrol a where a.patrolplandetailsid=#{patrolplandetailsid}
+  </select>
+  <select id="findPatrolDetailsByPage" parameterType="java.util.Map" resultType="com.benqzl.pojo.patrol.PatrolDetails">
+  	select * from pl_patrol_details a where a.patrolid='${patrolid}'
+  	
+  </select>
+  <select id="pageCount2" resultType="java.lang.Integer" parameterType="java.util.Map">
+  	select count(*) from pl_patrol_details a where a.patrolid='${patrolid}'
+  </select>
+  <select id="aaa">
+  	select a.patrolplandetailsid,a.patroltime,
+	b.id as patroldetailid,b.enumid,b.contents,b.istype,b.handletype,b.handlecontents 
+	from pl_patrol a ,pl_patrol_details b,pl_patrol_people c
+	where a.id=b.patrolid and a.id=c.patrolid and a.patrolplandetailsid=#{patrolplandetailsid}
+  </select>
+  <update id="approval" parameterType="java.lang.String">
+  	update pl_patrol set state='3' where id=#{id}
+  </update>
+  <delete id="deletePatrolPeople" parameterType="java.lang.String">
+  	delete pl_patrol_people a where a.patrolid=#{patrolid}
+  </delete>
+  <update id="approval2" parameterType="java.lang.String">
+  	update pl_patrol set state='0' where id=#{patrolid}
+  </update>
+  <select id="findPatrolPeople" resultMap="map7" parameterType="java.lang.String">
+  	  select * from sys_user a,sys_employee b where a.employeeid=b.id and a.isdel='0' and b.sid=#{sid}
+  </select>
+  <resultMap type="com.benqzl.pojo.system.User" id="map7">
+  	<id column="USERID" property="userid"/>   	
+   	<result column="EMPLOYEEID" property="employeeid"/>
+   	<association property="employee" javaType="com.benqzl.pojo.system.Employee" >
+    	<id column="EMPLOYEEID" property="id"/>
+    	<result column="NAME" property="name"/>
+   	</association>
+  </resultMap>
+  <resultMap type="com.benqzl.pojo.patrol.Patrol" id="map3">
+  	<id column="PATROLID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLPLANDETAILSID" property="patrolplandetailsid" jdbcType="VARCHAR" />
+    <result column="PATROLTIME" property="patroltime" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="ADUITER" property="aduiter" jdbcType="VARCHAR" />
+    <result column="ADUITTIME" property="aduittime" jdbcType="TIMESTAMP" />
+    <association property="create" javaType="com.benqzl.pojo.system.User" >
+    	<id column="USERID" property="userid"/>
+    	<result column="USERNAME" property="username"/>
+    	<result column="EMPLOYEEID" property="employeeid"/>
+    	<association property="employee" javaType="com.benqzl.pojo.system.Employee" >
+	    	<id column="EMPLOYEEID" property="id"/>
+	    	<result column="NAME" property="name"/>
+    		<association property="station" javaType="com.benqzl.pojo.system.Station" >
+	    	<id column="SID" property="id"/>
+	    	<result column="STATIONNAME" property="name"/>  			
+    		</association>
+    	</association>
+    </association>
+    <association property="ppd" javaType="com.benqzl.pojo.patrol.PatrolPlanDetails">
+    	<id column="PATROLPLANDETAILSID" property="id" jdbcType="VARCHAR" />
+	    <result column="PATROLPLANID" property="patrolplanid" jdbcType="VARCHAR" />
+	    <result column="SID" property="sid" jdbcType="VARCHAR" />
+	    <result column="STATE" property="state" jdbcType="DECIMAL" />
+	    <result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+	    <result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+	    <association property="patrolplan" javaType="com.benqzl.pojo.patrol.PatrolPlan">
+	    	<id column="PATROLPLANID" property="id" jdbcType="VARCHAR" />
+		    <result column="CODE" property="code" jdbcType="VARCHAR" />
+		    <result column="EXCEPTTIME" property="excepttime" jdbcType="TIMESTAMP" />
+		    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		    <result column="STATE" property="state" jdbcType="DECIMAL" />
+		    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		    <result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		    <result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+	    </association>
+	    <association property="station" javaType="com.benqzl.pojo.system.Station">
+	    	<id column="SID" property="id" />
+	    	<result column="STATIONNAME" property="name"/>
+	    </association>
+    </association>
+    <collection property="pds" ofType="com.benqzl.pojo.patrol.PatrolDetails">
+    	<id column="ID" property="id" jdbcType="VARCHAR" />
+	    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+	    <result column="ENUMID" property="enumid" jdbcType="VARCHAR" />
+	    <result column="ISTYPE" property="istype" jdbcType="DECIMAL" />
+	    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+	    <result column="HANDLETYPE" property="handletype" jdbcType="DECIMAL" />
+	    <result column="HANDLECONTENTS" property="handlecontents" jdbcType="VARCHAR" />
+    </collection>
+    <collection property="pp" ofType="com.benqzl.pojo.patrol.PatrolPeople">
+    	<id column="PATROLPEOPLEID" property="id" jdbcType="VARCHAR" />
+	    <result column="PEOPLESTATE" property="state" jdbcType="DECIMAL" />
+	    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+	    <result column="OPERATER" property="operater" jdbcType="VARCHAR" />
+	    <result column="OPERATETIME" property="operatetime" jdbcType="TIMESTAMP" />
+	    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+	    <association property="user" javaType="com.benqzl.pojo.system.User">
+	    	<id column="OPERATER" property="userid"/>
+	    	<result column="USERNAME" property="username"/>
+	    </association>
+    </collection>
+  </resultMap>
+  <select id="findPatrolDetailProblemByPage" resultMap="map3" parameterType="java.util.Map">
+  		select a.id    as patrolplanid,
+                       a.code,
+                       b.id         as patrolplandetailsid,
+                       c.id         as patrolid,
+                       c.patroltime,
+                       c.creater,
+                       e.username,
+                       e.employeeid,
+                       x.name,
+                       c.createtime,
+                       c.state,
+                       x.sid,
+       				   y.name as stationname
+                  from pl_patrolplan         a,
+                       pl_patrolplan_details b,
+                       pl_patrol             c,
+                       pl_patrol_details     d,
+                       sys_user              e,
+                       sys_employee x,
+                       sys_station y
+                 where a.id = b.patrolplanid
+                   and b.id = c.patrolplandetailsid
+                   and c.id = d.patrolid
+                   and c.creater = e.userid
+                   and e.employeeid=x.id
+                   and x.sid=y.id
+                   and d.handletype = '0'
+                   and (c.state = '3' or c.state = '4')
+                   <if test="sid !=null">
+					 and b.sid=#{sid} 
+				   </if>                   
+  				   <if test="begin !=null">
+					 and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+				   </if>
+				   <if test="end !=null">
+					 and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+				   </if>
+  					and c.id in(
+  					select id
+                  from (select s.*, rownum rn
+                          from (select distinct h.id,h.state,h.patroltime
+                                  from pl_patrolplan          f,
+                                       pl_patrolplan_details  g,
+                                       pl_patrol              h,
+                                       pl_patrol_details      i,
+                                       sys_user               j
+                                 where f.id = g.patrolplanid
+                                   and g.id = h.patrolplandetailsid
+                                   and h.id = i.patrolid
+                                   and h.creater = j.userid
+                                   and i.handletype = '0'
+                                   and (h.state = '3' or h.state = '4')
+                                   <if test="sid !=null">
+									 and g.sid=#{sid} 
+								   </if>                   
+				  				   <if test="begin !=null">
+									 and h.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+								   </if>
+								   <if test="end !=null">
+									 and h.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+								   </if>
+                                 order by h.patroltime desc) s
+                         where rownum &lt;=#{p2}) where rn &gt; #{p1})
+                 order by c.patroltime desc
+                 
+  </select>
+  <select id="findPatrolDetailProblemByPage3" resultMap="map5" parameterType="java.util.Map">
+	select * from (select s.*,rownum rn from 
+  		(
+    select e.id as ID, a.id as patrolplanid,a.code,c.patrolplandetailsid,c.id as patrolid,c.creater,
+    d.username,d.employeeid,f.name,
+  	c.createtime,c.state,c.patroltime,e.state as peoplestate
+  	<if test="operater !=null">
+  		,f.sid,
+        g.name as stationname
+  	</if>
+	from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c,
+	sys_user d,pl_patrol_people e,sys_employee f
+	<if test="operater !=null">
+		,sys_station g
+	</if>
+	where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.creater=d.userid
+	and c.id=e.patrolid and d.employeeid=f.id and e.state in (0,1) and e.type='0' 
+	<if test="operater !=null">
+	and f.sid=g.id
+   	and e.operater='${operater}'
+    </if>	
+	<if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if>	
+	order by c.patroltime desc
+	) s
+    where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  </select>
+  <select id="pageCount3" resultType="java.lang.Integer" parameterType="java.util.Map">
+  	select count(distinct c.id)
+	from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c,sys_user d,pl_patrol_people e
+	where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.creater=d.userid
+	and c.id=e.patrolid and e.state in (0,1) and e.type='0' 
+	<if test="operater !=null">
+	and e.operater='${operater}'
+	</if>
+	<if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if>   	
+  </select>
+  <resultMap type="com.benqzl.pojo.patrol.Patrol" id="map4">
+  	<id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLPLANDETAILSID" property="patrolplandetailsid" jdbcType="VARCHAR" />
+    <result column="PATROLTIME" property="patroltime" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="ADUITER" property="aduiter" jdbcType="VARCHAR" />
+    <result column="ADUITTIME" property="aduittime" jdbcType="TIMESTAMP" />       
+    <collection property="pds" ofType="com.benqzl.pojo.patrol.PatrolDetails">
+    	<id column="ID" property="id" jdbcType="VARCHAR" />
+	    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+	    <result column="ENUMID" property="enumid" jdbcType="VARCHAR" />
+	    <result column="ISTYPE" property="istype" jdbcType="DECIMAL" />
+	    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+	    <result column="HANDLETYPE" property="handletype" jdbcType="DECIMAL" />
+	    <result column="HANDLECONTENTS" property="handlecontents" jdbcType="VARCHAR" />
+    </collection>
+  </resultMap>
+  <select id="findPatrolById" resultMap="map4" parameterType="java.lang.String">
+  	select * from pl_patrol a,pl_patrol_details b where a.id=b.patrolid and a.id=#{patrolid}
+  </select>
+  <select id="findPatrolById2" parameterType="java.lang.String" resultType="com.benqzl.pojo.patrol.Patrol">
+  	select * from pl_patrol a where a.id=#{patrolid}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_PATROLPLAN
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <select id="findPatrolDetailsProblemByPage" resultType="com.benqzl.pojo.patrol.PatrolDetails" parameterType="java.util.Map">
+  	select * from pl_patrol_details where patrolid='${patrolid}' and istype='1'
+  </select>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolPlan" >
+    insert into PL_PATROLPLAN (ID, CODE, EXCEPTTIME,
+      MEMO, STATE, CREATER,
+      CREATETIME, SENDER, SENDTIME
+      )
+    values (#{id,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{excepttime,jdbcType=TIMESTAMP}, 
+      #{memo,jdbcType=VARCHAR}, #{state,jdbcType=DECIMAL}, #{creater,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{sender,jdbcType=VARCHAR}, #{sendtime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolPlan" >
+    insert into PL_PATROLPLAN
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="code != null" >
+        CODE,
+      </if>
+      <if test="excepttime != null" >
+        EXCEPTTIME,
+      </if>
+      <if test="memo != null" >
+        MEMO,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="sender != null" >
+        SENDER,
+      </if>
+      <if test="sendtime != null" >
+        SENDTIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="excepttime != null" >
+        #{excepttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="memo != null" >
+        #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sender != null" >
+        #{sender,jdbcType=VARCHAR},
+      </if>
+      <if test="sendtime != null" >
+        #{sendtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolPlan" >
+    update PL_PATROLPLAN
+    <set >
+      <if test="code != null" >
+        CODE = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="excepttime != null" >
+        EXCEPTTIME = #{excepttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="memo != null" >
+        MEMO = #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sender != null" >
+        SENDER = #{sender,jdbcType=VARCHAR},
+      </if>
+      <if test="sendtime != null" >
+        SENDTIME = #{sendtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolPlan" >
+    update PL_PATROLPLAN
+    set CODE = #{code,jdbcType=VARCHAR},
+      EXCEPTTIME = #{excepttime,jdbcType=TIMESTAMP},
+      MEMO = #{memo,jdbcType=VARCHAR},
+      STATE = #{state,jdbcType=DECIMAL},
+      CREATER = #{creater,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      SENDER = #{sender,jdbcType=VARCHAR},
+      SENDTIME = #{sendtime,jdbcType=TIMESTAMP}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updatePatrolDetails" parameterType="java.util.Map">
+  	update pl_patrol_details a 
+  	set a.handlecontents='${handlecontents}' 
+  	where a.enumid='${enumid}' and patrolid='${patrolid}'
+  </update>
+  <insert id="insertPatrolPeople" parameterType="com.benqzl.pojo.patrol.PatrolPeople" >
+    insert into PL_PATROL_PEOPLE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="patrolid != null" >
+        PATROLID,
+      </if>
+      <if test="operater != null" >
+        OPERATER,
+      </if>
+      <if test="operatetime != null" >
+        OPERATETIME,
+      </if>
+      <if test="type != null" >
+        TYPE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="patrolid != null" >
+        #{patrolid,jdbcType=VARCHAR},
+      </if>
+      <if test="operater != null" >
+        #{operater,jdbcType=VARCHAR},
+      </if>
+      <if test="operatetime != null" >
+        #{operatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updatePatrolDone" parameterType="java.lang.String">
+  	update pl_patrol set state='4' where id=#{id}
+  </update>
+  <select id="findOperaterByPatrolid" parameterType="java.lang.String" resultType="java.lang.String">
+  	select b.userid from pl_patrol_people a,sys_user b
+ 	where a.patrolid=#{patrolid} and a.type='1' and a.operater=b.userid
+  </select>
+  <select id="findOperatetimeByPatrolid" parameterType="java.lang.String" resultType="java.lang.String">
+  	select operatetime from pl_patrol_people where patrolid=#{patrolid} and type='1'
+  </select>
+  <select id="findPatrolDetailProblemByPage2" resultMap="map6" parameterType="java.util.Map">  	
+	  select c.id as patrolid, b.patrolplanid,a.code,a.excepttime,c.patrolplandetailsid,b.sid,f.name as stationname,
+	  c.patroltime,e.id as patrolpeopleid,e.operater,
+	  g.username,d.id as patroldetailsid,g.employeeid,x.name
+	  from pl_patrolplan a, pl_patrolplan_details b,pl_patrol c, pl_patrol_details d,pl_patrol_people e,
+	  sys_station f ,sys_user g,sys_employee x
+	  where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.id=d.patrolid and c.id=e.patrolid and b.sid=f.id 
+	  and e.operater=g.userid and g.employeeid=x.id
+	  and d.istype='1' and d.handletype='1' and c.state in('3','4') 
+	  <!-- and e.type='0'  -->
+	  <if test="sid !=null">
+	  	and b.sid=#{sid}
+	  </if>
+	  <if test="begin !=null">
+		and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	  </if>
+	  <if test="end !=null">
+		and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	  </if>	  
+  		and c.id in(select id
+        from (select s.*, rownum rn
+        from (select distinct(j.id),j.patroltime
+        from pl_patrolplan    h,
+        pl_patrolplan_details i,
+        pl_patrol             j,
+        pl_patrol_details     k,
+        pl_patrol_people      l,
+        sys_station           m,
+        sys_user              n
+        where h.id = i.patrolplanid
+           and i.id = j.patrolplandetailsid
+           and j.id = k.patrolid
+           and j.id = l.patrolid
+           and i.sid = m.id
+           and l.operater = n.userid
+           and k.istype = '1'
+           and k.handletype = '1'
+           and j.state in('3','4') 
+           <!-- and l.type = '0' -->
+           <if test="sid !=null">
+			 and i.sid=#{sid}
+		   </if>
+			 <if test="begin !=null">
+			and j.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+			 </if>
+			 <if test="end !=null">
+			and j.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+			 </if>
+			 order by j.patroltime desc
+			 ) s where rownum &lt;=#{p2}) where rn &gt; #{p1})
+			 order by c.patroltime desc
+  </select>
+  <update id="verify" parameterType="java.util.Map">
+  	update pl_patrol_people set state='1' 
+  	where operater='${operater}' and patrolid='${patrolid}' and type='0'
+  </update>
+  <select id="findPeopleByPatrolid" parameterType="java.util.Map" resultType="com.benqzl.pojo.patrol.PatrolPeople">
+  	select * from pl_patrol_people where patrolid='${patrolid}' 
+  	and operater!='${operater}' and type='0'
+  </select>
+  <update id="updatePatrol" parameterType="java.lang.String">
+  	update pl_patrol set state='2' where id=#{patrolid}
+  </update>
+  <select id="findPPidByPatrolid" parameterType="java.lang.String" resultType="java.lang.String">	  
+	  select a.id from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c 
+	  where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.id=#{patrolid}
+  </select>
+  <select id="findNotAll" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select * from (select s.*,rownum rn from 
+  		(
+  	select a.id as patrolplanid ,a.code,b.id,
+    c.id as patrolid,c.patroltime,c.creater,d.username as creatername,c.createtime,
+    b.id as plandetailsid,c.state,d.employeeid,e.name,b.sid,f.name as stationname
+    from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c ,
+    sys_user d,sys_employee e,sys_station f
+  	where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.creater=d.userid
+  	and d.employeeid = e.id and b.sid=f.id and c.state='2' 
+  	<if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+  	<if test="sql!=null">
+  		and b.id in(
+		<foreach collection="sql" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>
+		)
+  	</if>
+  	order by c.patroltime desc 	
+  	) s
+  		where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  		
+  </select>
+    <select id="pageNotAll" parameterType="java.util.Map" resultType="java.lang.Integer" >	     
+    select count(*) from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c ,
+    sys_user d where a.id=b.patrolplanid and b.id=c.patrolplandetailsid 
+    and c.creater=d.userid and c.state='2'
+    <if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if> 
+  	<if test="sql!=null">
+  		and b.id in(
+		<foreach collection="sql" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>
+		)
+  	</if>
+  </select>
+  <select id="findPatrolDetailProblemByPage3NotAll" resultMap="map5" parameterType="java.util.Map">  	
+    select * from (select s.*,rownum rn from 
+  		(
+    select e.id as ID, a.id as patrolplanid,a.code,c.patrolplandetailsid,c.id as patrolid,c.creater,
+    d.username,d.employeeid,f.name,
+  	c.createtime,c.state,c.patroltime,e.state as peoplestate
+  	<if test="operater !=null">
+  		,f.sid,
+        g.name as stationname
+  	</if>
+	from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c,
+	sys_user d,pl_patrol_people e,sys_employee f
+	<if test="operater !=null">
+		,sys_station g
+	</if>
+	where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.creater=d.userid
+	and c.id=e.patrolid and d.employeeid=f.id  and e.state='0' and e.type='0' 
+	<if test="operater !=null">
+		and f.sid=g.id
+	   	and e.operater='${operater}'
+    </if>
+	<if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	order by c.patroltime desc
+	) s
+    where rownum &lt;=#{p2}) where rn &gt; #{p1}
+  </select>
+  <select id="pageCount3NotAll" resultType="java.lang.Integer" parameterType="java.util.Map">
+  	select count(distinct c.id)
+	from pl_patrolplan a,pl_patrolplan_details b,pl_patrol c,sys_user d,pl_patrol_people e
+	where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.creater=d.userid
+	and c.id=e.patrolid and e.state ='0' and e.type='0' and e.operater='${operater}' 
+  	<if test="operater !=null">
+	and operater='${operater}'
+	</if>
+  	<if test="begin !=null">
+	and a.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and a.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+  </select>
+  <select id="findSidByUserId" resultType="java.lang.String" parameterType="java.lang.String">
+  	    select b.sid from sys_user a,sys_employee b 
+  	    where a.isdel='0' and a.employeeid=b.id and a.userid=#{userid}
+  </select>
+  <resultMap type="com.benqzl.pojo.patrol.Patrol" id="map5">
+  		<id column="PATROLID" property="id" jdbcType="VARCHAR" />
+	    <result column="PATROLPLANDETAILSID" property="patrolplandetailsid" jdbcType="VARCHAR" />
+	    <result column="PATROLTIME" property="patroltime" jdbcType="TIMESTAMP" />
+	    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+	    <result column="STATE" property="state" jdbcType="VARCHAR" />
+	    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+	    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+	    <result column="ADUITER" property="aduiter" jdbcType="VARCHAR" />
+	    <result column="ADUITTIME" property="aduittime" jdbcType="TIMESTAMP" />
+	    <association property="create" javaType="com.benqzl.pojo.system.User" >
+	    	<id column="USERID" property="userid"/>
+	    	<result column="USERNAME" property="username"/>
+	    	<result column="EMPLOYEEID" property="employeeid"/>
+	    	<association property="employee" javaType="com.benqzl.pojo.system.Employee" >
+	    		<id column="EMPLOYEEID" property="id"/>
+	    		<result column="NAME" property="name"/>
+	    		<result column="SID" property="sid"/>
+	    		<association property="station" javaType="com.benqzl.pojo.system.Station" >
+	    		<id column="SID" property="id"/>
+	    		<result column="STATIONNAME" property="name"/>	    		
+	    		</association>
+	    	</association>
+	    </association>
+	    <association property="ppd" javaType="com.benqzl.pojo.patrol.PatrolPlanDetails">
+	    	<id column="PATROLPLANDETAILSID" property="id" jdbcType="VARCHAR" />
+		    <result column="PATROLPLANID" property="patrolplanid" jdbcType="VARCHAR" />
+		    <result column="SID" property="sid" jdbcType="VARCHAR" />
+		    <result column="STATE" property="state" jdbcType="DECIMAL" />
+		    <result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+		    <result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+		    <association property="patrolplan" javaType="com.benqzl.pojo.patrol.PatrolPlan">
+		    	<id column="PATROLID" property="id" jdbcType="VARCHAR" />
+			    <result column="CODE" property="code" jdbcType="VARCHAR" />
+			    <result column="EXCEPTTIME" property="excepttime" jdbcType="TIMESTAMP" />
+			    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+			    <result column="STATE" property="state" jdbcType="DECIMAL" />
+			    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+			    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+			    <result column="SENDER" property="sender" jdbcType="VARCHAR" />
+			    <result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		    </association>
+		    <association property="station" javaType="com.benqzl.pojo.system.Station">
+		    	<id column="SID" property="id" />
+		    	<result column="STATIONNAME" property="name"/>
+		    </association>
+	    </association>
+  		<association property="patrolpeople" javaType="com.benqzl.pojo.patrol.PatrolPeople">
+  			<id column="ID" property="id" jdbcType="VARCHAR" />
+		    <result column="PEOPLESTATE" property="state" jdbcType="DECIMAL" />
+		    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+		    <result column="OPERATER" property="operater" jdbcType="VARCHAR" />
+		    <result column="OPERATETIME" property="operatetime" jdbcType="TIMESTAMP" />
+		    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+  		</association>
+  </resultMap>
+  <select id="findOtherPatrolsByPatrolid" parameterType="java.lang.String" resultType="com.benqzl.pojo.patrol.Patrol">
+  	  select c.* from pl_patrolplan a ,pl_patrolplan_details b, pl_patrol c
+  
+	  where a.id=b.patrolplanid and b.id=c.patrolplandetailsid 
+	  
+	  and a.id=(  select a.id from pl_patrolplan a ,pl_patrolplan_details b, pl_patrol c
+	  
+	  where a.id=b.patrolplanid and b.id=c.patrolplandetailsid 
+	  
+	  and c.id !=#{patrolid})
+	  
+	  and c.id !=#{patrolid}
+  </select>
+  <select id="pageCount4" resultType="java.lang.Integer" parameterType="java.util.Map">
+  	select count(distinct c.id)
+  	from pl_patrolplan a,pl_patrolplan_details b, pl_patrol c,pl_patrol_details d ,sys_user e
+	where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.id=d.patrolid and c.creater=e.userid
+	and d.handletype='0' and (c.state='3' or c.state='4')  
+	<if test="sid !=null">
+	and b.sid=#{sid} 
+	</if>
+	<if test="begin !=null">
+	and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="end !=null">
+	and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	</if>		
+	order by c.state
+  </select>
+  <select id="pageCount5" resultType="java.lang.Integer" parameterType="java.util.Map">
+  	  select count(distinct c.id)
+	  from pl_patrolplan a, pl_patrolplan_details b,pl_patrol c, pl_patrol_details d,pl_patrol_people e, sys_station f ,sys_user g
+	  where a.id=b.patrolplanid and b.id=c.patrolplandetailsid and c.id=d.patrolid and c.id=e.patrolid and b.sid=f.id and e.operater=g.userid
+	  and d.istype='1' and d.handletype='1' and e.type='0' and c.state in('3','4')
+	  <if test="sid !=null">
+	  	and b.sid=#{sid}
+	  </if>
+	  <if test="begin !=null">
+	    and c.patroltime &gt;= to_date('${begin}','yyyy-mm-dd hh24:mi:ss')
+	  </if>
+	  <if test="end !=null">
+		and c.patroltime &lt;= to_date('${end}','yyyy-mm-dd hh24:mi:ss')
+	  </if>
+  </select>
+  <select id="findPatrolDetailsProblemByPage3" resultType="com.benqzl.pojo.patrol.PatrolDetails" parameterType="java.util.Map">
+  	select * from pl_patrol_details where patrolid='${patrolid}' and istype='1' and handletype='0'
+  </select>
+  <select id="findPatrolDetailsProblemByPage4" resultType="com.benqzl.pojo.patrol.PatrolDetails" parameterType="java.util.Map">
+  	select * from pl_patrol_details where patrolid='${patrolid}' and istype='1' and handletype='1'
+  </select>
+  <select id="pageCount6" resultType="java.lang.Integer" parameterType="java.util.Map">
+  	select count(*) from pl_patrol_details where patrolid='${patrolid}' and istype='1' and handletype='0'
+  </select>
+  <select id="findPDidByPatrolid" resultType="java.lang.String" parameterType="java.lang.String">
+  	 select a.patrolplandetailsid from pl_patrol a where id=#{patrolid}
+  </select>
+  <resultMap type="com.benqzl.pojo.patrol.Patrol" id="map6">
+  	<id column="PATROLID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLPLANDETAILSID" property="patrolplandetailsid" jdbcType="VARCHAR" />
+    <result column="PATROLTIME" property="patroltime" jdbcType="TIMESTAMP" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="ADUITER" property="aduiter" jdbcType="VARCHAR" />
+    <result column="ADUITTIME" property="aduittime" jdbcType="TIMESTAMP" />
+    <!-- <association property="create" javaType="com.benqzl.pojo.system.User" >
+    	<id column="USERID" property="userid"/>
+    	<result column="USERNAME" property="username"/>
+    </association> -->
+    <association property="ppd" javaType="com.benqzl.pojo.patrol.PatrolPlanDetails">
+    	<id column="PATROLPLANDETAILSID" property="id" jdbcType="VARCHAR" />
+	    <result column="PATROLPLANID" property="patrolplanid" jdbcType="VARCHAR" />
+	    <result column="SID" property="sid" jdbcType="VARCHAR" />
+	    <result column="STATE" property="state" jdbcType="DECIMAL" />
+	    <result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+	    <result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+	    <association property="patrolplan" javaType="com.benqzl.pojo.patrol.PatrolPlan">
+	    	<id column="PATROLPLANID" property="id" jdbcType="VARCHAR" />
+		    <result column="CODE" property="code" jdbcType="VARCHAR" />
+		    <result column="EXCEPTTIME" property="excepttime" jdbcType="TIMESTAMP" />
+		    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		    <result column="STATE" property="state" jdbcType="DECIMAL" />
+		    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		    <result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		    <result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+	    </association>
+	    <association property="station" javaType="com.benqzl.pojo.system.Station">
+	    	<id column="SID" property="id" />
+	    	<result column="STATIONNAME" property="name"/>
+	    </association>
+    </association>
+    <collection property="pds" ofType="com.benqzl.pojo.patrol.PatrolDetails">
+    	<id column="PATROLDETAILSID" property="id" jdbcType="VARCHAR" />
+	    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+	    <result column="ENUMID" property="enumid" jdbcType="VARCHAR" />
+	    <result column="ISTYPE" property="istype" jdbcType="DECIMAL" />
+	    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+	    <result column="HANDLETYPE" property="handletype" jdbcType="DECIMAL" />
+	    <result column="HANDLECONTENTS" property="handlecontents" jdbcType="VARCHAR" />
+    </collection>
+    <collection property="pp" ofType="com.benqzl.pojo.patrol.PatrolPeople">
+    	<id column="PATROLPEOPLEID" property="id" jdbcType="VARCHAR" />
+	    <result column="PEOPLESTATE" property="state" jdbcType="DECIMAL" />
+	    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+	    <result column="OPERATER" property="operater" jdbcType="VARCHAR" />
+	    <result column="OPERATETIME" property="operatetime" jdbcType="TIMESTAMP" />
+	    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+	    <association property="user" javaType="com.benqzl.pojo.system.User">
+	    	<id column="OPERATER" property="userid"/>
+	    	<result column="USERNAME" property="username"/>
+	    	<result column="EMPLOYEEID" property="employeeid"/>
+	    	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+	    	<id column="EMPLOYEEID" property="id"/>
+	    	<result column="NAME" property="name"/>
+	    </association>
+	    </association>
+    </collection>
+  </resultMap>
+  <select id="findSidByPatrolid" parameterType="java.lang.String" resultType="java.lang.String">
+  	select b.sid from pl_patrol a,pl_patrolplan_details b
+	where a.patrolplandetailsid=b.id and a.id=#{patrolid}
+  </select>
+  	 <resultMap id="map1" type="com.benqzl.pojo.patrol.PatrolNormal" >
+	    <id column="ID" property="id" jdbcType="VARCHAR" />
+	    <result column="PARTTIME" property="parttime" jdbcType="TIMESTAMP" />
+	    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+	    <result column="STATE" property="state" jdbcType="DECIMAL" />
+	    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+	    <result column="SID" property="sid" jdbcType="VARCHAR" />
+	    <result column="DEGREE" property="degree" jdbcType="DECIMAL" />
+	    <association property="createuser" javaType="com.benqzl.pojo.system.User" >
+	    	<id column="CREATER" property="userid" jdbcType="VARCHAR" />	    		    
+		    <result column="createremployeeid" property="employeeid" jdbcType="TIMESTAMP" />
+		    <association property="employee" javaType="com.benqzl.pojo.system.Employee" >
+		    	<id column="createremployeeid" property="id" jdbcType="VARCHAR" />	    
+			    <result column="creatername" property="name" jdbcType="TIMESTAMP" />
+	    	</association>
+	    </association>
+	    <association property="station" javaType="com.benqzl.pojo.system.Station" >
+	    	<id column="SID" property="id"/>
+    		<result column="STATIONNAME" property="name"/>
+	    </association>
+	    <collection property="peoples" ofType="com.benqzl.pojo.patrol.PatrolNormalPeople">
+	    	<id column="normalpeopleid" property="id" jdbcType="VARCHAR" />
+		    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+		    <result column="HANDLER" property="handler" jdbcType="VARCHAR" />
+		    <result column="HANDLERTIME" property="handlertime" jdbcType="DATE" />
+		    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+		    <association property="user" javaType="com.benqzl.pojo.system.User" >
+		    	<id column="handler" property="userid" jdbcType="VARCHAR" />	    		    
+			    <result column="handleremployeeid" property="employeeid" jdbcType="TIMESTAMP" />
+			    <association property="employee" javaType="com.benqzl.pojo.system.Employee" >
+			    	<id column="handleremployeeid" property="id" jdbcType="VARCHAR" />	    
+				    <result column="handlername" property="name" jdbcType="TIMESTAMP" />
+		    	</association>
+		    </association>
+	    </collection>
+	  </resultMap>
+ 	<select id="findPatrolNormal" parameterType="java.util.Map" resultMap="map1">
+         select a.*,g.name as stationname ,c.employeeid as createremployeeid,d.name as creatername,
+         b.id as normalpeopleid,b.handler,e.employeeid as handleremployeeid,f.name handlername                                
+         from pl_patrol_normal a,pl_normal_people b,
+         sys_user c,sys_employee d ,sys_user e,sys_employee f,sys_station g
+         where a.id=b.patrolid and a.creater=c.userid and c.employeeid=d.id and a.sid=g.id
+         and b.handler=e.userid and e.employeeid=f.id
+         and a.state !=9 and a.state!=0
+         <if test="sid !=null">
+         	and a.sid=#{sid}
+         </if>
+         <if test="begin !=null">
+         	and a.parttime &gt;=to_date(#{begin},'yyyy-mm-dd HH24:MI:SS')
+         </if>
+         <if test="end !=null">
+         	and a.parttime &lt;=to_date(#{end},'yyyy-mm-dd HH24:MI:SS')
+         </if>
+         and a.id in (
+         	select id from (select s.*,rownum rn from 
+  			(
+  			select  distinct a.id  ,a.creater                             
+                 from pl_patrol_normal a,pl_normal_people b,
+                 sys_user c,sys_employee d ,sys_user e,sys_employee f,sys_station g
+                 where a.id=b.patrolid and a.creater=c.userid and c.employeeid=d.id and a.sid=g.id
+                 and b.handler=e.userid and e.employeeid=f.id
+                 <if test="sid !=null">
+		         	and a.sid=#{sid}
+		         </if>
+		         <if test="begin !=null">
+		         	and a.parttime &gt;=to_date(#{begin},'yyyy-mm-dd HH24:MI:SS')
+		         </if>
+		         <if test="end !=null">
+		         	and a.parttime &lt;=to_date(#{end},'yyyy-mm-dd HH24:MI:SS')
+		         </if>
+                  
+                 order by a.creater desc
+  			) s
+    where rownum &lt;=#{p2}) where rn &gt; #{p1}
+         )
+        <!--  order by a.creater desc, a.sid asc 按创建人/枢纽排序-->
+       <!--   按制单时间倒序 -->
+         order by a.createtime desc 
+ 	</select>
+ 	<select id="findPatrolNormalcount" parameterType="java.util.Map" resultType="java.lang.Integer">
+ 		select count(*) from( select  distinct a.id  ,a.creater                             
+        from pl_patrol_normal a,pl_normal_people b,
+        sys_user c,sys_employee d ,sys_user e,sys_employee f,sys_station g
+        where a.id=b.patrolid and a.creater=c.userid and c.employeeid=d.id and a.sid=g.id
+        and b.handler=e.userid and e.employeeid=f.id
+        and a.state !=9 and a.state!=0
+        <if test="sid !=null">
+        	and a.sid=#{sid}
+        </if>
+        <if test="begin !=null">
+         	and a.parttime &gt;=to_date(#{begin},'yyyy-mm-dd HH24:MI:SS')
+         </if>
+         <if test="end !=null">
+         	and a.parttime &lt;=to_date(#{end},'yyyy-mm-dd HH24:MI:SS')
+         </if>
+	        and a.id in (
+	         	select id from (select s.*,rownum rn from 
+	  			(
+	  			select  distinct a.id  ,a.creater                             
+	                 from pl_patrol_normal a,pl_normal_people b,
+	                 sys_user c,sys_employee d ,sys_user e,sys_employee f,sys_station g
+	                 where a.id=b.patrolid and a.creater=c.userid and c.employeeid=d.id and a.sid=g.id
+	                 and b.handler=e.userid and e.employeeid=f.id
+	                 <if test="sid !=null">
+			         	and a.sid=#{sid}
+			         </if>
+			         <if test="begin !=null">
+			         	and a.parttime &gt;=to_date(#{begin},'yyyy-mm-dd HH24:MI:SS')
+			         </if>
+			         <if test="end !=null">
+			         	and a.parttime &lt;=to_date(#{end},'yyyy-mm-dd HH24:MI:SS')
+			         </if>
+	                  
+	                 order by a.creater desc
+	  			) s
+	    where rownum &lt;=#{p2}) where rn &gt; #{p1}
+	         ) )
+ 	</select>
+</mapper>

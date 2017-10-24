@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.DepartmentMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Department" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PAREID" property="pareid" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="TELEPHONE" property="telephone" jdbcType="DECIMAL" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime"  />
+    <result column="EDITTIME" property="edittime"  />
+    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, PAREID, NAME, TELEPHONE, REMARK, CREATETIME, EDITTIME, ISDEL
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_DEPARTMENT
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectByName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_DEPARTMENT
+    where  name=#{name,jdbcType=VARCHAR} AND isdel = 0
+  </select>
+  <select id="selectByParentId" parameterType="java.lang.String" resultMap="BaseResultMap">
+  	select
+  	<include refid="Base_Column_List"></include>
+  	from SYS_DEPARTMENT
+  	where PAREID=#{pareid,jdbcType=VARCHAR} AND isdel = 0
+  	order by createtime
+  </select>
+  <!-- selectAll -->
+  <select id="selectAll" resultMap="BaseResultMap">
+  	select
+  	<include refid="Base_Column_List"></include>
+  	from SYS_DEPARTMENT
+  	where isdel = 0
+  	order by createtime
+  </select>
+  <update id="deleteByPrimaryKey" parameterType="java.util.Map" >
+ 	 update SYS_DEPARTMENT set ISDEL =#{isdel,jdbcType=DECIMAL} , EDITTIME = #{edittime}
+     where ID in (
+     <foreach collection="list" item="item" index="index" separator ="union all" >  
+      select #{item,jdbcType=VARCHAR} from dual
+    </foreach>
+    ) 
+  </update>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Department" >
+    insert into SYS_DEPARTMENT (ID, PAREID, NAME, 
+      TELEPHONE, REMARK, CREATETIME, 
+      EDITTIME, ISDEL)
+    values (#{id,jdbcType=VARCHAR}, #{pareid,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{telephone,jdbcType=DECIMAL}, #{remark,jdbcType=VARCHAR}, #{createtime}, 
+      #{edittime}, #{isdel,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Department" >
+    insert into SYS_DEPARTMENT
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="pareid != null" >
+        PAREID,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="telephone != null" >
+        TELEPHONE,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="isdel != null" >
+        ISDEL,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="pareid != null" >
+        #{pareid,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null" >
+        #{telephone,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime},
+      </if>
+      <if test="edittime != null" >
+        #{edittime},
+      </if>
+      <if test="isdel != null" >
+        #{isdel,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Department" >
+    update SYS_DEPARTMENT
+    <set >
+      <if test="pareid != null" >
+        PAREID = #{pareid,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null" >
+        TELEPHONE = #{telephone,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime},
+      </if>
+      <if test="isdel != null" >
+        ISDEL = #{isdel,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Department" >
+    update SYS_DEPARTMENT
+    set PAREID = #{pareid,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      TELEPHONE = #{telephone,jdbcType=DECIMAL},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      CREATETIME = #{createtime},
+      EDITTIME = #{edittime},
+      ISDEL = #{isdel,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByArea" resultMap="BaseResultMap">
+  	select * from sys_department where id in (
+select departmentid from sys_station group by departmentid)
+  </select>
+</mapper>

@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchDepartmentMapper">
+	<resultMap id="BaseResultMap"
+		type="com.benqzl.pojo.dispatch.ReceiptDispatchDepartment">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="RDID" property="rdid" jdbcType="VARCHAR" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+	</resultMap>
+	<resultMap id="BaseResulAlltMap"
+		type="com.benqzl.pojo.dispatch.ReceiptDispatchDepartment">
+		<id column="rddid" property="id" jdbcType="VARCHAR" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<result column="DSENDER" property="sender" jdbcType="VARCHAR" />
+		<result column="DSENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<result column="RDDSTATE" property="state" jdbcType="DECIMAL"/>
+		<association property="senduser" javaType="com.benqzl.pojo.system.User">
+			<id column="DSENDER" property="userid" />
+			<result column="SENDUSERNAME" property="username" jdbcType="VARCHAR" />
+		</association>
+		<association property="department" javaType="com.benqzl.pojo.system.Department">
+			<id column="DEPARTMENTID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		</association>
+		<association property="rd"
+			javaType="com.benqzl.pojo.dispatch.ReceiptDispatch">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="RECEIPTID" property="receiptid" jdbcType="VARCHAR" />
+			<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+			<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+			<result column="CODE" property="code" jdbcType="VARCHAR" />
+			<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+			<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+			<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+			<result column="TRANSMITCONTENTS" property="transmitcontents"
+				jdbcType="VARCHAR" />
+			<result column="TRANSMITER" property="transmiter" jdbcType="VARCHAR" />
+			<result column="TRANSMITTIME" property="transmittime"
+				jdbcType="TIMESTAMP" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+			<result column="TRSTATE" property="trstate" jdbcType="DECIMAL" />
+			<result column="COMPLETETIME" property="completetime"
+				jdbcType="TIMESTAMP" />
+			<result column="DISPATCHTYPE" property="dispatchtype"
+				jdbcType="VARCHAR" />
+			<association property="receipt" javaType="com.benqzl.pojo.dispatch.Receipt">
+				<id column="RECEIPTID" property="id" />
+				<result column="RECEIPTER" property="receipter" />
+				<result column="RECEIPTETIME" property="receiptetime" />
+				<result column="LAUNCHER" property="launcher" />
+				<result column="LAUNCHTIME" property="launchtime" />
+				<result column="ENDTIME" property="endtime" />
+				<result column="RMEMO" property="memo"></result>
+				<result column="RCODE" property="code"></result>
+			</association>
+			<association property="names"
+				javaType="com.benqzl.pojo.dispatch.ReceiptDispatchUserName">
+				<result column="CREATENAME" property="CreateName" />
+				<!-- <result column="SENDUSERNAME" property="SendUserName" /> -->
+				<result column="TRANSMITNAME" property="TransmitName" />
+				<result column="RECEIPTNAME" property="ReceiptName" />
+				<result column="RCREATENAME" property="RCreateName" />
+			</association>
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, RDID, DEPARTMENTID, SENDER, SENDTIME, STATE
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from DIS_RD_DEPARTMENT
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		DIS_RD_DEPARTMENT
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="deleteDepartment" parameterType="java.lang.String">
+		delete from
+		DIS_RD_DEPARTMENT
+		where rdId=#{reid,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insertDepartment" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchDepartment">
+		insert into DIS_RD_DEPARTMENT (ID, DEPARTMENTID, RDID,STATE
+		)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR},
+			#{item.departmentid,jdbcType=VARCHAR},
+			#{item.rdid,jdbcType=VARCHAR},#{item.state,jdbcType=VARCHAR}
+			from
+			dual)
+		</foreach>
+	</insert>
+	<insert id="insert" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchDepartment">
+		insert into DIS_RD_DEPARTMENT
+		(ID, RDID, DEPARTMENTID,
+		SENDER, SENDTIME, STATE
+		)
+		values
+		(#{id,jdbcType=VARCHAR}, #{rdid,jdbcType=VARCHAR},
+		#{departmentid,jdbcType=VARCHAR},
+		#{sender,jdbcType=VARCHAR},
+		#{sendtime,jdbcType=DATE}, #{state,jdbcType=DECIMAL}
+		)
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchDepartment">
+		insert into DIS_RD_DEPARTMENT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="rdid != null">
+				RDID,
+			</if>
+			<if test="departmentid != null">
+				DEPARTMENTID,
+			</if>
+			<if test="sender != null">
+				SENDER,
+			</if>
+			<if test="sendtime != null">
+				SENDTIME,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="rdid != null">
+				#{rdid,jdbcType=VARCHAR},
+			</if>
+			<if test="departmentid != null">
+				#{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="sender != null">
+				#{sender,jdbcType=VARCHAR},
+			</if>
+			<if test="sendtime != null">
+				#{sendtime,jdbcType=DATE},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchDepartment">
+		update DIS_RD_DEPARTMENT
+		<set>
+			<if test="rdid != null">
+				RDID = #{rdid,jdbcType=VARCHAR},
+			</if>
+			<if test="departmentid != null">
+				DEPARTMENTID = #{departmentid,jdbcType=VARCHAR},
+			</if>
+			<if test="sender != null">
+				SENDER = #{sender,jdbcType=VARCHAR},
+			</if>
+			<if test="sendtime != null">
+				SENDTIME = #{sendtime,jdbcType=DATE},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchDepartment">
+		update
+		DIS_RD_DEPARTMENT
+		set RDID = #{rdid,jdbcType=VARCHAR},
+		DEPARTMENTID =
+		#{departmentid,jdbcType=VARCHAR},
+		SENDER = #{sender,jdbcType=VARCHAR},
+		SENDTIME = #{sendtime,jdbcType=DATE},
+		STATE = #{state,jdbcType=DECIMAL}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateById" parameterType="java.util.Map">
+		update dis_rd_department
+		<set>
+			state=1,
+			sender=#{sender,jdbcType=VARCHAR},
+			sendtime=sysdate
+		</set>
+		where RDID =#{id,jdbcType=VARCHAR}
+		and departmentid =
+		#{departmentid,jdbcType=VARCHAR}
+	</update>
+	<update id="update" parameterType="java.util.Map">
+		update dis_rd_department
+		set
+		state=2
+		where RDID =#{id,jdbcType=VARCHAR}
+		and
+		departmentid =
+		#{departmentid,jdbcType=VARCHAR}
+	</update>
+	<select id="selectByPk" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+	<!-- 	select count(d.states) as STATE from(
+		select
+		distinct(count(state)) as states
+		from dis_rd_department where RDID
+		=#{id,jdbcType=VARCHAR}
+		and
+		departmentid=#{departmentid,jdbcType=VARCHAR})d -->
+	   <!--  判断部门下的枢纽状态 states=1时完成 -->
+		select count(d.state) as states from( select distinct(drs.state) as state
+        from  dis_rd_department drd 
+        left join 
+       <!--  dis_rd_stations drs  -->
+       (select drs.rdispatchid as rdispatchid ,drs.state as state from dis_rd_stations drs left join sys_station s on drs.sid=s.id
+                 where s.departmentid=#{departmentid,jdbcType=VARCHAR}           
+                ) drs
+        on  drd.rdid =drs.rdispatchid        
+        where drd.rdid = #{id,jdbcType=VARCHAR}
+        and drd.departmentid = #{departmentid,jdbcType=VARCHAR}) d
+	</select>
+	<select id="findRdSendList" parameterType="java.util.Map" resultMap="BaseResulAlltMap">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		rd.*,rdd.departmentid,rdd.id as rddid,rdd.sendtime as dsendtime,rdd.sender as dsender,d.name,zu.name as
+		CreateName, su.name as
+		SendUserName,ru.name as
+		ReceiptName,tu.name as
+		transmitName,r.receipter,r.receiptetime,r.launcher,r.launchtime,r.endtime,r.memo
+		as rmemo,rdd.state as RDDSTATE
+		from dis_receipt_dispatch rd left join dis_receipt r on r.id =
+		rd.receiptid
+		inner join dis_rd_department rdd on rd.id = rdd.rdid 
+		left join (select userid,name from SYS_EMPLOYEE join
+		SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) zu on zu.userid =
+		rd.creater
+		left join (select userid,name from SYS_EMPLOYEE join
+		SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) su on su.userid =
+		rdd.sender
+		left join (select userid,name from SYS_EMPLOYEE join SYS_USER
+		on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) ru on ru.userid = r.receipter
+		left join (select userid, name
+		from SYS_EMPLOYEE
+		join SYS_USER
+		on
+		SYS_EMPLOYEE.id = SYS_USER.employeeid) tu
+		on tu.userid = rd.transmiter
+		
+		left join sys_department d on d.id = rdd.departmentid
+		<where>
+			rd.state != 9 and rd.state !=0
+			<if test="state != null">
+				and rd.state = #{state}
+			</if>
+			<if test="rpid != null">
+				and ${rpid}
+			</if>
+			<if test="bh !=null and bh!=''">
+				and rd.code like '%'||#{bh,jdbcType=VARCHAR}||'%'
+			</if>
+			<if test="code != null">
+				and rd.code like '%${code}%'
+			</if>
+			<if test="launchBegintime != null">
+				and r.LaunchTime &gt;= #{launchBegintime}
+			</if>
+			<if test="launchEndtime != null">
+				and r.endtime &lt;= #{launchEndtime}
+			</if>
+			<if test="launcher != null">
+				and r.launcher like '%${launcher}%'
+			</if>
+			<if test="starttime !=null">
+			     and r.receiptetime &gt;=#{starttime}
+			</if>
+			<if test="endtime !=null">
+			     and r.receiptetime &lt;=#{endtime}
+			</if>
+			<if test="type != null">
+				and rd.dispatchtype = #{type}
+			</if>
+		</where>
+
+		order by r.launchtime desc ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	
+	<select id="findRdSendCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select Count(*) from dis_receipt_dispatch rd left
+		join
+		dis_receipt r on
+		r.id = rd.receiptid
+		inner join dis_rd_department rdd on rd.id = rdd.rdid
+		left join (select userid,name from
+		SYS_EMPLOYEE join
+		SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) zu
+		on zu.userid =
+		rd.creater
+		left join (select userid,name from
+		SYS_EMPLOYEE join SYS_USER
+		on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) su
+		on su.userid = rd.sender
+		left
+		join (select userid,name from
+		SYS_EMPLOYEE join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) ru
+		on ru.userid = r.receipter
+		left
+		join (select userid, name
+		from SYS_EMPLOYEE
+		join SYS_USER
+		on SYS_EMPLOYEE.id = SYS_USER.employeeid) tu
+		on tu.userid = rd.transmiter 
+		
+		<where>
+			rd.state != 9 and rd.state !=0
+			<if test="state != null">
+				and rd.state = #{state}
+			</if>
+			<if test="rpid != null">
+				and ${rpid}
+			</if>
+			<if test="bh !=null and bh!=''">
+				and rd.code like '%'||#{bh,jdbcType=VARCHAR}||'%'
+			</if>
+			<if test="code != null">
+				and rd.code like '%${code}%'
+			</if>
+			<if test="launchBegintime != null">
+				and r.LaunchTime &gt;= #{launchBegintime}
+			</if>
+			<if test="launchEndtime != null">
+				and r.endtime &lt;= #{launchEndtime}
+			</if>
+			<if test="launcher != null">
+				and r.launcher like '%${launcher}%'
+			</if>
+				<if test="starttime !=null">
+			     and r.receiptetime &gt;=#{starttime}
+			</if>
+			<if test="endtime !=null">
+			     and r.receiptetime &lt;=#{endtime}
+			</if>
+			<if test="type != null">
+				and rd.dispatchtype = #{type}
+			</if>
+		</where>
+	</select>
+</mapper>

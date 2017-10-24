@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolSpecialProjectReportMapper">
+	<resultMap id="BaseResultMap"
+		type="com.benqzl.pojo.patrol.PatrolSpecialProjectReport">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ISID" property="isid" jdbcType="VARCHAR" />
+		<result column="REPORTER" property="reporter" jdbcType="VARCHAR" />
+		<result column="REPORTTIME" property="reporttime" jdbcType="DATE" />
+		<association property="reportUser" javaType="com.benqzl.pojo.system.User">
+			<id column="REPORTER" property="userid" />
+			<result column="ENAME" property="username" />
+		</association>
+		<association property="flow"
+			javaType="com.benqzl.pojo.patrol.PatrolSpecialFolw">
+			<id column="ISID" property="isid"></id>
+			<result column="SY" property="sy" />
+		</association>
+	</resultMap>
+	<resultMap type="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReport"
+		id="BaseListMap">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ISID" property="isid" jdbcType="VARCHAR" />
+		<result column="REPORTER" property="reporter" jdbcType="VARCHAR" />
+		<result column="REPORTTIME" property="reporttime" jdbcType="DATE" />
+		<result column="DEPARTMENTID" property="departmentid" jdbcType="VARCHAR" />
+		<association property="reportUser" javaType="com.benqzl.pojo.system.User">
+			<id column="REPORTER" property="userid" />
+			<result column="ENAME" property="username" />
+		</association>
+		<association property="flow"
+			javaType="com.benqzl.pojo.patrol.PatrolSpecialFolw">
+			<id column="ISID" property="isid"></id>
+			<result column="SB" property="sb" />
+		</association>
+		<association property="department" javaType="com.benqzl.pojo.system.Department">
+			<id column="DEPARTMENTID" property="id"></id>
+			<result column="NAME" property="name" />
+		</association>
+	</resultMap>
+	<!-- 开始 冯庆国 -->
+	<!-- 根据签发单ID查询详细 -->
+	<resultMap type="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReport"
+		id="BaseResutlMapByIssue">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="DNAME" property="isid" jdbcType="VARCHAR" />
+		<result column="REPORTER" property="reporter" jdbcType="VARCHAR" />
+		<result column="REPORTTIME" property="reporttime" jdbcType="DATE" />
+		<collection property="details"
+			ofType="com.benqzl.pojo.patrol.PatrolSpecialDeaprtmentReportDetails">
+			<id column="DDID" property="id" jdbcType="VARCHAR" />
+			<association property="specialImplements"
+				javaType="com.benqzl.pojo.patrol.PatrolSpecialImplement">
+				<id column="SID" property="id" jdbcType="VARCHAR" />
+				<result column="SNAME" property="isid" jdbcType="VARCHAR" />
+				<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+				<result column="CREATETIME" property="createtime" jdbcType="DATE" />
+				<collection property="patrolImplementClasses"
+					ofType="com.benqzl.pojo.patrol.PatrolImplementClass">
+					<id column="IID" property="id" jdbcType="VARCHAR" />
+					<result column="ICLASS" property="classes" jdbcType="VARCHAR" />
+					<collection property="implementClasses"
+						ofType="com.benqzl.pojo.patrol.PatrolImplementClass">
+						<id column="IIID" property="id" jdbcType="VARCHAR" />
+						<result column="IICLASS" property="classes" jdbcType="VARCHAR" />
+						<collection property="implementTables"
+							ofType="com.benqzl.pojo.patrol.PatrolImplementTable">
+							<id column="TID" property="id" jdbcType="VARCHAR" />
+							<result column="TNAME" property="name" jdbcType="VARCHAR" />
+						</collection>
+					</collection>
+				</collection>
+			</association>
+		</collection>
+	</resultMap>
+	<resultMap id="BaseResultMapIssue" type="com.benqzl.pojo.patrol.PatrolSpecialIssue">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="CLASSES" property="classes" jdbcType="DECIMAL" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="BaseResultMapByIsId" type="com.benqzl.pojo.patrol.PatrolImplementDetails">
+		<result column="IMPLEMENTID" property="implementid" jdbcType="VARCHAR" />
+		<result column="VALS" property="vals" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID, ISID, REPORTER, REPORTTIME
+	</sql>
+	<sql id="Base_Column_List_Issue">
+		i.ID as ID, i.CODE as CODE,u.name as CREATER, i.CREATETIME
+		as CREATETIME,
+		i.CLASSES as CLASSES, i.CONTENT as CONTENT, i.REMARK as
+		REMARK
+	</sql>
+	<!-- 根据签发单ID查询详细 -->
+	<sql id="Base_Column_List_SelectByIssu">
+		d.ID as ID, dp.NAME as DNAME, d.REPORTER as REPORTER,
+		d.REPORTTIME as REPORTTIME,
+		dd.id as DDID,
+		s.ID as SID,s.CREATER as
+		CREATER,s.CREATETIME as CREATETIME,ss.name as SNAME,
+		i.id as
+		IID,i.CLASSES as ICLASS,
+		ii.id as IIID,ii.CLASSES as IICLASS,
+		t.id as
+		TID,t.NAME as TNAME
+	</sql>
+	<!-- 根据签发单ID查询详细 -->
+	<select id="selectByIssueId" resultMap="BaseResutlMapByIssue"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List_SelectByIssu" />
+		from pl_special_departmentreport d
+		left join sys_department dp on d.departmentid=dp.id
+		left join pl_special_dr_details dd on dd.reportId=d.id
+		left join pl_special_implement s on s.Id=dd.implementId
+		left join sys_station ss on ss.id=s.sid
+		left join pl_implement_details pid on s.Id=pid.implementId
+		left join pl_implement_class i on i.parentid=0
+		left join pl_implement_class ii on ii.parentid=i.id
+		left join pl_implement_table t on t.classId=ii.id
+		where
+		<foreach collection="lists" item="item" index="index" separator="or">
+			d.isid=#{isId,jdbcType=VARCHAR} and dd.implementId=(select #{item.implementId,jdbcType=VARCHAR} from dual)
+			and t.id in (
+			<foreach collection="item.list" item="items" index="index" separator=",">
+				(select #{items,jdbcType=VARCHAR} from dual)
+			</foreach>
+			)
+		</foreach>
+		
+	</select>
+
+	<!-- 签发单分页查询 -->
+	<select id="findIssueByPage" resultMap="BaseResultMapIssue"
+		parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List_Issue" />
+		from pl_special_issue i
+		left join (select userid,name from SYS_EMPLOYEE
+		join SYS_USER on
+		SYS_EMPLOYEE.id=SYS_USER.employeeid) u on
+		u.userid=i.CREATER
+		left join pl_special_flow pf on pf.isId=i.id
+		<where>
+			<if test="type != null">
+				<if test="typeDate ==null">
+					pf.hz=1 and pf.sb=0
+				</if>
+				<if test="typeDate !=null">
+					pf.hz=1 
+				</if>
+			</if>
+			<if test="type1 != null">
+				<if test="typeDate ==null">
+					pf.sb=1 and pf.sy=0
+				</if>
+				<if test="typeDate !=null">
+					pf.sb=1 
+				</if>
+			</if>
+			<if test="code !=null">
+				i.code=#{code,jdbcType=VARCHAR}
+			</if>
+			<if test="starttime != null">
+				and i.CREATETIME &gt;=#{starttime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and i.CREATETIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="classes !=null">
+				and i.classes=3
+			</if>
+			<if test="classes ==null">
+				and i.classes != 3
+			</if>
+		</where>
+		order by i.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt;#{p1}
+	</select>
+	<select id="pageIssueCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*)
+		from pl_special_issue i
+		left join pl_special_flow pf on
+		pf.isId=i.id
+		<where>
+			<if test="type != null">
+				<if test="typeDate ==null">
+					pf.hz=1 and pf.sb=0
+				</if>
+				<if test="typeDate !=null">
+					pf.hz=1 
+				</if>
+			</if>
+			<if test="type1 != null">
+				<if test="typeDate ==null">
+					pf.sb=1 and pf.sy=0
+				</if>
+				<if test="typeDate !=null">
+					pf.sb=1 
+				</if>
+			</if>
+			<if test="code !=null">
+				i.code=#{code,jdbcType=VARCHAR}
+			</if>
+			<if test="starttime != null">
+				and i.CREATETIME &gt;=#{starttime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and i.CREATETIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="classes !=null">
+				and i.classes=3
+			</if>
+			<if test="classes ==null">
+				and i.classes != 3
+			</if>
+		</where>
+	</select>
+	<select id="selectValsByIsid" resultMap="BaseResultMapByIsId"
+		parameterType="java.lang.String">
+		select pid.vals as vals,pid.implementId as implementId from PL_IMPLEMENT_DETAILS pid
+		left join pl_special_dr_details psdd on pid.implementId=psdd.implementId
+		left join pl_special_departmentreport psd on psd.id=psdd.reportId
+		where psd.isid=#{id,jdbcType=VARCHAR}
+	</select>
+	
+	<update id="updateFlow" parameterType="java.util.Map" >
+	    update PL_SPECIAL_FLOW
+	      set 
+	      <if test="sb != null">
+	        sb=1
+	      </if>
+	      <if test="sy != null">
+	        sy=1
+	      </if>
+	      <if test="hz != null">
+	        hz=1
+	      </if>
+	      <if test="ss != null">
+	        ss=1
+	      </if>
+	      <if test="zx != null">
+	        zx=1
+	      </if>
+	      <if test="fj != null">
+	        fj=1
+	      </if>
+	      <if test="qf != null">
+	        qf=1
+	      </if>
+	    where isid= #{isid,jdbcType=VARCHAR}
+	 </update>
+
+	<!-- 结束 冯庆国 -->
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PL_SPECIAL_PROJECTREPORT
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		PL_SPECIAL_PROJECTREPORT
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolSpecialProjectReport">
+		insert into
+		PL_SPECIAL_PROJECTREPORT (ID, ISID, REPORTER,
+		REPORTTIME)
+		values
+		(#{id,jdbcType=VARCHAR}, #{isid,jdbcType=VARCHAR},
+		#{reporter,jdbcType=VARCHAR},
+		#{reporttime,jdbcType=DATE})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialProjectReport">
+		insert into PL_SPECIAL_PROJECTREPORT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="isid != null">
+				ISID,
+			</if>
+			<if test="reporter != null">
+				REPORTER,
+			</if>
+			<if test="reporttime != null">
+				REPORTTIME,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="isid != null">
+				#{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="reporter != null">
+				#{reporter,jdbcType=VARCHAR},
+			</if>
+			<if test="reporttime != null">
+				#{reporttime,jdbcType=DATE},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolSpecialProjectReport">
+		update PL_SPECIAL_PROJECTREPORT
+		<set>
+			<if test="isid != null">
+				ISID = #{isid,jdbcType=VARCHAR},
+			</if>
+			<if test="reporter != null">
+				REPORTER = #{reporter,jdbcType=VARCHAR},
+			</if>
+			<if test="reporttime != null">
+				REPORTTIME = #{reporttime,jdbcType=DATE},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolSpecialProjectReport">
+		update
+		PL_SPECIAL_PROJECTREPORT
+		set ISID = #{isid,jdbcType=VARCHAR},
+		REPORTER =
+		#{reporter,jdbcType=VARCHAR},
+		REPORTTIME = #{reporttime,jdbcType=DATE}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findBypage" resultMap="BaseListMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(select dr.*,d.name , t.ename
+		as ename, f.sb from pl_special_departmentreport dr
+		left join
+		pl_special_flow f on f.isid = dr.isid
+		left join sys_department
+		d on d.id
+		= dr.departmentid
+		left join (select userid,e.name as ename
+		from sys_user
+		u left join
+		sys_employee e on u.employeeid = e.id) t on
+		t.userid =
+		dr.reporter
+		<where>
+			<if test="state != null">
+				f.sb != 1
+			</if>
+		</where>
+		order by dr.reporttime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*) from pl_special_departmentreport dr left join
+		sys_department d on d.id = dr.departmentid
+		left join (select
+		userid,e.name as ename from sys_user u left join
+		sys_employee e on
+		u.employeeid = e.id) t on t.userid = dr.reporter
+		<where>
+			<if test="state != null">
+				f.sb != 1
+			</if>
+		</where>
+	</select>
+	<select id="findManageByPage" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(select dr.*, t.ename
+		as ename,
+		f.sy from pl_special_projectreport dr
+		left join pl_special_flow f on
+		f.isid = dr.isid
+
+		left join (select userid,e.name as ename
+		from sys_user
+		u left join
+		sys_employee e on u.employeeid = e.id) t on
+		t.userid =
+		dr.reporter
+		<where>
+			<if test="state != null">
+				f.sy != 1
+			</if>
+		</where>
+		order by dr.reporttime desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+	</select>
+	<select id="pageManageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*)
+		from pl_special_projectreport dr
+		left join
+		pl_special_flow f
+		on f.isid = dr.isid
+		left join (select userid, e.name
+		as ename
+		from sys_user u
+		left join sys_employee e
+		on u.employeeid = e.id)
+		t
+		on t.userid = dr.reporter
+		<where>
+			<if test="state != null">
+				f.sy != 1
+			</if>
+		</where>
+	</select>
+
+</mapper>

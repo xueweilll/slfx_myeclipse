@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.ActivitiDeploymentMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.ActivitiDeployment" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="DEPLOYMENTNAME" property="deploymentname" jdbcType="VARCHAR" />
+    <result column="DEPLOYMENTID" property="deploymentId" jdbcType="VARCHAR" />
+    <result column="PROCESSDEFINITIONID" property="processdefinitionid" jdbcType="VARCHAR" />
+    <result column="PROCESSDEFINITIONKEY" property="processdefinitionKey" jdbcType="VARCHAR" />
+    <result column="VERSION" property="version" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="EDITUSERID" property="edituserid" jdbcType="VARCHAR" />
+    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+    <result column="ISDEL" property="isDel" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, DEPLOYMENTNAME,DEPLOYMENTID, PROCESSDEFINITIONID,PROCESSDEFINITIONKEY,VERSION, CREATETIME, EDITTIME, EDITUSERID, TYPE,ISDEL
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_ACTIVITI_DEPLOYMENT
+    where processdefinitionid = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map" >
+   select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from SYS_ACTIVITI_DEPLOYMENT m
+		<where> 
+		<if test="starttime != null" >
+			and m.CREATETIME &gt;=#{starttime}
+		</if>
+		<if test="endtime != null" >
+			and m.CREATETIME &lt;= #{endtime}
+		</if>
+			and m.isdel=0
+      	</where>
+		 order by m.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+  </select>
+  <select id="pageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select
+		count(*) as num
+		from SYS_ACTIVITI_DEPLOYMENT m
+		<where> 
+		<if test="starttime != null" >
+			and m.CREATETIME &gt;=#{starttime}
+		</if>
+		<if test="endtime != null" >
+			and m.CREATETIME &lt;= #{endtime}
+		</if>
+			and m.isdel=0
+      	</where>
+	</select>
+  <update id="deleteByname" parameterType="java.lang.String" >
+    update  SYS_ACTIVITI_DEPLOYMENT set isDel=1
+    where processdefinitionkey = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update  SYS_ACTIVITI_DEPLOYMENT set isDel=1
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.ActivitiDeployment" >
+    insert into SYS_ACTIVITI_DEPLOYMENT
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="deploymentname != null" >
+        DEPLOYMENTNAME,
+      </if>
+      <if test="processdefinitionid != null" >
+        PROCESSDEFINITIONID,
+      </if>
+      <if test="processdefinitionKey != null" >
+        PROCESSDEFINITIONKEY,
+      </if>
+      <if test="deploymentId != null" >
+        DEPLOYMENTID,
+      </if>
+      <if test="version != null" >
+        VERSION,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="edituserid != null" >
+        EDITUSERID,
+      </if>
+      <if test="type != null" >
+        TYPE,
+      </if>
+      <if test="isDel != null" >
+        ISDEL
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="deploymentname != null" >
+        #{deploymentname,jdbcType=VARCHAR},
+      </if>
+      <if test="processdefinitionid != null" >
+        #{processdefinitionid,jdbcType=VARCHAR},
+      </if>
+      <if test="processdefinitionKey != null" >
+        #{processdefinitionKey,jdbcType=VARCHAR},
+      </if>
+      <if test="deploymentId != null" >
+        #{deploymentId,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edituserid != null" >
+        #{edituserid,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=DECIMAL},
+      </if>
+      <if test="isDel != null" >
+        #{isDel,jdbcType=DECIMAL}
+      </if>
+    </trim>
+  </insert>
+</mapper>

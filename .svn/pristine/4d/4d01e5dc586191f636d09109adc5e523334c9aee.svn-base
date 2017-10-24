@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchExecuteGateMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteGate" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="GID" property="gid" jdbcType="VARCHAR" />
+    <result column="OPERATETIME" property="operatetime" jdbcType="TIMESTAMP" />
+    <result column="OPERATE" property="operate" jdbcType="DECIMAL" />
+    <result column="RDEXECUTEID" property="rdexecuteid" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap type="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteGate" id="BaseGateTotalMap">
+   <id column="GATEID" property="id" jdbcType="VARCHAR" />
+	<result column="GID" property="gid" jdbcType="VARCHAR" />
+	<result column="OPERATETIME" property="operatetime" jdbcType="TIMESTAMP" />
+	<result column="OPERATE" property="operate" jdbcType="DECIMAL" />
+	<result column="RDEXECUTEID" property="rdexecuteid" jdbcType="VARCHAR" />
+	<association property="gate" javaType="com.benqzl.pojo.system.Gate">
+		<id column="GID" property="id" jdbcType="VARCHAR" />
+		<result column="GATENAME" property="name" jdbcType="VARCHAR" />
+	</association>
+	<association property="execute"	javaType="com.benqzl.pojo.dispatch.ReceiptDispatchExecute">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="RDSTATIONID" property="rdstationid" jdbcType="VARCHAR" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id" jdbcType="VARCHAR" />
+			<result column="STATIONNAME" property="name" jdbcType="VARCHAR" />
+		</association>
+	</association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, GID, OPERATETIME, OPERATE, RDEXECUTEID
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_EXECUTE_GATE
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from DIS_RD_EXECUTE_GATE
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteGate" >
+    insert into DIS_RD_EXECUTE_GATE (ID, GID, OPERATETIME, 
+      OPERATE, RDEXECUTEID)
+      <foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.gid,jdbcType=VARCHAR}, #{item.operatetime,jdbcType=TIMESTAMP}, 
+      #{item.operate,jdbcType=DECIMAL}, #{item.rdexecuteid,jdbcType=VARCHAR}
+			from dual)
+		</foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteGate" >
+    insert into DIS_RD_EXECUTE_GATE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="gid != null" >
+        GID,
+      </if>
+      <if test="operatetime != null" >
+        OPERATETIME,
+      </if>
+      <if test="operate != null" >
+        OPERATE,
+      </if>
+      <if test="rdexecuteid != null" >
+        RDEXECUTEID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="gid != null" >
+        #{gid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatetime != null" >
+        #{operatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operate != null" >
+        #{operate,jdbcType=DECIMAL},
+      </if>
+      <if test="rdexecuteid != null" >
+        #{rdexecuteid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteGate" >
+    update DIS_RD_EXECUTE_GATE
+    <set >
+      <if test="gid != null" >
+        GID = #{gid,jdbcType=VARCHAR},
+      </if>
+      <if test="operatetime != null" >
+        OPERATETIME = #{operatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operate != null" >
+        OPERATE = #{operate,jdbcType=DECIMAL},
+      </if>
+      <if test="rdexecuteid != null" >
+        RDEXECUTEID = #{rdexecuteid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteGate" >
+    update DIS_RD_EXECUTE_GATE
+    set GID = #{gid,jdbcType=VARCHAR},
+      OPERATETIME = #{operatetime,jdbcType=TIMESTAMP},
+      OPERATE = #{operate,jdbcType=DECIMAL},
+      RDEXECUTEID = #{rdexecuteid,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByTotalPrint" parameterType="java.util.Map" resultMap="BaseGateTotalMap">
+  	select e.id,e.sid,g.gid,g.operatetime,g.operate,s.name as
+	stationname,ga.name as gatename,g.id as gateid from dis_rd_execute e inner join
+	dis_rd_execute_gate g on e.id = g.rdexecuteid
+	left join sys_station s on s.id= e.sid left join sys_gate ga on ga.id =
+	g.gid    left join dis_rd_stations rds on rds.id = e.rdstationid 
+   left join dis_receipt_dispatch rd on rd.id = rds.rdispatchid 
+	<where> 
+	 1=1 
+		<if test="type != null">
+			and rd.dispatchtype = #{type}
+		</if>
+		<if test="begintime != null">
+			and g.operatetime &gt;= #{begintime}
+		</if>
+		<if test="endtime != null">
+			and g.operatetime &lt;= #{endtime}
+		</if>
+		<if test="ssid !=null">
+			and	e.sid in 
+	        (<foreach collection="ssid" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>)
+		</if>
+	</where>
+	order by g.operatetime desc
+  </select>
+  <select id="selectByTotal" parameterType="java.util.Map" resultMap="BaseGateTotalMap">
+	select * from
+		(select A.*,ROWNUM RN from(select e.id,e.sid,g.gid,g.operatetime,g.operate,s.name as
+	stationname,ga.name as gatename,g.id as gateid from dis_rd_execute e inner join
+	dis_rd_execute_gate g on e.id = g.rdexecuteid
+	left join sys_station s on s.id= e.sid left join sys_gate ga on ga.id =
+	g.gid    left join dis_rd_stations rds on rds.id = e.rdstationid 
+   left join dis_receipt_dispatch rd on rd.id = rds.rdispatchid 
+	<where> 
+	 1=1 
+		<if test="type != null">
+			and rd.dispatchtype = #{type}
+		</if>
+		<if test="begintime != null">
+			and g.operatetime &gt;= #{begintime}
+		</if>
+		<if test="endtime != null">
+			and g.operatetime &lt;= #{endtime}
+		</if>
+		<if test="ssid !=null">
+			and	e.sid in 
+	        (<foreach collection="ssid" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>)
+		</if>
+	</where>
+	order by g.operatetime desc ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt;
+		#{p1}
+  </select>
+  <select id="selectByCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+  	select count(*) from dis_rd_execute e inner join
+	dis_rd_execute_gate g on e.id = g.rdexecuteid
+	left join sys_station s on s.id= e.sid left join sys_gate ga on ga.id =
+	g.gid left join dis_rd_stations rds on rds.id = e.rdstationid 
+   left join dis_receipt_dispatch rd on rd.id = rds.rdispatchid 
+	<where > 
+	 1=1 
+		<if test="type != null">
+			and rd.dispatchtype = #{type}
+		</if>
+		<if test="begintime != null">
+			and g.operatetime &gt;= #{begintime}
+		</if>
+		<if test="endtime != null">
+			and g.operatetime &lt;= #{endtime}
+		</if>
+		<if test="ssid !=null">
+			and	e.sid in 
+	        (<foreach collection="ssid" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>)
+		</if>
+	</where>
+  </select>
+</mapper>

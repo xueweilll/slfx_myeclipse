@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.SelfDispatchInstructionsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.SelfDispatchInstructions" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="SDID" property="sdid" jdbcType="VARCHAR" />
+    <result column="INSTRUCTION" property="instruction" jdbcType="DECIMAL" />
+    <result column="GATEOPERATETIME" property="gateoperatetime" jdbcType="TIMESTAMP" />
+    <result column="UNITOPERATETIME" property="unitoperatetime" jdbcType="TIMESTAMP" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, SDID, INSTRUCTION, GATEOPERATETIME, UNITOPERATETIME, STATE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_SD_INSTRUCTIONS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectBySDID" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_SD_INSTRUCTIONS
+    where SDID = #{sdid,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from DIS_SD_INSTRUCTIONS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.dispatch.SelfDispatchInstructions" >
+    insert into DIS_SD_INSTRUCTIONS (ID, SDID, INSTRUCTION, 
+      GATEOPERATETIME, UNITOPERATETIME, STATE
+      )
+    values (#{id,jdbcType=VARCHAR}, #{sdid,jdbcType=VARCHAR}, #{instruction,jdbcType=DECIMAL}, 
+      #{gateoperatetime,jdbcType=DATE}, #{unitoperatetime,jdbcType=DATE}, #{state,jdbcType=DECIMAL}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.SelfDispatchInstructions" >
+    insert into DIS_SD_INSTRUCTIONS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="sdid != null" >
+        SDID,
+      </if>
+      <if test="instruction != null" >
+        INSTRUCTION,
+      </if>
+      <if test="gateoperatetime != null" >
+        GATEOPERATETIME,
+      </if>
+      <if test="unitoperatetime != null" >
+        UNITOPERATETIME,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="sdid != null" >
+        #{sdid,jdbcType=VARCHAR},
+      </if>
+      <if test="instruction != null" >
+        #{instruction,jdbcType=DECIMAL},
+      </if>
+      <if test="gateoperatetime != null" >
+        #{gateoperatetime,jdbcType=DATE},
+      </if>
+      <if test="unitoperatetime != null" >
+        #{unitoperatetime,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.SelfDispatchInstructions" >
+    update DIS_SD_INSTRUCTIONS
+    <set >
+      <if test="sdid != null" >
+        SDID = #{sdid,jdbcType=VARCHAR},
+      </if>
+      <if test="instruction != null" >
+        INSTRUCTION = #{instruction,jdbcType=DECIMAL},
+      </if>
+      <if test="gateoperatetime != null" >
+        GATEOPERATETIME = #{gateoperatetime,jdbcType=DATE},
+      </if>
+      <if test="unitoperatetime != null" >
+        UNITOPERATETIME = #{unitoperatetime,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.SelfDispatchInstructions" >
+    update DIS_SD_INSTRUCTIONS
+    set SDID = #{sdid,jdbcType=VARCHAR},
+      INSTRUCTION = #{instruction,jdbcType=DECIMAL},
+      GATEOPERATETIME = #{gateoperatetime,jdbcType=DATE},
+      UNITOPERATETIME = #{unitoperatetime,jdbcType=DATE},
+      STATE = #{state,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+ 
+</mapper>

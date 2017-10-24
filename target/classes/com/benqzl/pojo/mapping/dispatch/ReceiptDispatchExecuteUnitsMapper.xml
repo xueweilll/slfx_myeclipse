@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.ReceiptDispatchExecuteUnitsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteUnits" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="UNITID" property="unitid" jdbcType="VARCHAR" />
+    <result column="BEGINTIME" property="begintime" jdbcType="TIMESTAMP" />
+    <result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="EXECUTEID" property="executeid" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, UNITID, BEGINTIME, ENDTIME, EXECUTEID
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_EXECUTE_UNITS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from DIS_RD_EXECUTE_UNITS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteUnits" >
+    insert into DIS_RD_EXECUTE_UNITS (ID, UNITID, BEGINTIME, 
+      ENDTIME, EXECUTEID)
+      <foreach collection="list" item="item" index="index"	separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, #{item.unitid,jdbcType=VARCHAR}, #{item.begintime,jdbcType=TIMESTAMP}, 
+      #{item.endtime,jdbcType=TIMESTAMP}, #{item.executeid,jdbcType=VARCHAR} from dual)
+		</foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteUnits" >
+    insert into DIS_RD_EXECUTE_UNITS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="unitid != null" >
+        UNITID,
+      </if>
+      <if test="begintime != null" >
+        BEGINTIME,
+      </if>
+      <if test="endtime != null" >
+        ENDTIME,
+      </if>
+      <if test="executeid != null" >
+        EXECUTEID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="unitid != null" >
+        #{unitid,jdbcType=VARCHAR},
+      </if>
+      <if test="begintime != null" >
+        #{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="executeid != null" >
+        #{executeid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteUnits" >
+    update DIS_RD_EXECUTE_UNITS
+    <set >
+      <if test="unitid != null" >
+        UNITID = #{unitid,jdbcType=VARCHAR},
+      </if>
+      <if test="begintime != null" >
+        BEGINTIME = #{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        ENDTIME = #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="executeid != null" >
+        EXECUTEID = #{executeid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.dispatch.ReceiptDispatchExecuteUnits" >
+    update DIS_RD_EXECUTE_UNITS
+    set UNITID = #{unitid,jdbcType=VARCHAR},
+      BEGINTIME = #{begintime,jdbcType=TIMESTAMP},
+      ENDTIME = #{endtime,jdbcType=TIMESTAMP},
+      EXECUTEID = #{executeid,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <select id="selectUnitByExecuteId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from DIS_RD_EXECUTE_UNITS
+    where EXECUTEID = #{executeid,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByCheck" resultMap="BaseResultMap" parameterType="java.util.Map">
+  	select * from dis_rd_execute_units  where unitid=#{unitid} and endtime is null  
+  	<if test="executeid != null">
+  		and executeid != #{executeid}
+  	</if>
+  </select>
+</mapper>

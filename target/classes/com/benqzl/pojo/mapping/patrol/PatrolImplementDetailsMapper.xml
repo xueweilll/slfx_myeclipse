@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolImplementDetailsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolImplementDetails" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="IMPLEMENTID" property="implementid" jdbcType="VARCHAR" />
+    <result column="CLASSES" property="classes" jdbcType="DECIMAL" />
+    <result column="VALS" property="vals" jdbcType="VARCHAR" />
+    <result column="EXAMINER" property="examiner" jdbcType="VARCHAR" />
+    <result column="EXAMINTIME" property="examintime" jdbcType="DATE" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, IMPLEMENTID, CLASSES, VALS, EXAMINER, EXAMINTIME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_IMPLEMENT_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_IMPLEMENT_DETAILS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolImplementDetails" >
+    insert into PL_IMPLEMENT_DETAILS (ID, IMPLEMENTID, CLASSES, 
+      VALS, EXAMINER, EXAMINTIME
+      )
+    values (#{id,jdbcType=VARCHAR}, #{implementid,jdbcType=VARCHAR}, #{classes,jdbcType=DECIMAL}, 
+      #{vals,jdbcType=VARCHAR}, #{examiner,jdbcType=VARCHAR}, #{examintime,jdbcType=DATE}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolImplementDetails" >
+    insert into PL_IMPLEMENT_DETAILS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="implementid != null" >
+        IMPLEMENTID,
+      </if>
+      <if test="classes != null" >
+        CLASSES,
+      </if>
+      <if test="vals != null" >
+        VALS,
+      </if>
+      <if test="examiner != null" >
+        EXAMINER,
+      </if>
+      <if test="examintime != null" >
+        EXAMINTIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="implementid != null" >
+        #{implementid,jdbcType=VARCHAR},
+      </if>
+      <if test="classes != null" >
+        #{classes,jdbcType=DECIMAL},
+      </if>
+      <if test="vals != null" >
+        #{vals,jdbcType=VARCHAR},
+      </if>
+      <if test="examiner != null" >
+        #{examiner,jdbcType=VARCHAR},
+      </if>
+      <if test="examintime != null" >
+        #{examintime,jdbcType=DATE},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolImplementDetails" >
+    update PL_IMPLEMENT_DETAILS
+    <set >
+      <if test="implementid != null" >
+        IMPLEMENTID = #{implementid,jdbcType=VARCHAR},
+      </if>
+      <if test="classes != null" >
+        CLASSES = #{classes,jdbcType=DECIMAL},
+      </if>
+      <if test="vals != null" >
+        VALS = #{vals,jdbcType=VARCHAR},
+      </if>
+      <if test="examiner != null" >
+        EXAMINER = #{examiner,jdbcType=VARCHAR},
+      </if>
+      <if test="examintime != null" >
+        EXAMINTIME = #{examintime,jdbcType=DATE},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolImplementDetails" >
+    update PL_IMPLEMENT_DETAILS
+    set IMPLEMENTID = #{implementid,jdbcType=VARCHAR},
+      CLASSES = #{classes,jdbcType=DECIMAL},
+      VALS = #{vals,jdbcType=VARCHAR},
+      EXAMINER = #{examiner,jdbcType=VARCHAR},
+      EXAMINTIME = #{examintime,jdbcType=DATE}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

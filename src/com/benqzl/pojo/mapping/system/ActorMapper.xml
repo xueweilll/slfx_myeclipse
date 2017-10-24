@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.ActorMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Actor" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+  </resultMap>
+  <resultMap id="BaseResultMap1" type="com.benqzl.pojo.system.Actor" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+    <collection property="authorities" ofType="com.benqzl.pojo.system.Authority">
+    	<id property="id" column="AID" />
+		<result property="actorid" column="ACTORID" />
+		<result property="menuid" column="MENUID" />
+		<result property="val" column="VAL" />
+		<result property="createtime" column="ACREATETIME" />
+		<result property="edittime" column="AEDITTIME" />
+    </collection>
+  </resultMap>  
+  <sql id="Base_Column_List" >
+    ID, NAME, REMARK, CREATETIME, EDITTIME, ISDEL
+  </sql>
+  <sql id="Base_Column_List1" >
+    s.ID as ID, s.NAME as Name, s.REMARK as REMARK, s.CREATETIME as CREATETIME, s.EDITTIME as EDITTIME, s.ISDEL as ISDEL,
+    a.ID as AID,a.ACTORID as ACTORID,a.MENUID as MMENUID, a.VAL as VAL,a.CREATETIME as ACREATETIME,a.EDITTIME as AEDITTIME
+  </sql>
+  <select id="selectAuthorityByActorId" resultMap="BaseResultMap1" parameterType="java.lang.String">
+  		select <include refid="Base_Column_List1" /> from SYS_AUTHORITY a join SYS_ACTOR s on s.id= a.ActorId 
+  		where s.id=#{id,jdbcType=VARCHAR} 
+  </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from SYS_ACTOR
+		where IsDel=0
+	</select>
+		<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from SYS_ACTOR 
+		where 1=1
+		<if test="name !=null and name !=''">
+		 and name  like '%'||#{name,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="remark !=null and remark !=''">
+		 and remark like '%'||#{remark,jdbcType=VARCHAR}||'%'
+		</if>
+		
+		and IsDel=0 order by CREATETIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+    <select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from SYS_ACTOR	
+	    where 1=1
+		<if test="name !=null and name !=''">
+		 and name  like '%'||#{name,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="remark !=null and remark !=''">
+		 and remark like '%'||#{remark,jdbcType=VARCHAR}||'%'
+		</if> 
+		 and IsDel = 0
+	</select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_ACTOR
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update  SYS_ACTOR
+    set IsDel=1
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Actor" >
+    insert into SYS_ACTOR (ID, NAME, REMARK, 
+      CREATETIME, EDITTIME, ISDEL
+      )
+    values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{edittime,jdbcType=TIMESTAMP}, #{isdel,jdbcType=DECIMAL}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Actor" >
+    insert into SYS_ACTOR
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="isdel != null" >
+        ISDEL,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=DATE},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=DATE},
+      </if>
+      <if test="isdel != null" >
+        #{isdel,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Actor" >
+    update SYS_ACTOR
+    <set >
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isdel != null" >
+        ISDEL = #{isdel,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Actor" >
+    update SYS_ACTOR
+    set NAME = #{name,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=DATE},
+      EDITTIME = #{edittime,jdbcType=DATE},
+      ISDEL = #{isdel,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  	<select id="exsitName" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) from SYS_ACTOR where isdel=0 and name =#{name}
+	</select>
+</mapper>

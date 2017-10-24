@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.AuthorityMapper" >
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.system.MenuAndAuthority">
+	<id column="MENUID" property="menuid" jdbcType="VARCHAR" />
+	<result column="MENUNAME" property="menuname" jdbcType="VARCHAR" />
+	<result column="MENUICON" property="menuicon" jdbcType="VARCHAR" />
+	<result column="MENUURL" property="menuurl" jdbcType="VARCHAR" />
+	<result column="PAREID" property="pareid" jdbcType="VARCHAR" />
+	<result column="ISSHOW" property="isshow" jdbcType="DECIMAL" />
+	<result column="MENUORDER" property="menuorder" jdbcType="DECIMAL" />
+	<association property="authority" javaType="com.benqzl.pojo.system.Authority">
+		<id property="id" column="AID" />
+		<result property="actorid" column="ACTORID" />
+		<result property="menuid" column="MENUID" />
+		<result property="val" column="VAL" />
+		<result property="createtime" column="CREATETIME" />
+		<result property="edittime" column="EDITTIME" />
+	</association>
+</resultMap>
+   <sql id="Base_Column_List" >
+    m.MENUID as MENUID , m.MENUNAME as MENUNAME, m.MENUICON as MENUICON, m.MENUURL as MENUURL,
+     m.PAREID as PAREID, m.ISSHOW as ISSHOW, m.MENUORDER as MENUORDER ,a.ID as AID,a.ACTORID as ACTORID,
+     a.MENUID as MMENUID, a.VAL as VAL,a.CREATETIME as CREATETIME,a.EDITTIME as EDITTIME
+  </sql>
+  <select id="selectAll" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_MENU m left join SYS_AUTHORITY a on m.MENUID=a.MENUID AND a.ACTORID=#{actorid,jdbcType=VARCHAR} 
+    where m.ISSHOW=1 order by m.MENUORDER asc 
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from SYS_AUTHORITY
+    where actorid = #{actorid,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into SYS_AUTHORITY (ID, ACTORID, MENUID,VAL, CREATETIME, EDITTIME) 
+    <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.actorid,jdbcType=VARCHAR}, #{item.menuid,jdbcType=VARCHAR},#{item.val,jdbcType=DECIMAL}, #{item.createtime}, #{item.edittime}  from dual) 
+    </foreach>
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Authority" >
+    insert into SYS_AUTHORITY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="actorid != null" >
+        ACTORID,
+      </if>
+      <if test="menuid != null" >
+        MENUID,
+      </if>
+      <if test="val != null" >
+        VAL,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="actorid != null" >
+        #{actorid,jdbcType=VARCHAR},
+      </if>
+      <if test="menuid != null" >
+        #{menuid,jdbcType=VARCHAR},
+      </if>
+      <if test="val != null" >
+        #{val,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null" >
+        #{createtime},
+      </if>
+      <if test="edittime != null" >
+        #{edittime},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Authority" >
+    update SYS_AUTHORITY
+    <set >
+      <if test="actorid != null" >
+        ACTORID = #{actorid,jdbcType=VARCHAR},
+      </if>
+      <if test="menuid != null" >
+        MENUID = #{menuid,jdbcType=VARCHAR},
+      </if>
+      <if test="val != null" >
+        VAL = #{val,jdbcType=DECIMAL},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Authority" >
+    update SYS_AUTHORITY
+    set ACTORID = #{actorid,jdbcType=VARCHAR},
+      MENUID = #{menuid,jdbcType=VARCHAR},
+      VAL = #{val,jdbcType=DECIMAL},
+      CREATETIME = #{createtime},
+      EDITTIME = #{edittime}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

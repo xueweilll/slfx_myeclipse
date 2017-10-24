@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.MessageMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.Message" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+    <result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+    <result column="ISPC" property="ispc" jdbcType="DECIMAL" />
+    <result column="ISPHONEMESS" property="isphonemess" jdbcType="DECIMAL" />
+    <result column="ISDEL" property="isDel" jdbcType="DECIMAL" />
+    <association property="user" javaType="com.benqzl.pojo.system.User">
+    	 <id column="MESSAGER" property="userid" jdbcType="VARCHAR" />
+    </association>
+  </resultMap>
+  <resultMap type="com.benqzl.pojo.system.User" id="BaseResultMapUsers">
+  	<id column="ID" property="userid" jdbcType="VARCHAR" />
+    <result column="name" property="username" jdbcType="VARCHAR" />
+  	<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+	    <result column="EPHONE" jdbcType="VARCHAR" property="phone" />
+	    <result column="ENAME" property="name" jdbcType="VARCHAR" />
+	    <result column="STNAME" property="sid" jdbcType="VARCHAR" />
+	    <association property="department" javaType="com.benqzl.pojo.system.Department">
+	    	<result column="DNAME" property="name" jdbcType="VARCHAR" />
+    	</association>
+    </association>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    ID, CREATETIME, EDITTIME, MESSAGER, CONTENTS, SENDTIME, ISPC, ISPHONEMESS,ISDEL
+  </sql>
+  <sql id="Base_Column_List_Users">
+  	u.userid as ID ,u.username as name,e.name as ENAME,e.phone as EPHONE,d.name as DNAME,st.name as STNAME
+  </sql>
+  <select id="selectUsers" resultMap="BaseResultMapUsers">
+  	select  <include refid="Base_Column_List_Users" /> from SYS_USER u join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID left join SYS_STATION st on e.sid=st.Id
+  	join SYS_DEPARTMENT d on e.departmentid=d.id where u.isdel=0
+  </select>
+  <select id="selectUsersById" resultMap="BaseResultMapUsers" parameterType="java.lang.String">
+  	select  <include refid="Base_Column_List_Users" /> from SYS_USER u join SYS_EMPLOYEE e on u.EMPLOYEEID=e.ID left join SYS_STATION st on e.sid=st.Id
+  	join SYS_DEPARTMENT d on e.departmentid=d.id where  u.userid in (select ReceiverId from OA_MESSAGE_RECEIVER where MessageId=#{id,jdbcType=VARCHAR})
+  </select>
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from OA_MESSAGE m
+		<where> 
+		 m.IsDel=0 and m.messager=#{messager,jdbcType=VARCHAR}
+		<if test="starttime != null" >
+			and m.CREATETIME &gt;=#{starttime}
+		</if>
+		<if test="endtime != null" >
+			and m.CREATETIME &lt;= #{endtime}
+		</if>
+      	</where>
+		 order by m.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+  <select id="pageCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select
+		count(*) as num
+		from OA_MESSAGE m
+		<where> 
+		m.IsDel=0 and m.messager=#{messager,jdbcType=VARCHAR}
+		<if test="starttime != null" >
+			and m.CREATETIME &gt;=#{starttime}
+		</if>
+		<if test="endtime != null" >
+			and m.CREATETIME &lt;= #{endtime}
+		</if>
+      	</where>
+	</select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from OA_MESSAGE
+    where ID = #{id,jdbcType=VARCHAR} and isdel=0
+  </select>
+  <update id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update  OA_MESSAGE set ISDEL = 1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="insert" parameterType="com.benqzl.pojo.oa.Message" >
+    insert into OA_MESSAGE (ID, CREATETIME, EDITTIME, 
+      MESSAGER, CONTENTS, SENDTIME, 
+      ISPC, ISPHONEMESS,ISDEL)
+    values (#{id,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, #{edittime,jdbcType=TIMESTAMP}, 
+      #{user.userid,jdbcType=VARCHAR}, #{contents,jdbcType=VARCHAR}, #{sendtime,jdbcType=TIMESTAMP}, 
+      #{ispc,jdbcType=DECIMAL}, #{isphonemess,jdbcType=DECIMAL},#{isDel,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.oa.Message" >
+    insert into OA_MESSAGE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="user != null" >
+        MESSAGER,
+      </if>
+      <if test="contents != null" >
+        CONTENTS,
+      </if>
+      <if test="sendtime != null" >
+        SENDTIME,
+      </if>
+      <if test="ispc != null" >
+        ISPC,
+      </if>
+      <if test="isphonemess != null" >
+        ISPHONEMESS,
+      </if>
+      <if test="isDel != null" >
+        ISDEL,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="user != null" >
+        #{user.userid,jdbcType=VARCHAR},
+      </if>
+      <if test="contents != null" >
+        #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="sendtime != null" >
+        #{sendtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ispc != null" >
+        #{ispc,jdbcType=DECIMAL},
+      </if>
+      <if test="isphonemess != null" >
+        #{isphonemess,jdbcType=DECIMAL},
+      </if>
+      <if test="isDel != null" >
+        #{isDel,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+</mapper>

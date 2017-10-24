@@ -1,0 +1,1093 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.dispatch.DispatchInstructionsMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.dispatch.SelfDispatch">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PROMOTER" property="promoter" jdbcType="VARCHAR" />
+		<result column="PROMOTETIME" property="promotetime" jdbcType="TIMESTAMP" />
+		<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+		<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+		<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<result column="COMPLETETIME" property="completetime" jdbcType="TIMESTAMP" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<association property="user" javaType="com.benqzl.pojo.system.User">
+			<id column="PROMOTER" property="userid" />
+			<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+		</association>
+		<association property="CreateUser" javaType="com.benqzl.pojo.system.User">
+			<id column="CREATER" property="userid" />
+			<result column="CREATENAME" property="username" jdbcType="VARCHAR" />
+		</association>
+		<collection property="instructions"
+			ofType="com.benqzl.pojo.dispatch.SelfDispatchInstructions">
+			<id column="INSTRUCTIONS_ID" property="id" />
+			<result column="SDID" property="sdid" jdbcType="VARCHAR" />
+			<result column="INSTRUCTION" property="instruction" jdbcType="DECIMAL" />
+			<result column="GATEOPERATETIME" property="gateoperatetime"
+				jdbcType="TIMESTAMP" />
+			<result column="UNITOPERATETIME" property="unitoperatetime"
+				jdbcType="TIMESTAMP" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+		</collection>
+		<collection property="stations"
+			ofType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+			<id column="STATIONS_ID" property="id" />
+			<result column="SDID" property="sdid" jdbcType="VARCHAR" />
+			<result column="SID" property="sid" jdbcType="VARCHAR" />
+			<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+			<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+			<result column="STATIONSTATE" property="state" jdbcType="DECIMAL" />
+		</collection>
+	</resultMap>
+	<resultMap id="BaseResultMap2" type="com.benqzl.pojo.dispatch.SelfDispatchStations">
+		<id column="STATION_ID" property="id" />
+		<result column="SDID" property="sdid" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+		<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+		<result column="STATIONSTATE" property="state" jdbcType="DECIMAL" />
+		<association property="station" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id" />
+			<result column="STATIONNAME" property="name" />
+		</association>
+		<association property="employee" javaType="com.benqzl.pojo.system.Employee">
+			<id column="ID" property="id" />
+			<result column="SENAME" property="name" />
+		</association>
+		<association property="selfDispatch"
+			javaType="com.benqzl.pojo.dispatch.SelfDispatch">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="PROMOTER" property="promoter" jdbcType="VARCHAR" />
+			<result column="PROMOTETIME" property="promotetime" jdbcType="TIMESTAMP" />
+			<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+			<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+			<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+			<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+			<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+			<result column="COMPLETETIME" property="completetime"
+				jdbcType="TIMESTAMP" />
+			<result column="CODE" property="code" jdbcType="VARCHAR" />
+			<association property="user" javaType="com.benqzl.pojo.system.User">
+				<id column="PROMOTER" property="userid" />
+				<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+			</association>
+			<association property="CreateUser" javaType="com.benqzl.pojo.system.User">
+				<id column="CREATER" property="userid" />
+				<result column="CREATENAME" property="username" jdbcType="VARCHAR" />
+			</association>
+			<collection property="instructions"
+				ofType="com.benqzl.pojo.dispatch.SelfDispatchInstructions">
+				<id column="INSTRUCTIONS_ID" property="id" />
+				<result column="SDID" property="sdid" jdbcType="VARCHAR" />
+				<result column="INSTRUCTION" property="instruction" jdbcType="DECIMAL" />
+				<result column="GATEOPERATETIME" property="gateoperatetime"
+					jdbcType="TIMESTAMP" />
+				<result column="UNITOPERATETIME" property="unitoperatetime"
+					jdbcType="TIMESTAMP" />
+				<result column="STATE" property="state" jdbcType="DECIMAL" />
+			</collection>
+		</association>
+	</resultMap>
+	<select id="findDispatch" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		select * from (select s.*,rownum rn from
+		(
+		select a.*,b.username as
+		username,c.username as createname
+		from dis_selfdispatch a,
+		(select
+		u.userid,e.name as username from sys_user u left join sys_employee e
+		on u.employeeid = e.id where u.isdel !='1') b,
+		(select u.userid,e.name
+		as username from sys_user u left join sys_employee e
+		on u.employeeid =
+		e.id where u.isdel !='1') c
+		where a.promoter=b.userid and
+		a.creater=c.userid
+		and a.state!='9'
+		<if test="code!=null">
+			and a.code like '%${code}%'
+		</if>
+		<if test="begintime!=null">
+			and a.promotetime &gt;= to_date('${begintime}','yyyy-MM-dd
+			hh24:mi:ss')
+		</if>
+		<if test="endtime!=null">
+			and a.promotetime &lt;= to_date('${endtime}','yyyy-MM-dd
+			hh24:mi:ss')
+		</if>
+		order by a.createtime desc
+		) s
+		where rownum &lt;=#{p2}) where rn &gt;
+		#{p1}
+	</select>
+	<select id="findDispatch2" resultMap="BaseResultMap2"
+		parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(select b.*,f.name as
+		stationname, d.username as username,e.username as createname,
+
+		a.id
+		station_id,a.sid,a.receipter,a.receipttime,a.state as
+		stationstate
+		from
+		dis_selfdispatch b left join dis_sd_stations a on a.sdid=b.id
+
+		left join
+		(select eu1.userid,e.name as username from sys_user eu1 left
+		join
+		sys_employee e on e.id = eu1.employeeid) d on b.promoter=d.userid
+		left
+		join (select eu1.userid,e.name as username from sys_user eu1 left
+		join
+		sys_employee e on e.id = eu1.employeeid) e on b.creater=e.userid
+		left
+		join sys_station f on a.sid=f.id 
+		  left join dis_sd_department sde
+    on b.id = sde.sdid and f.departmentid = sde.departmentid
+		<where>
+			b.state !=9 and b.state >2
+			and b.state !=5
+			and b.state !=3
+			   and sde.state >=1
+			<if test="rpid != null">
+				and ${rpid}
+			</if>
+			<if test="starttime !=null">
+				and b.promotetime &gt;=#{starttime}
+			</if>
+			<if test="endtime !=null">
+				and b.promotetime &lt;=#{endtime}
+			</if>
+			<if test="code !=null and code!=''">
+				and b.code like '%'||#{code,jdbcType=VARCHAR}||'%'
+			</if>
+		</where>
+		order by b.promotetime desc,b.Code ) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select count(*)
+		from dis_selfdispatch a,sys_user b,sys_user c
+		where
+		a.promoter=b.userid and a.creater=c.userid
+		and a.state!='9'
+
+		<if test="code!=null">
+			and a.code like '%${code}%'
+		</if>
+		<if test="begintime!=null">
+			and a.promotetime &gt;= to_date('${begintime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="endtime!=null">
+			and a.promotetime &lt;= to_date('${endtime}','yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+
+
+	</select>
+	<select id="pageCount2" resultType="java.lang.Integer">
+		select count(*)
+		from dis_selfdispatch b left join dis_sd_stations a on
+		a.sdid=b.id
+
+		left join (select eu1.userid,e.name as username from
+		sys_user eu1 left
+		join sys_employee e on e.id = eu1.employeeid) d on
+		b.promoter=d.userid
+		left join (select eu1.userid,e.name as username
+		from sys_user eu1 left
+		join sys_employee e on e.id = eu1.employeeid) e
+		on b.creater=e.userid
+		left join sys_station f on a.sid=f.id
+		<where>
+			b.state !=9 and b.state >=2
+			and b.state !=5
+			and b.state !=3
+			<if test="rpid != null">
+				and ${rpid}
+			</if>
+			<if test="starttime !=null">
+				and b.promotetime &gt;=#{starttime}
+			</if>
+			<if test="endtime !=null">
+				and b.promotetime &lt;=#{endtime}
+			</if>
+			<if test="code !=null and code!=''">
+				and b.code like '%'||#{code,jdbcType=VARCHAR}||'%'
+			</if>
+		</where>
+	</select>
+	<select id="findStation" resultType="com.benqzl.pojo.system.Station">
+		select * from sys_station
+		where isdel='0'
+	</select>
+	<select id="findUser" resultType="com.benqzl.pojo.system.User">
+		select u.userid,e.name as
+		username from sys_user u left join sys_employee e on u.employeeid =
+		e.id where u.isdel='0'
+	</select>
+	<select id="findsidByname" parameterType="com.benqzl.pojo.system.Station"
+		resultType="java.lang.String">
+		select id from sys_station where isdel='0'
+		<if test="names !=null">
+			<foreach collection="names" item="station_name" open="and name in ("
+				close=")" separator=",">
+				#{station_name}
+			</foreach>
+		</if>
+	</select>
+	<select id="findUseridsByname" parameterType="com.benqzl.pojo.system.User"
+		resultType="java.lang.String">
+		select userid from sys_user where isdel='0'
+		<if test="names !=null">
+			<foreach collection="names" item="user_name" open="and username in ("
+				close=")" separator=",">
+				#{user_name}
+			</foreach>
+		</if>
+	</select>
+	<select id="findUnitsByname" parameterType="com.benqzl.pojo.system.Unit"
+		resultType="java.lang.String">
+		select id from sys_unit where isdel='0'
+		<if test="names !=null">
+			<foreach collection="names" item="unit_name" open="and name in ("
+				close=")" separator=",">
+				#{unit_name}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="findDispatchByid" parameterType="java.util.Map"
+		resultMap="BaseResultMap">
+		select a.*,b.username,
+		<!-- c.id instruction_id ,c.instruction,c.gateoperatetime,c.unitoperatetime, -->
+		d.id
+		station_id,d.sid,d.receipter,d.receipttime,d.state
+		from
+		dis_selfdispatch a,sys_user b,
+		<!-- dis_sd_instructions c, -->
+		dis_sd_stations
+		d
+		where
+		<!-- a.id=c.sdid and -->
+		a.id=d.sdid and a.promoter=b.userid and
+		a.state!='9'
+		and
+		a.id='${dispatchid}'
+	</select>
+	<select id="findInstructionsByid" parameterType="java.lang.String"
+		resultType="com.benqzl.pojo.dispatch.SelfDispatchInstructions">
+		select * from dis_sd_instructions where sdid=#{sid}
+	</select>
+	<select id="findStationsByid" parameterType="java.lang.String"
+		resultType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+		select * from dis_sd_stations where sdid=#{sid}
+	</select>
+	<select id="findDepartmentStation" parameterType="java.util.Map"
+	    resultType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+	    select s.* from dis_sd_stations  s left join sys_station ss
+        on s.sid=ss.id
+        where s.sdid=#{id}
+        and ss.departmentid=#{departmentid}
+	</select>
+	<select id="findSnameByid" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select name from sys_station where id=#{id}
+	</select>
+	<select id="selectstationById" parameterType="java.lang.String"
+		resultMap="BaseResultMap2">
+		select b.*,
+		f.name as stationname,
+		d.username as username,
+		e.username as createname,
+		<!-- c.id instruction_id,
+		c.instruction,
+		c.gateoperatetime,
+		c.unitoperatetime, -->
+		a.id station_id,
+		a.sid,
+		a.receipter,
+		a.receipttime,
+		a.state as stationstate,
+		a.sdid
+		from
+		dis_sd_stations a,
+		dis_selfdispatch b,
+		<!-- dis_sd_instructions c, -->
+		(select
+		u.userid,e.name as username from sys_user u left join sys_employee e
+		on u.employeeid= e.id) d,
+		(select u.userid,e.name as username from
+		sys_user u left join sys_employee e
+		on u.employeeid= e.id) e,
+		sys_station f
+		where a.sdid = b.id
+		and a.sid = f.id
+		<!-- and b.id = c.sdid -->
+		and
+		b.promoter = d.userid
+		and b.creater = e.userid
+		and b.state != '9'
+		and
+		b.state != '0'
+		and b.sender is not null
+		and a.id=#{stationid}
+	</select>
+	<select id="selectstationById2" parameterType="java.lang.String"
+		resultMap="BaseResultMap2">
+		select b.*,
+		f.name as stationname,
+		d.username as username,
+		e.username as createname,
+		a.id station_id,
+		a.sid,
+		a.receipter,
+		a.receipttime,
+		a.state as stationstate,
+		a.sdid
+		from dis_sd_stations a,
+		dis_selfdispatch b,
+
+		(select u.userid,e.name as username from sys_user u
+		left join sys_employee e
+		on u.employeeid= e.id) d,
+		(select
+		u.userid,e.name as username from
+		sys_user u left join sys_employee e
+		on
+		u.employeeid= e.id) e,
+		sys_station f
+		where a.sdid = b.id
+		and a.sid = f.id
+
+		and b.promoter = d.userid
+		and b.creater = e.userid
+		and b.state != '9'
+		and
+		b.state != '0'
+		and b.sender is not null
+		and a.id=#{stationid}
+	</select>
+
+	<!-- <select id="selectExecuteById1" parameterType="java.lang.String" resultMap="execute1"> 
+		select a.id,a.dispatchstationid,c.id as patchid,c.code,a.sid,d.name,a.memo 
+		from dis_sd_execute a,dis_sd_stations b, dis_selfdispatch c, sys_station 
+		d where a.dispatchstationid=b.id and b.sdid=c.id and a.sid=d.id </select> -->
+	<select id="findUnit2" parameterType="java.lang.String"
+		resultType="com.benqzl.pojo.system.Unit">
+		select * from sys_unit where isdel='0' and sid=#{sid}
+	</select>
+	<select id="findGate" parameterType="java.lang.String"
+		resultType="com.benqzl.pojo.system.Gate">
+		select * from sys_gate where isdel='0' and sid=#{sid}
+	</select>
+	<insert id="insertInstruction" parameterType="com.benqzl.pojo.dispatch.SelfDispatchInstructions">
+		insert into DIS_SD_INSTRUCTIONS
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="sdid != null">
+				SDID,
+			</if>
+			<if test="instruction != null">
+				INSTRUCTION,
+			</if>
+			<if test="gateoperatetime != null">
+				GATEOPERATETIME,
+			</if>
+			<if test="unitoperatetime != null">
+				UNITOPERATETIME,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="sdid != null">
+				#{sdid,jdbcType=VARCHAR},
+			</if>
+			<if test="instruction != null">
+				#{instruction,jdbcType=DECIMAL},
+			</if>
+			<if test="gateoperatetime != null">
+				#{gateoperatetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="unitoperatetime != null">
+				#{unitoperatetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<insert id="insertStation" parameterType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+		insert into DIS_SD_STATIONS
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="sdid != null">
+				SDID,
+			</if>
+			<if test="sid != null">
+				SID,
+			</if>
+			<if test="receipter != null">
+				RECEIPTER,
+			</if>
+			<if test="receipttime != null">
+				RECEIPTTIME,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="controlwaterlevel != null">
+				CONTROLWATERLEVEL,
+			</if>
+
+			<if test="truewaterlevel != null">
+				TRUEWATERLEVEL,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="sdid != null">
+				#{sdid,jdbcType=VARCHAR},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="receipter != null">
+				#{receipter,jdbcType=VARCHAR},
+			</if>
+			<if test="receipttime != null">
+				#{receipttime,jdbcType=DATE},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+
+			<if test="controlwaterlevel != null">
+				#{controlwaterlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="truewaterlevel != null">
+				#{truewaterlevel,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<!-- <insert id="insertStation" parameterType="com.benqzl.pojo.dispatch.SelfDispatchStations"> 
+		insert into DIS_SD_STATIONS <trim prefix="(" suffix=")" suffixOverrides=","> 
+		<if test="id != null"> ID, </if> <if test="sdid != null"> SDID, </if> <if 
+		test="sid != null"> SID, </if> <if test="receipter != null"> RECEIPTER, </if> 
+		<if test="receipttime != null"> RECEIPTTIME, </if> <if test="state != null"> 
+		STATE, </if> </trim> <trim prefix="values (" suffix=")" suffixOverrides=","> 
+		<if test="id != null"> #{id,jdbcType=VARCHAR}, </if> <if test="sdid != null"> 
+		#{sdid,jdbcType=VARCHAR}, </if> <if test="sid != null"> #{sid,jdbcType=VARCHAR}, 
+		</if> <if test="receipter != null"> #{receipter,jdbcType=VARCHAR}, </if> 
+		<if test="receipttime != null"> #{receipttime,jdbcType=TIMESTAMP}, </if> 
+		<if test="state != null"> #{state,jdbcType=DECIMAL}, </if> </trim> </insert> -->
+	<insert id="insertDispatch" parameterType="com.benqzl.pojo.dispatch.SelfDispatch">
+		insert into DIS_SELFDISPATCH
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="promoter != null">
+				PROMOTER,
+			</if>
+			<if test="promotetime != null">
+				PROMOTETIME,
+			</if>
+			<if test="sender != null">
+				SENDER,
+			</if>
+			<if test="sendtime != null">
+				SENDTIME,
+			</if>
+			<if test="memo != null">
+				MEMO,
+			</if>
+			<if test="creater != null">
+				CREATER,
+			</if>
+			<if test="createtime != null">
+				CREATETIME,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="completetime != null">
+				COMPLETETIME,
+			</if>
+			<if test="code != null">
+				CODE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="promoter != null">
+				#{promoter,jdbcType=VARCHAR},
+			</if>
+			<if test="promotetime != null">
+				#{promotetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="sender != null">
+				#{sender,jdbcType=VARCHAR},
+			</if>
+			<if test="sendtime != null">
+				#{sendtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="memo != null">
+				#{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="creater != null">
+				#{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				#{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=DECIMAL},
+			</if>
+			<if test="completetime != null">
+				#{completetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateDispatch" parameterType="com.benqzl.pojo.dispatch.SelfDispatch">
+		update DIS_SELFDISPATCH
+		<set>
+			<if test="promoter != null">
+				PROMOTER = #{promoter,jdbcType=VARCHAR},
+			</if>
+			<if test="promotetime != null">
+				PROMOTETIME = #{promotetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="sender != null">
+				SENDER = #{sender,jdbcType=VARCHAR},
+			</if>
+			<if test="sendtime != null">
+				SENDTIME = #{sendtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="memo != null">
+				MEMO = #{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="creater != null">
+				CREATER = #{creater,jdbcType=VARCHAR},
+			</if>
+			<if test="createtime != null">
+				CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=DECIMAL},
+			</if>
+			<if test="completetime != null">
+				COMPLETETIME = #{completetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="code != null">
+				CODE = #{code,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<delete id="deleteInstruction" parameterType="java.lang.String">
+		delete
+		dis_sd_instructions where sdid=#{sid}
+	</delete>
+	<delete id="deleteStation" parameterType="java.lang.String">
+		delete dis_sd_stations
+		where sdid=#{sid}
+	</delete>
+	<update id="deleteDispatch" parameterType="java.lang.String">
+		update
+		dis_selfdispatch set state='9' where id=#{id}
+	</update>
+	<insert id="insertExecute" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		insert into DIS_SD_EXECUTE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="sid != null">
+				SID,
+			</if>
+			<if test="dispatchstationid != null">
+				DISPATCHSTATIONID,
+			</if>
+			<if test="executetime != null">
+				EXECUTETIME,
+			</if>
+			<if test="unitexecutetime != null">
+				UNITEXECUTETIME,
+			</if>
+			<if test="memo != null">
+				MEMO,
+			</if>
+			<if test="startouterlevel != null">
+				STARTOUTERLEVEL ,
+			</if>
+			<if test="startinlandlevel != null">
+				STARTINLANDLEVEL,
+			</if>
+			<if test="stopouterlevel != null">
+				STOPPUTERLEVEL,
+			</if>
+			<if test="stopinlandlevel != null">
+				STOPINLANDLEVEL,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="sid != null">
+				#{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="dispatchstationid != null">
+				#{dispatchstationid,jdbcType=VARCHAR},
+			</if>
+			<if test="executetime != null">
+				#{executetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="unitexecutetime != null">
+				#{unitexecutetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="memo != null">
+				#{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="startouterlevel != null">
+				 #{startouterlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="startinlandlevel != null">
+				#{startinlandlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="stopouterlevel != null">
+				#{stopouterlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="stopinlandlevel != null">
+				#{stopinlandlevel,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<insert id="insertExecutePeople" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecutePeople">
+		insert into DIS_SD_EXECUTE_PEOPLE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="execteid != null">
+				EXECTEID,
+			</if>
+			<if test="peopletype != null">
+				PEOPLETYPE,
+			</if>
+			<if test="userid != null">
+				USERID,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="execteid != null">
+				#{execteid,jdbcType=VARCHAR},
+			</if>
+			<if test="peopletype != null">
+				#{peopletype,jdbcType=DECIMAL},
+			</if>
+			<if test="userid != null">
+				#{userid,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<insert id="insertExecuteUnit" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecuteUnits">
+		insert into DIS_SD_EXECUTE_UNITS
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="unitid != null">
+				UNITID,
+			</if>
+			<if test="begintime != null">
+				BEGINTIME,
+			</if>
+			<if test="endtime != null">
+				ENDTIME,
+			</if>
+			<if test="executeid != null">
+				EXECUTEID,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="unitid != null">
+				#{unitid,jdbcType=VARCHAR},
+			</if>
+			<if test="begintime != null">
+				#{begintime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="endtime != null">
+				#{endtime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="executeid != null">
+				#{executeid,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<insert id="insertExecuteGate" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecuteGate">
+		insert into DIS_SD_EXECUTE_GATE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="gid != null">
+				GID,
+			</if>
+			<if test="operatetime != null">
+				OPERATETIME,
+			</if>
+			<if test="operate != null">
+				OPERATE,
+			</if>
+			<if test="sdexecuteid != null">
+				SDEXECUTEID,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="gid != null">
+				#{gid,jdbcType=VARCHAR},
+			</if>
+			<if test="operatetime != null">
+				#{operatetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="operate != null">
+				#{operate,jdbcType=DECIMAL},
+			</if>
+			<if test="sdexecuteid != null">
+				#{sdexecuteid,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateDispatchStations" parameterType="java.lang.String">
+		update
+		dis_sd_stations set state='2' where id=#{id}
+	</update>
+	<update id="updateDispatchStations2" parameterType="java.lang.String">
+		update
+		dis_sd_stations set state='3' where id=#{id}
+	</update>
+	<select id="selectExecuteByStationId" parameterType="java.lang.String"
+		resultMap="BaseResultMap2">
+		select b.*,f.name as stationname, d.username as
+		username,e.username as
+		createname,
+		c.id instruction_id
+		,c.instruction,c.gateoperatetime,c.unitoperatetime,
+		a.id
+		station_id,a.sid,a.receipter,a.receipttime,a.state as
+		stationstate
+		from
+		dis_sd_stations a,dis_selfdispatch b,dis_sd_instructions c,sys_user
+		d,sys_user e,sys_station f
+		where a.sdid=b.id and a.sid=f.id and
+		b.id=c.sdid and b.promoter=d.userid
+		and b.creater=e.userid
+		and
+		b.state!='9' and b.state!='0' and b.sender is not null and
+		order by
+		b.state
+	</select>
+	<resultMap type="com.benqzl.pojo.dispatch.SelfDispatchExecute"
+		id="execute1">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="SID" property="sid" jdbcType="VARCHAR" />
+		<result column="RDSTATIONID" property="rdstationid" jdbcType="VARCHAR" />
+		<result column="GATEEXECUTETIME" property="gateexecutetime"
+			jdbcType="TIMESTAMP" />
+		<result column="UNITEXECUTETIME" property="unitexecutetime"
+			jdbcType="TIMESTAMP" />
+		<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="STARTOUTERLEVEL" jdbcType="DECIMAL" property="startouterlevel" />
+		<result column="STARTINLANDLEVEL" jdbcType="DECIMAL" property="startinlandlevel" />
+		<result column="STOPPUTERLEVEL" jdbcType="DECIMAL" property="stopouterlevel" />
+		<result column="STOPINLANDLEVEL" jdbcType="DECIMAL" property="stopinlandlevel" />
+		<association property="s" javaType="com.benqzl.pojo.system.Station">
+			<id column="SID" property="id" jdbcType="VARCHAR" />
+			<result column="CODE" property="code" jdbcType="VARCHAR" />
+			<result column="NAME" property="name" jdbcType="VARCHAR" />
+			<result column="LAT" property="lat" jdbcType="DECIMAL" />
+			<result column="LON" property="lon" jdbcType="DECIMAL" />
+			<result column="LEVELS" property="levels" jdbcType="DECIMAL" />
+			<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+			<result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+			<result column="ISDEL" property="isdel" jdbcType="DECIMAL" />
+			<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		</association>
+		<association property="sds"
+			javaType="com.benqzl.pojo.dispatch.SelfDispatchStations">
+			<id column="DISPATCHSTATIONID" property="id" jdbcType="VARCHAR" />
+			<result column="SDID" property="sdid" jdbcType="VARCHAR" />
+			<result column="SID" property="sid" jdbcType="VARCHAR" />
+			<result column="RECEIPTER" property="receipter" jdbcType="VARCHAR" />
+			<result column="RECEIPTTIME" property="receipttime" jdbcType="TIMESTAMP" />
+			<result column="STATE" property="state" jdbcType="DECIMAL" />
+			<association property="selfDispatch"
+				javaType="com.benqzl.pojo.dispatch.SelfDispatch">
+				<id column="PATCHID" property="id" jdbcType="VARCHAR" />
+				<result column="PROMOTER" property="promoter" jdbcType="VARCHAR" />
+				<result column="PROMOTETIME" property="promotetime" jdbcType="TIMESTAMP" />
+				<result column="SENDER" property="sender" jdbcType="VARCHAR" />
+				<result column="SENDTIME" property="sendtime" jdbcType="TIMESTAMP" />
+				<result column="MEMO" property="memo" jdbcType="VARCHAR" />
+				<result column="CREATER" property="creater" jdbcType="VARCHAR" />
+				<result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+				<result column="STATE" property="state" jdbcType="DECIMAL" />
+				<result column="COMPLETETIME" property="completetime" />
+				<result column="CODE" property="code" jdbcType="VARCHAR" />
+			</association>
+		</association>
+		<collection property="sdep"
+			ofType="com.benqzl.pojo.dispatch.SelfDispatchExecutePeople">
+			<id column="EXECUTEPEOPLE_ID" property="id" jdbcType="VARCHAR" />
+			<result column="USERID" property="userid" jdbcType="VARCHAR" />
+			<association property="user" javaType="com.benqzl.pojo.system.User">
+				<id column="USERID" property="userid" jdbcType="VARCHAR" />
+				<result column="USERNAME" property="username" jdbcType="VARCHAR" />
+			</association>
+		</collection>
+	</resultMap>
+<!-- 	<select id="selectExecuteByStationId2" parameterType="java.lang.String"
+		resultMap="execute1">
+		select a.id,a.dispatchstationid,c.id as
+		patchid,c.code,a.sid,d.name,a.memo,  a.startouterlevel,a.startinlandlevel,
+		a.stopputerlevel,a.stopinlandlevel,e.id as
+		executepeople_id,e.userid,f.username
+		from dis_sd_execute
+		a,dis_sd_stations b, dis_selfdispatch c, sys_station
+		d,dis_sd_execute_people e,sys_user f
+		where a.dispatchstationid=b.id and
+		b.sdid=c.id and a.sid=d.id and
+		a.id=e.execteid and e.userid=f.userid
+		and a.dispatchstationid=#{dispatchstationid}
+	</select> -->
+	<select id="selectExecuteByStationId2" parameterType="java.lang.String"
+		resultMap="execute1">
+	select a.id,
+       a.dispatchstationid,
+       c.id                as patchid,
+       c.code,
+       a.sid,
+       d.name,
+       a.memo,
+       a.startouterlevel,
+       a.startinlandlevel,
+       a.stopputerlevel,
+       a.stopinlandlevel,
+       e.id                as executepeople_id,
+       e.userid,
+       f.username
+  from dis_sd_execute        a
+       inner join dis_sd_stations b on b.id=a.dispatchstationid
+       inner join dis_selfdispatch c on c.id=b.sdid
+       inner join sys_station d on d.id=a.sid
+       left join dis_sd_execute_people e on e.execteid=a.id
+       left join sys_user f on e.userid=f.userid
+   where 1 = 1
+   and a.dispatchstationid =#{dispatchstationid}
+	</select>
+		<select id="countExecuteByStationId2" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+	select count(*)
+  from dis_sd_execute        a
+       inner join dis_sd_stations b on b.id=a.dispatchstationid
+       inner join dis_selfdispatch c on c.id=b.sdid
+       inner join sys_station d on d.id=a.sid
+       left join dis_sd_execute_people e on e.execteid=a.id
+       left join sys_user f on e.userid=f.userid
+   where 1 = 1
+   and a.dispatchstationid =#{dispatchstationid}
+	</select>
+	
+	
+	<update id="updateExecute" parameterType="com.benqzl.pojo.dispatch.SelfDispatchExecute">
+		update DIS_SD_EXECUTE
+		<set>
+			<if test="sid != null">
+				SID = #{sid,jdbcType=VARCHAR},
+			</if>
+			<if test="dispatchstationid != null">
+				DISPATCHSTATIONID =
+				#{dispatchstationid,jdbcType=VARCHAR},
+			</if>
+			<if test="executetime != null">
+				EXECUTETIME = #{executetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="unitexecutetime != null">
+				UNITEXECUTETIME = #{unitexecutetime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="memo != null">
+				MEMO = #{memo,jdbcType=VARCHAR},
+			</if>
+			<if test="startouterlevel != null">
+				STARTOUTERLEVEL = #{startouterlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="startinlandlevel != null">
+				STARTINLANDLEVEL = #{startinlandlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="stopouterlevel != null">
+				STOPPUTERLEVEL = #{stopouterlevel,jdbcType=DECIMAL},
+			</if>
+			<if test="stopinlandlevel != null">
+				STOPINLANDLEVEL =#{stopinlandlevel,jdbcType=DECIMAL},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteExecutePeople" parameterType="java.lang.String">
+		delete
+		dis_sd_execute_people where execteid=#{executeid}
+	</delete>
+	<delete id="deleteExecuteUnit" parameterType="java.lang.String">
+		delete
+		dis_sd_execute_units where executeid=#{executeid}
+	</delete>
+	<delete id="deleteExecuteGate" parameterType="java.lang.String">
+		delete
+		dis_sd_execute_gate where sdexecuteid=#{executeid}
+	</delete>
+	<resultMap type="com.benqzl.pojo.dispatch.SelfDispatchExecuteUnits"
+		id="Unit">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="UNITID" property="unitid" jdbcType="VARCHAR" />
+		<result column="BEGINTIME" property="begintime" jdbcType="TIMESTAMP" />
+		<result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+		<result column="EXECUTEID" property="executeid" jdbcType="VARCHAR" />
+		<association property="unit" javaType="com.benqzl.pojo.system.Unit">
+			<id column="UNITID" property="id" jdbcType="VARCHAR" />
+			<result column="NAME" property="name" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	<select id="findUnitByExecuteid" resultMap="Unit" parameterType="java.lang.String">
+		select a.*,b.name from dis_sd_execute_units a,sys_unit b where
+		a.unitid=b.id and a.executeid=#{executeid}
+	</select>
+	<resultMap type="com.benqzl.pojo.dispatch.SelfDispatchExecuteGate"
+		id="Gate">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="GID" property="gid" jdbcType="VARCHAR" />
+		<result column="OPERATETIME" property="operatetime" jdbcType="TIMESTAMP" />
+		<result column="OPERATE" property="operate" jdbcType="DECIMAL" />
+		<result column="SDEXECUTEID" property="sdexecuteid" jdbcType="VARCHAR" />
+		<association property="gate" javaType="com.benqzl.pojo.system.Gate">
+			<id column="GID" property="id" jdbcType="VARCHAR" />
+			<result column="NAME" property="name" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	<select id="findGateByExecuteid" resultMap="Gate" parameterType="java.lang.String">
+		select a.*,b.name from dis_sd_execute_gate a,sys_gate b where
+		a.gid=b.id and a.sdexecuteid=#{executeid}
+	</select>
+	<resultMap type="com.benqzl.pojo.dispatch.ReceiptDispatch"
+		id="rd">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="RECEIPTID" property="receiptid" jdbcType="VARCHAR" />
+		<result column="DISPATCHMEMO" property="memo" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="DECIMAL" />
+		<association property="receipt" javaType="com.benqzl.pojo.dispatch.Receipt">
+			<id column="RECEIPTID" property="id" />
+			<result column="LAUNCHER" property="launcher" />
+			<result column="LAUNCHTIME" property="launchtime" />
+			<result column="RECEIPTER" property="receipter" />
+			<result column="RECEIPTETIME" property="receiptetime" />
+			<result column="MEMO" property="memo"></result>
+			<association property="receipteUser" javaType="com.benqzl.pojo.system.User">
+				<id column="RECEIPTER" property="userid" />
+				<result column="USERNAME" property="username" />
+			</association>
+		</association>
+	</resultMap>
+	<select id="receptdispatch" parameterType="java.util.Map"
+		resultMap="rd">
+		select
+		a.launchtime,a.launcher,a.receipter,c.username,a.memo,
+
+		b.id,b.receiptid,b.state,b.memo as dispatchmemo
+
+		from dis_receipt
+		a,dis_receipt_dispatch b ,sys_user c
+
+		where a.id=b.receiptid and
+		a.receipter=c.userid
+
+		and a.state!='9' and a.dispatchtype='1'
+	</select>
+	<update id="updateDispatchCompleteTime" parameterType="com.benqzl.pojo.dispatch.SelfDispatch">
+		update
+		dis_selfdispatch set completetime=#{completetime} where id=#{id}
+	</update>
+	<select id="findSelfDispatchBySdstationid" resultType="com.benqzl.pojo.dispatch.SelfDispatch">
+		select a.*
+		from dis_selfdispatch a,dis_sd_stations b
+		where a.id=b.sdid and
+		b.id=#{dispatchstationid}
+	</select>
+	<select id="findDispatch2NotAll" resultMap="BaseResultMap2"
+		parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(select b.*,f.name as
+		stationname, d.username as username,e.username as createname,
+		c.id
+		instruction_id ,c.instruction,c.gateoperatetime,c.unitoperatetime,
+		a.id station_id,a.sid,a.receipter,a.receipttime,a.state as
+		stationstate
+		from dis_selfdispatch b left join dis_sd_stations a on
+		a.sdid=b.id
+		left join dis_sd_instructions c on b.id=c.sdid
+		left join
+		(select eu1.userid,e.name as username from sys_user eu1 left
+		join
+		sys_employee e on e.id = eu1.employeeid) d on b.promoter=d.userid
+		left
+		join (select eu1.userid,e.name as username from sys_user eu1 left
+		join
+		sys_employee e on e.id = eu1.employeeid) e on b.creater=e.userid
+		left
+		join sys_station f on a.sid=f.id
+		<where>
+			and b.state !=9 and b.state !=0
+			<if test="rpid != null">
+				and ${rpid}
+			</if>
+		</where>
+		order by b.state ) A
+		where ROWNUM &lt;=#{p2})
+		where RN &gt; #{p1}
+	</select>
+</mapper>

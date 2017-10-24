@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.water.TrGaterunMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.water.TrGaterun">
+		<id column="F_ID" property="fId" jdbcType="DECIMAL" />
+		<result column="F_STATIONCODE" property="fStationcode"
+			jdbcType="VARCHAR" />
+		<result column="F_GATECODE" property="fGatecode" jdbcType="VARCHAR" />
+		<result column="F_TIME" property="fTime" jdbcType="TIMESTAMP" />
+		<result column="F_RUNSTATE" property="fRunstate" jdbcType="VARCHAR" />
+		<result column="F_VA" property="fVa" jdbcType="DECIMAL" />
+		<result column="F_VB" property="fVb" jdbcType="DECIMAL" />
+		<result column="F_VC" property="fVc" jdbcType="DECIMAL" />
+		<result column="F_IA" property="fIa" jdbcType="DECIMAL" />
+		<result column="F_IB" property="fIb" jdbcType="DECIMAL" />
+		<result column="F_IC" property="fIc" jdbcType="DECIMAL" />
+		<result column="F_LEVEL" property="fLevel" jdbcType="DECIMAL" />
+		<result column="F_POSITIONSTATE" property="fPositionstate"
+			jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		F_ID, F_STATIONCODE, F_GATECODE, F_TIME, F_RUNSTATE, F_VA, F_VB, F_VC,
+		F_IA, F_IB,
+		F_IC, F_LEVEL, F_POSITIONSTATE,name,code
+	</sql>
+	<select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		F_ID, F_TIME, F_RUNSTATE, F_VA, F_VB, F_VC,
+		F_IA, F_IB,
+		F_IC, F_LEVEL, F_POSITIONSTATE,sys_station.name as F_STATIONCODE,SYS_GATE.name as F_GATECODE
+		from T_R_GATERUN left join sys_station on T_R_GATERUN.F_STATIONCODE = sys_station.code
+		left join SYS_GATE on T_R_GATERUN.F_GATECODE=SYS_GATE.CODE and sys_station.id=SYS_GATE.sid
+		<where>
+			<if test="code != null">
+				and F_STATIONCODE like '%'|| #{code,jdbcType=VARCHAR}
+				||'%'
+			</if>
+			<if test="starttime != null">
+				and F_TIME &gt;=#{starttime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and F_TIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+		</where>
+		order by F_TIME desc) A
+		where ROWNUM &lt;=#{p2})
+		where RN
+		&gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		select
+		count(*) as num
+		from T_R_GATERUN
+		<where>
+			<if test="code != null">
+				and F_STATIONCODE like '%'|| #{code,jdbcType=VARCHAR}
+				||'%'
+			</if>
+			<if test="starttime != null">
+				and F_TIME &gt;=#{starttime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="endtime != null">
+				and F_TIME &lt;= #{endtime,jdbcType=TIMESTAMP}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from T_R_GATERUN
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from T_R_GATERUN
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</delete>
+	<insert id="insert" parameterType="java.util.List">
+		insert into T_R_GATERUN (F_ID, F_STATIONCODE, F_GATECODE,
+		F_TIME, F_RUNSTATE, F_VA,
+		F_VB, F_VC, F_IA, F_IB,
+		F_IC, F_LEVEL, F_POSITIONSTATE
+		)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select SYS_GUID(),
+			#{item.fStationcode,jdbcType=VARCHAR}, 
+			#{item.fGatecode,jdbcType=VARCHAR},
+			#{item.fTime,jdbcType=TIMESTAMP},
+			#{item.fRunstate,jdbcType=VARCHAR},
+			<!-- <if test="item.fVa != null"> -->
+			#{item.fVa,jdbcType=DECIMAL},
+			<!-- </if> -->
+			#{item.fVb,jdbcType=DECIMAL}, 
+			#{item.fVc,jdbcType=DECIMAL}, 
+			#{item.fIa,jdbcType=DECIMAL},
+			#{item.fIb,jdbcType=DECIMAL},
+			#{item.fIc,jdbcType=DECIMAL}, #{item.fLevel,jdbcType=DECIMAL}, #{item.fPositionstate,jdbcType=VARCHAR} from
+			dual)
+		</foreach>
+
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.water.TrGaterun">
+		insert into T_R_GATERUN
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="fId != null">
+				F_ID,
+			</if>
+			<if test="fStationcode != null">
+				F_STATIONCODE,
+			</if>
+			<if test="fGatecode != null">
+				F_GATECODE,
+			</if>
+			<if test="fTime != null">
+				F_TIME,
+			</if>
+			<if test="fRunstate != null">
+				F_RUNSTATE,
+			</if>
+			<if test="fVa != null">
+				F_VA,
+			</if>
+			<if test="fVb != null">
+				F_VB,
+			</if>
+			<if test="fVc != null">
+				F_VC,
+			</if>
+			<if test="fIa != null">
+				F_IA,
+			</if>
+			<if test="fIb != null">
+				F_IB,
+			</if>
+			<if test="fIc != null">
+				F_IC,
+			</if>
+			<if test="fLevel != null">
+				F_LEVEL,
+			</if>
+			<if test="fPositionstate != null">
+				F_POSITIONSTATE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="fId != null">
+				#{fId,jdbcType=VARCHAR},
+			</if>
+			<if test="fStationcode != null">
+				#{fStationcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fGatecode != null">
+				#{fGatecode,jdbcType=VARCHAR},
+			</if>
+			<if test="fTime != null">
+				#{fTime,jdbcType=DATE},
+			</if>
+			<if test="fRunstate != null">
+				#{fRunstate,jdbcType=VARCHAR},
+			</if>
+			<if test="fVa != null">
+				#{fVa,jdbcType=DECIMAL},
+			</if>
+			<if test="fVb != null">
+				#{fVb,jdbcType=DECIMAL},
+			</if>
+			<if test="fVc != null">
+				#{fVc,jdbcType=DECIMAL},
+			</if>
+			<if test="fIa != null">
+				#{fIa,jdbcType=DECIMAL},
+			</if>
+			<if test="fIb != null">
+				#{fIb,jdbcType=DECIMAL},
+			</if>
+			<if test="fIc != null">
+				#{fIc,jdbcType=DECIMAL},
+			</if>
+			<if test="fLevel != null">
+				#{fLevel,jdbcType=DECIMAL},
+			</if>
+			<if test="fPositionstate != null">
+				#{fPositionstate,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.water.TrGaterun">
+		update T_R_GATERUN
+		<set>
+			<if test="fStationcode != null">
+				F_STATIONCODE = #{fStationcode,jdbcType=VARCHAR},
+			</if>
+			<if test="fGatecode != null">
+				F_GATECODE = #{fGatecode,jdbcType=VARCHAR},
+			</if>
+			<if test="fTime != null">
+				F_TIME = #{fTime,jdbcType=DATE},
+			</if>
+			<if test="fRunstate != null">
+				F_RUNSTATE = #{fRunstate,jdbcType=VARCHAR},
+			</if>
+			<if test="fVa != null">
+				F_VA = #{fVa,jdbcType=DECIMAL},
+			</if>
+			<if test="fVb != null">
+				F_VB = #{fVb,jdbcType=DECIMAL},
+			</if>
+			<if test="fVc != null">
+				F_VC = #{fVc,jdbcType=DECIMAL},
+			</if>
+			<if test="fIa != null">
+				F_IA = #{fIa,jdbcType=DECIMAL},
+			</if>
+			<if test="fIb != null">
+				F_IB = #{fIb,jdbcType=DECIMAL},
+			</if>
+			<if test="fIc != null">
+				F_IC = #{fIc,jdbcType=DECIMAL},
+			</if>
+			<if test="fLevel != null">
+				F_LEVEL = #{fLevel,jdbcType=DECIMAL},
+			</if>
+			<if test="fPositionstate != null">
+				F_POSITIONSTATE = #{fPositionstate,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.water.TrGaterun">
+		update T_R_GATERUN
+		set F_STATIONCODE = #{fStationcode,jdbcType=VARCHAR},
+		F_GATECODE = #{fGatecode,jdbcType=VARCHAR},
+		F_TIME = #{fTime,jdbcType=DATE},
+		F_RUNSTATE = #{fRunstate,jdbcType=VARCHAR},
+		F_VA = #{fVa,jdbcType=DECIMAL},
+		F_VB = #{fVb,jdbcType=DECIMAL},
+		F_VC = #{fVc,jdbcType=DECIMAL},
+		F_IA = #{fIa,jdbcType=DECIMAL},
+		F_IB = #{fIb,jdbcType=DECIMAL},
+		F_IC = #{fIc,jdbcType=DECIMAL},
+		F_LEVEL = #{fLevel,jdbcType=DECIMAL},
+		F_POSITIONSTATE = #{fPositionstate,jdbcType=VARCHAR}
+		where F_ID = #{fId,jdbcType=VARCHAR}
+	</update>
+</mapper>

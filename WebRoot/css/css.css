@@ -1,0 +1,64 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+	padding: 0px;
+	margin: 0px;
+	text-align: center
+}
+table {
+	width: 100%;
+	text-align: center;
+	margin: auto;
+	font-family: 微软雅黑;
+}
+.table01 {
+	height:auto;
+	max-height:700px
+	width: 600px;
+	background-color: #fff;
+	border-top: 1px solid #222;
+	border-right: 1px solid #222;
+	table-layout:fixed;
+}
+.table01 td {
+	border-bottom: 1px solid #222;
+	border-left: 1px solid #222;
+	height: 28px;
+	color: #666;
+	vertical-align: middle;
+	color: #000;
+	font-size: 14px;
+	text-align: left;
+	padding-left: 10px;
+	padding-right: 10px;
+	WORD-WRAP: break-word;
+}
+.gdlm {
+	font-weight: bold;
+	text-align: center!important;
+
+}
+.register_input {
+	height: 25px;
+	line-height: 25px;
+	width: 80px;
+	border: 1px solid #d4d4d4;
+	padding-left: 10px;
+	font-size: 14px;
+	font-family: 微软雅黑;
+	color: #000;
+	outline: none;
+}
+.btt {
+	font-size: 24px;
+	font-weight: bold
+}
+.srk {
+	width: 90%;
+	border: none;
+	height: 90%;
+	text-align: center;
+	font-size: 16px
+}
+.dwb{height:100%!important;width:100%!important;border:1px solid #fff; padding:0px; font-size:12px;margin:0px;}

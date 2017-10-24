@@ -1,0 +1,212 @@
+package com.benqzl.service.dispatch;
+
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.benqzl.dao.dispatch.DispatchInstructionsMapper;
+import com.benqzl.dao.dispatch.ReceiptDispatchExecuteMapper;
+import com.benqzl.dao.dispatch.ReceiptMapper;
+import com.benqzl.dao.dispatch.SelfDispatchDepartmentMapper;
+import com.benqzl.dao.dispatch.SelfDispatchExecuteMapper;
+import com.benqzl.dao.water.TrPumprunMapper;
+import com.benqzl.pojo.dispatch.Receipt;
+import com.benqzl.pojo.dispatch.ReceiptDispatch;
+import com.benqzl.pojo.dispatch.SelfDispatchDepartment;
+import com.benqzl.pojo.system.Station;
+import com.benqzl.pojo.system.User;
+import com.benqzl.pojo.util.RealTimeUnitReport;
+import com.benqzl.pojo.util.UserStatistics;
+
+@Service("receiptService")
+public class ReceiptServiceImpl implements ReceiptService{
+
+	@Autowired
+	private ReceiptMapper mapper;
+	@Autowired
+	private ReceiptDispatchExecuteMapper receiptDispatchExecuteMapper;
+	@Autowired
+	private DispatchInstructionsMapper dim;
+	@Autowired
+	private SelfDispatchDepartmentMapper selfdepartments;
+	@Autowired
+	private SelfDispatchExecuteMapper selfDispatchExecuteMapper;
+	@Autowired
+	private TrPumprunMapper trPumprunMapper;
+	@Override
+	public List<Receipt> findByPage(Map<String, Object> map) {
+		return mapper.findByPage(map);
+	}
+
+	@Override
+	public int pageCount(Map<String, Object> map) {
+		return mapper.pageCount(map);
+	}
+
+	@Override
+	public int deleteByPrimaryKey(String id) {
+		return mapper.deleteByPrimaryKey(id);
+	}
+
+	@Override
+	public int insert(Receipt record) {
+		return mapper.insert(record);
+	}
+
+	@Override
+	public int insertSelective(Receipt record) {
+		return mapper.insertSelective(record);
+	}
+
+	@Override
+	public Receipt selectByPrimaryKey(String id) {
+		return mapper.selectByPrimaryKey(id);
+	}
+
+	@Override
+	public int updateByPrimaryKeySelective(Receipt record) {
+		return mapper.updateByPrimaryKeySelective(record);
+	}
+
+	@Override
+	public int updateByPrimaryKey(Receipt record) {
+		return mapper.updateByPrimaryKey(record);
+	}
+
+	@Override
+	public List<User> userList() {
+		return mapper.userList();
+	}
+
+	@Override
+	public List<Receipt> findDocket(List<String> list) {
+		/*List<String> receipts=dismapper.findReceiptIds("0");
+		list.removeAll(receipts);
+		if(list.size()==0){
+			return null;
+		}*/
+		return mapper.findDocket(list);
+	}
+   	@Override
+	public int deleteState(String id) {
+		return mapper.deleteState(id);
+	}
+
+	@Override
+	public int commitState(String id) {
+		return mapper.commitState(id);
+	}
+
+	@Override
+	public void insertAreaDispatch(ReceiptDispatch rd) {
+	}
+
+	@Override
+	public int aduitState(Map<String, Object> map) {
+		return mapper.aduitState(map);
+	}
+
+	@Override
+	public Receipt findReceiptDocket(String id) {
+		return mapper.findReceiptDocket(id);
+	}
+
+	@Override
+	public List<UserStatistics> findStatisticsByPage(Map<String, Object> map)
+			throws Exception {
+		return receiptDispatchExecuteMapper.findStatisticsByPage(map);
+	}
+
+	@Override
+	public int pageStatisticsCount(Map<String, Object> map) {
+		return receiptDispatchExecuteMapper.pageStatisticsCount(map);
+	}
+
+	@Override
+	public List<UserStatistics> findStations(String sid) {
+		return receiptDispatchExecuteMapper.findStations(sid);
+	}
+
+	@Override
+	public List<Station> findStation() {
+		Station station1=new Station();
+		station1.setId("0");
+		station1.setName("全部");
+		List<Station> stations=dim.findStation();
+		stations.add(0, station1);
+		return stations;
+	}
+
+	@Override
+	public void insertDepartment(List<SelfDispatchDepartment> selfdepartment) {
+		selfdepartments.insertDepartment(selfdepartment);
+		
+	}
+
+	@Override
+	public List<UserStatistics> findSelfStatisticsByPage(Map<String, Object> map) {
+		
+		return selfDispatchExecuteMapper.findSelfStatisticsByPage(map);
+	}
+
+	@Override
+	public int findSelfStatisticsCount(Map<String, Object> map) {
+		
+		return selfDispatchExecuteMapper.findSelfStatisticsCount(map);
+	}
+
+	@Override
+	public List<UserStatistics> findStatisticsPrint(Map<String, Object> map) {
+		return receiptDispatchExecuteMapper.findStatisticsPrint(map);
+	}
+
+	@Override
+	public List<UserStatistics> findSelfStatisticsPrint(Map<String, Object> map) {
+		return selfDispatchExecuteMapper.findSelfStatisticsPrint(map);
+	}
+    /*自主运用统计导出报表*/
+	@Override
+	public List<UserStatistics> findSelfStatisticsByExport(
+			Map<String, Object> map) {
+		return selfDispatchExecuteMapper.findSelfStatisticsByExport(map);
+	}
+	  /*大包围/片区运用统计导出报表*/
+	@Override
+	public List<UserStatistics> findStatisticsByExport(Map<String, Object> map) {
+		return receiptDispatchExecuteMapper.findStatisticsByExport(map);
+	}
+
+	@Override
+	public List<Receipt> findEDEndList(Map<String, Object> map) {
+		return mapper.findEDEndList(map);
+	}
+
+	@Override
+	public void updateState(HashMap<String, Object> map) {
+	    mapper.updateState(map);
+	}
+
+	@Override
+	public int findEDEndCount(Map<String, Object> map) {
+		return mapper.findEDEndCount(map);
+	}
+
+	@Override
+	public List<RealTimeUnitReport> findRealTimeUnitReportByPage(Map<String, Object> map) {
+		return trPumprunMapper.findRealTimeUnitReportByPage(map);
+	}
+
+	@Override
+	public int pageRealTimeUnitReportCount(Map<String, Object> map) {
+		return trPumprunMapper.pageRealTimeUnitReportCount(map);
+	}
+
+	@Override
+	public List<RealTimeUnitReport> explortRealTimeUnitReport(Map<String, Object> map) {
+		return trPumprunMapper.explortRealTimeUnitReport(map);
+	}
+}

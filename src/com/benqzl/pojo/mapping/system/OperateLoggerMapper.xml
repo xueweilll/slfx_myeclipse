@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.OperateLoggerMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.OperateLogger" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="USERID" property="userid" jdbcType="VARCHAR" />
+    <result column="CONTENTS" property="contents" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="TYPES" property="types" jdbcType="DECIMAL" />
+     <association property="user" javaType="com.benqzl.pojo.system.User">
+    <id property="userid" column="USERID"/>
+    <result property="username" column="UNAME"/>
+    </association>
+    <association property="employee" javaType="com.benqzl.pojo.system.Employee">
+    <id property="id" column="ID"/>
+    <result property="name" column="ENAME"/>
+    </association>
+  </resultMap>
+  <resultMap  type="com.benqzl.pojo.system.User" id="BaseResultMap1">
+  <id column="ID" jdbcType="VARCHAR" property="id" />
+	<result column="NAME" jdbcType="VARCHAR" property="name" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    o.ID as ID, o.USERID as USERID, u.USERNAME as UNAME,o.CONTENTS as CONTENTS, o.CREATETIME as CREATETIME, 
+    o.TYPES as TYPES,e.name as ENAME
+  </sql>
+ <sql id="Base_Column_List1">
+  u.USERID as USERID, u.USERNAME as USERNAME 
+  </sql>
+    <select id="selectUserbyParentID" parameterType="java.lang.String" resultMap="BaseResultMap1">
+  	select 
+    <include refid="Base_Column_List1" />
+    from SYS_USER u
+   join SYS_OPERATE_LOGGER o on o.USERID=u.USERID 
+  </select>
+
+  <select id="findByPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List" />
+		from SYS_OPERATE_LOGGER o
+		join SYS_USER u on o.USERID=u.USERID
+		left join sys_employee e on e.id=u.employeeid
+		where 1 = 1
+        <if test="contents != null and contents !=''" >
+		and o.CONTENTS like '%'||#{contents,jdbcType=VARCHAR}||'%'
+		</if> 
+		 <if test="userid != null and userid !='' and userid !='0'.toString()" >
+		and o.USERID = #{userid,jdbcType=VARCHAR}
+		</if> 
+		 <if test="types != null and types!=''" >
+		and o.TYPES = #{types,jdbcType=DECIMAL}
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and o.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and o.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		order by o.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		)
+		where RN &gt; #{p1}
+	</select>
+	<select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		SYS_OPERATE_LOGGER o
+		join SYS_USER u on o.USERID=u.USERID
+		left join sys_employee e on e.id=u.employeeid
+		where 1 = 1
+        <if test="contents != null and contents!=''" >
+		and o.CONTENTS like '%'||#{contents,jdbcType=VARCHAR}||'%'
+		</if> 
+		 <if test="userid != null and userid !='' and userid !='0'.toString()" >
+		and o.USERID = #{userid,jdbcType=VARCHAR}
+		</if> 
+		 <if test="types != null and types!=''" >
+		and o.TYPES = #{types,jdbcType=DECIMAL}
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and o.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and o.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+	</select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_OPERATE_LOGGER
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from SYS_OPERATE_LOGGER
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.OperateLogger" >
+    insert into SYS_OPERATE_LOGGER (ID, USERID, CONTENTS, 
+      CREATETIME, TYPES)
+    values (#{id,jdbcType=VARCHAR}, #{userid,jdbcType=VARCHAR}, #{contents,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=DATE}, #{types,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.OperateLogger" >
+    insert into SYS_OPERATE_LOGGER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="userid != null" >
+        USERID,
+      </if>
+      <if test="contents != null" >
+        CONTENTS,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="types != null" >
+        TYPES,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=VARCHAR},
+      </if>
+      <if test="contents != null" >
+        #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=DATE},
+      </if>
+      <if test="types != null" >
+        #{types,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.OperateLogger" >
+    update SYS_OPERATE_LOGGER
+    <set >
+      <if test="userid != null" >
+        USERID = #{userid,jdbcType=VARCHAR},
+      </if>
+      <if test="contents != null" >
+        CONTENTS = #{contents,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=DATE},
+      </if>
+      <if test="types != null" >
+        TYPES = #{types,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.OperateLogger" >
+    update SYS_OPERATE_LOGGER
+    set USERID = #{userid,jdbcType=VARCHAR},
+      CONTENTS = #{contents,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=DATE},
+      TYPES = #{types,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

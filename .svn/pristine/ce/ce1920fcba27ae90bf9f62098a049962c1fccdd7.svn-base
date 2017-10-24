@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.AssetsMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.Assets" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="CREATER" property="creater" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <result column="PRINCIPAL" property="principal" jdbcType="VARCHAR" />
+    <result column="MOBLIE" property="moblie" jdbcType="VARCHAR" />
+    <result column="MEMO" property="memo" jdbcType="VARCHAR" />
+    <result column="URL" property="url" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+    <result column="STATE" property="state" jdbcType="DECIMAL" />
+    <result column="SID" property="sid" jdbcType="VARCHAR" />
+    <result column="MATERIALTYPE" property="materialtype" jdbcType="VARCHAR" />
+    <association property="employee" javaType="com.benqzl.pojo.system.Employee">
+    <id property="id" column="ID"/>
+    <result property="name" column="ENAME"/>
+    </association>
+     <association property="station" javaType="com.benqzl.pojo.system.Station">
+    <id property="id" column="SID"/>
+    <result property="name" column="SNAME"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, CREATER, NAME, CODE, PRINCIPAL, MOBLIE, MEMO, URL, CREATETIME, EDITTIME, STATE, 
+    MATERIALTYPE,SID
+  </sql>
+    <sql id="Base_Column_List1" >
+    a.id as ID, a.creater as CREATER, a.name as NAME, 
+    a.code as CODE,a.principal as  PRINCIPAL,a.moblie as MOBLIE, 
+    a.memo as MEMO, a.url as URL, a.createtime as CREATETIME,a.edittime as EDITTIME,a.state as STATE, 
+    a.materialtype as MATERIALTYPE,e.name as ENAME,s.name as SNAME
+  </sql>
+   <sql id="Base_Column_List2" >
+    a.id as ID, a.creater as CREATER, a.name as NAME, 
+    a.code as CODE,a.principal as  PRINCIPAL,a.moblie as MOBLIE, 
+    a.memo as MEMO, a.url as URL, a.createtime as CREATETIME,a.edittime as EDITTIME,a.state as STATE, 
+    a.materialtype as MATERIALTYPE,s.name as SNAME
+  </sql>
+   <select id="findByPage" resultMap="BaseResultMap" parameterType="java.lang.String">
+     select * from
+		(select A.*,ROWNUM RN from(
+		select
+		<include refid="Base_Column_List1" />
+		from SYS_ASSETS a
+		left join SYS_USER u on u.USERID=a.creater
+		left join SYS_EMPLOYEE e on e.id=u.employeeid
+		left join sys_station s on s.id=a.sid
+		where 1 = 1
+		 <if test="creater != null and creater !='' and creater !='0'.toString()" >
+		and e.name like '%'||#{creater,jdbcType=VARCHAR}||'%'
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and a.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and a.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		and a.state != 9
+		order by a.CREATETIME desc) A
+		where ROWNUM &lt;=#{p2}
+		) 
+		where RN &gt; #{p1}
+  </select>
+  <select id="pageCount" resultType="java.lang.Integer">
+		select
+		count(*) as num
+		from
+		SYS_ASSETS a
+		left join SYS_USER u on u.USERID=a.creater
+		left join SYS_EMPLOYEE e on e.id=u.employeeid
+		where 1 = 1
+		 <if test="creater != null and creater !=''and creater !='0'.toString()" >
+		and e.name like '%'||#{creater,jdbcType=VARCHAR}||'%'
+		</if> 
+		<if test="createtime != null and createtime!=''" >
+		and a.CREATETIME &gt;= to_date( #{createtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="endtime != null and endtime!=''" >
+		and a.CREATETIME &lt;= to_date( #{endtime,jdbcType=TIMESTAMP},'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		and a.state !=9
+	</select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_ASSETS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectQrByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List2" />
+    from SYS_ASSETS a
+    left join sys_station s
+    on s.id= a.sid
+    where a.ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectDownByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+      select 
+      <include refid="Base_Column_List2"/>
+      from sys_assets a
+      left join sys_station s
+      on a.sid=s.id
+    where a.ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    update SYS_ASSETS set state=9
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.system.Assets" >
+    insert into SYS_ASSETS (ID, CREATER, NAME, 
+      CODE, PRINCIPAL, MOBLIE, 
+      MEMO, URL, CREATETIME, 
+      EDITTIME, STATE, MATERIALTYPE,SID
+      )
+    values (#{id,jdbcType=VARCHAR}, #{creater,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{code,jdbcType=VARCHAR}, #{principal,jdbcType=VARCHAR}, #{moblie,jdbcType=VARCHAR}, 
+      #{memo,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{edittime,jdbcType=TIMESTAMP}, #{state,jdbcType=DECIMAL}, #{materialtype,jdbcType=VARCHAR}
+      ,#{sid,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.system.Assets" >
+    insert into SYS_ASSETS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="creater != null" >
+        CREATER,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="code != null" >
+        CODE,
+      </if>
+      <if test="principal != null" >
+        PRINCIPAL,
+      </if>
+      <if test="moblie != null" >
+        MOBLIE,
+      </if>
+      <if test="memo != null" >
+        MEMO,
+      </if>
+      <if test="url != null" >
+        URL,
+      </if>
+      <if test="createtime != null" >
+        CREATETIME,
+      </if>
+      <if test="edittime != null" >
+        EDITTIME,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="materialtype != null" >
+        MATERIALTYPE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="principal != null" >
+        #{principal,jdbcType=VARCHAR},
+      </if>
+      <if test="moblie != null" >
+        #{moblie,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null" >
+        #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=DATE},
+      </if>
+      <if test="edittime != null" >
+        #{edittime,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="materialtype != null" >
+        #{materialtype,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.system.Assets" >
+    update SYS_ASSETS
+    <set >
+      <if test="creater != null" >
+        CREATER = #{creater,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        CODE = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="principal != null" >
+        PRINCIPAL = #{principal,jdbcType=VARCHAR},
+      </if>
+      <if test="moblie != null" >
+        MOBLIE = #{moblie,jdbcType=VARCHAR},
+      </if>
+      <if test="memo != null" >
+        MEMO = #{memo,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        URL = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        CREATETIME = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="edittime != null" >
+        EDITTIME = #{edittime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=DECIMAL},
+      </if>
+      <if test="materialtype != null" >
+        MATERIALTYPE = #{materialtype,jdbcType=VARCHAR},
+      </if>
+       <if test="sid != null" >
+       SID=#{sid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.system.Assets" >
+    update SYS_ASSETS
+    set CREATER = #{creater,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      CODE = #{code,jdbcType=VARCHAR},
+      PRINCIPAL = #{principal,jdbcType=VARCHAR},
+      MOBLIE = #{moblie,jdbcType=VARCHAR},
+      MEMO = #{memo,jdbcType=VARCHAR},
+      URL = #{url,jdbcType=VARCHAR},
+      CREATETIME = #{createtime,jdbcType=DATE},
+      EDITTIME = #{edittime,jdbcType=DATE},
+      STATE = #{state,jdbcType=DECIMAL},
+      MATERIALTYPE = #{materialtype,jdbcType=VARCHAR},
+      SID=#{sid,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="selfDispatch" name="自主调度" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <endEvent id="SDdistrictEnd" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.benqzl.core.activiti.CompleteDispatchListener"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
+    <userTask id="districtAuto" name="执行部门请示">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.benqzl.core.activiti.DistrictListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow19" sourceRef="startevent1" targetRef="districtAuto"></sequenceFlow>
+    <userTask id="leadertask" name="批准并下发调度令" activiti:formKey="fcc4398f-7b85-4352-9267-060d90cd6826">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.benqzl.core.activiti.DispatchListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow20" sourceRef="districtAuto" targetRef="leadertask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${order==true}]]></conditionExpression>
+    </sequenceFlow>
+    <callActivity id="callactivity" name="所调度实施" calledElement="districtDispath">
+      <extensionElements>
+        <activiti:in source="objId" target="objId"></activiti:in>
+        <activiti:in source="departmentId" target="departmentId"></activiti:in>
+        <activiti:in source="type" target="type"></activiti:in>
+      </extensionElements>
+      <multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${departmentList}" activiti:elementVariable="departmentId"></multiInstanceLoopCharacteristics>
+    </callActivity>
+    <sequenceFlow id="flow21" sourceRef="leadertask" targetRef="callactivity">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${order==true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow22" sourceRef="callactivity" targetRef="SDdistrictEnd"></sequenceFlow>
+    <sequenceFlow id="flow23" sourceRef="districtAuto" targetRef="SDdistrictEnd">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${order==false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow24" sourceRef="leadertask" targetRef="SDdistrictEnd">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${order==false}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_selfDispatch">
+    <bpmndi:BPMNPlane bpmnElement="selfDispatch" id="BPMNPlane_selfDispatch">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="30.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="SDdistrictEnd" id="BPMNShape_SDdistrictEnd">
+        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="420.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="districtAuto" id="BPMNShape_districtAuto">
+        <omgdc:Bounds height="55.0" width="105.0" x="85.0" y="100.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="leadertask" id="BPMNShape_leadertask">
+        <omgdc:Bounds height="55.0" width="105.0" x="85.0" y="200.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="callactivity" id="BPMNShape_callactivity">
+        <omgdc:Bounds height="55.0" width="105.0" x="85.0" y="300.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
+        <omgdi:waypoint x="137.0" y="65.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="100.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow20" id="BPMNEdge_flow20">
+        <omgdi:waypoint x="137.0" y="155.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="200.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow21" id="BPMNEdge_flow21">
+        <omgdi:waypoint x="137.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="300.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow22" id="BPMNEdge_flow22">
+        <omgdi:waypoint x="137.0" y="355.0"></omgdi:waypoint>
+        <omgdi:waypoint x="137.0" y="420.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow23" id="BPMNEdge_flow23">
+        <omgdi:waypoint x="190.0" y="127.0"></omgdi:waypoint>
+        <omgdi:waypoint x="218.0" y="127.0"></omgdi:waypoint>
+        <omgdi:waypoint x="218.0" y="437.0"></omgdi:waypoint>
+        <omgdi:waypoint x="155.0" y="437.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow24" id="BPMNEdge_flow24">
+        <omgdi:waypoint x="85.0" y="227.0"></omgdi:waypoint>
+        <omgdi:waypoint x="47.0" y="228.0"></omgdi:waypoint>
+        <omgdi:waypoint x="47.0" y="437.0"></omgdi:waypoint>
+        <omgdi:waypoint x="120.0" y="437.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

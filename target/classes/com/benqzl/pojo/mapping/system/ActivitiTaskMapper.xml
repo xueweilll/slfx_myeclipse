@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.system.ActivitiTaskMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.system.ActivitiTask" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="TASKID" property="taskid" jdbcType="VARCHAR" />
+    <result column="TASKUSERID" property="taskuserid" jdbcType="VARCHAR" />
+    <result column="PROCESSDEFINITIONID" property="processdefinitionid" jdbcType="VARCHAR" />
+    <result column="EDITUSERID" property="edituserid" jdbcType="VARCHAR" />
+    <result column="CREATETIME" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="EDITTIME" property="edittime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, TASKID, TASKUSERID, PROCESSDEFINITIONID, EDITUSERID, CREATETIME, EDITTIME
+  </sql>
+  <select id="selectUser" resultType="java.lang.String" parameterType="java.util.Map" >
+    select 
+    	taskuserid
+    from SYS_ACTIVITI_TASK
+    where  processdefinitionid = #{pid,jdbcType=VARCHAR} 
+    <if test="tid !=null"> and taskid in
+    	(<foreach collection="tid" item="item" index="index"
+			separator="union all">
+			(select #{item,jdbcType=VARCHAR} from dual)
+		</foreach>)
+	</if>
+  </select>
+  <select id="selectTaskIDs" resultType="java.lang.String" parameterType="java.util.Map" >
+    select 
+    	TaskID
+    from SYS_ACTIVITI_TASK
+    where  processdefinitionid = #{pid,jdbcType=VARCHAR} and TaskUserID=#{uid,jdbcType=VARCHAR}
+  </select>
+  <select id="selectUserAll" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from SYS_ACTIVITI_TASK
+    where  processdefinitionid = #{pid,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from SYS_ACTIVITI_TASK
+    where processdefinitionid = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    insert into SYS_ACTIVITI_TASK (ID, TASKID, TASKUSERID, 
+      PROCESSDEFINITIONID, EDITUSERID, CREATETIME, 
+      EDITTIME)
+    <foreach collection="list" item="item" index="index" separator ="union all" >  
+      (select #{item.id,jdbcType=VARCHAR}, #{item.taskid,jdbcType=VARCHAR}, #{item.taskuserid,jdbcType=VARCHAR},#{item.processdefinitionid,jdbcType=VARCHAR}, 
+      #{item.edituserid,jdbcType=VARCHAR},#{item.createtime,jdbcType=TIMESTAMP},#{item.edittime,jdbcType=TIMESTAMP}  from dual) 
+    </foreach>
+  </insert>
+  <select id="selectMaxCode"  resultType="java.lang.String" >
+		<!-- <selectKey resultType="String" keyProperty="code" order="BEFORE">
+		   select seq_newscode.nextVal  from dual
+  		</selectKey> -->
+  		<!-- select CONCAT(#{prefix},lpad(seq_newscode.nextVal,4,0)) from dual -->
+  		select  lpad(seq_newscode.nextVal,4,0) from dual
+	</select>
+	
+	
+	<select id="procedureExc" statementType="CALLABLE">  
+	<![CDATA[  
+	    {call indexchange}  
+	]]>  
+	</select>  
+	
+</mapper>

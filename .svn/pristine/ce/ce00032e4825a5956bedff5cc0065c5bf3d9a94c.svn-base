@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.oa.FileShareMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.oa.FileShare">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="FILESID" property="filesid" jdbcType="VARCHAR" />
+		<result column="SHAREUSERID" property="shareuserid" jdbcType="VARCHAR" />
+		<result column="SHAREDATE" property="sharedate" jdbcType="DATE" />
+	</resultMap>
+
+
+	<resultMap type="com.benqzl.pojo.oa.FileShare" id="BaseResultMap1">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="FILESID" property="filesid" jdbcType="VARCHAR" />
+		<result column="SHAREUSERID" property="shareuserid" jdbcType="VARCHAR" />
+		<result column="SHAREDATE" property="sharedate" jdbcType="TIMESTAMP" />
+		<association property="user" javaType="com.benqzl.pojo.system.User">
+			<id property="userid" column="SHAREUSERID" />
+			<result property="username" column="USERNAME" />
+		</association>
+		<association property="files" javaType="com.benqzl.pojo.oa.Files">
+			<id property="id" column="FILESID" />
+			<result property="name" column="FILESNAME" />
+			<result property="uploader" column="UPLOADER" />
+			<result property="uploadroute" column="UPLOADROUTE" />
+		</association>
+	</resultMap>
+
+
+	<resultMap type="com.benqzl.pojo.oa.FileShare" id="BaseResultMap2">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="FILESID" property="filesid" jdbcType="VARCHAR" />
+		<result column="SHAREUSERID" property="shareuserid" jdbcType="VARCHAR" />
+		<result column="SHAREDATE" property="sharedate" jdbcType="TIMESTAMP" />
+		<association property="files" javaType="com.benqzl.pojo.oa.Files">
+			<id property="id" column="FILESID" />
+			<result property="name" column="FILESNAME" />
+			<result property="uploader" column="UPLOADER" />
+			<result property="uploadroute" column="UPLOADROUTE" />
+			<association property="user" javaType="com.benqzl.pojo.system.User">
+				<id property="userid" column="UPLOADER" />
+				<result property="username" column="USERNAME" />
+			</association>
+		</association>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID, FILESID, SHAREUSERID, SHAREDATE
+	</sql>
+
+	<select id="findMyShare" resultMap="BaseResultMap1"
+		parameterType="java.util.Map">
+		SELECT B.*,S.USERNAME AS USERNAME,O.NAME AS FILESNAME,O.UPLOADER AS UPLOADER,O.UPLOADROUTE AS UPLOADROUTE FROM
+		(SELECT
+		A.*,ROWNUM RN FROM(
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM OA_FILES_SHARE M
+		<where>
+			<if test="starttime != null">
+				and M.SHAREDATE &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and M.SHAREDATE &lt;= #{endtime}
+			</if>
+		</where>
+		) A
+
+		WHERE ROWNUM &lt;=#{p2}) B
+		JOIN SYS_USER S ON
+		B.SHAREUSERID = S.USERID
+		JOIN OA_FILES O ON B.FILESID = O.ID
+		where RN
+		&gt;
+		#{p1}
+		<!-- AND O.UPLOADER = #{uploader,JDBCTYPE=VARCHAR} -->
+		ORDER BY B.SHAREDATE
+		DESC
+	</select>
+
+	<select id="findShareToMe" resultMap="BaseResultMap2"
+		parameterType="java.util.Map">
+		SELECT B.*,S.USERNAME AS USERNAME,O.NAME AS FILESNAME,O.UPLOADER AS UPLOADER,O.UPLOADROUTE AS UPLOADROUTE FROM
+		(SELECT
+		A.*,ROWNUM RN FROM(
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM OA_FILES_SHARE M
+		<where>
+			<if test="starttime != null">
+				and M.SHAREDATE &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and M.SHAREDATE &lt;= #{endtime}
+			</if>
+		</where>
+		) A
+
+		WHERE ROWNUM &lt;=#{p2}) B
+		JOIN OA_FILES O ON
+		B.FILESID = O.ID
+		JOIN SYS_USER S ON O.UPLOADER = S.USERID
+		where RN &gt;
+		#{p1}
+		<!-- AND B.SHAREUSERID = #{shareuserid,JDBCTYPE=VARCHAR} -->
+		ORDER BY
+		B.SHAREDATE
+		DESC
+	</select>
+
+	<select id="pageCount" resultType="java.lang.Integer"
+		parameterType="java.util.Map">
+		SELECT
+		COUNT(*) AS NUM
+		FROM OA_FILES_SHARE M
+		<where>
+			<if test="starttime != null">
+				and M.SHAREDATE &gt;=#{starttime}
+			</if>
+			<if test="endtime != null">
+				and M.SHAREDATE &lt;= #{endtime}
+			</if>
+		</where>
+	</select>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from OA_FILES_SHARE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+		delete from
+		OA_FILES_SHARE
+		where ID = #{id,jdbcType=VARCHAR}
+	</delete>
+	<delete id="deleteFilesShareByFilesId" parameterType="java.lang.String">
+		delete from
+		OA_FILES_SHARE
+		where FILESID = #{id,jdbcType=VARCHAR}
+	</delete>
+	
+	<insert id="insert" parameterType="com.benqzl.pojo.oa.FileShare">
+		insert into OA_FILES_SHARE
+		(ID, FILESID, SHAREUSERID,
+		SHAREDATE)
+		values (#{id,jdbcType=VARCHAR},
+		#{filesid,jdbcType=VARCHAR},
+		#{shareuserid,jdbcType=VARCHAR},
+		#{sharedate,jdbcType=TIMESTAMP})
+	</insert>
+	<insert id="insertSelective" parameterType="com.benqzl.pojo.oa.FileShare">
+		insert into OA_FILES_SHARE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="filesid != null">
+				FILESID,
+			</if>
+			<if test="shareuserid != null">
+				SHAREUSERID,
+			</if>
+			<if test="sharedate != null">
+				SHAREDATE,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="filesid != null">
+				#{filesid,jdbcType=VARCHAR},
+			</if>
+			<if test="shareuserid != null">
+				#{shareuserid,jdbcType=VARCHAR},
+			</if>
+			<if test="sharedate != null">
+				#{sharedate,jdbcType=TIMESTAMP},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.oa.FileShare">
+		update OA_FILES_SHARE
+		<set>
+			<if test="filesid != null">
+				FILESID = #{filesid,jdbcType=VARCHAR},
+			</if>
+			<if test="shareuserid != null">
+				SHAREUSERID = #{shareuserid,jdbcType=VARCHAR},
+			</if>
+			<if test="sharedate != null">
+				SHAREDATE = #{sharedate,jdbcType=DATE},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.oa.FileShare">
+		update
+		OA_FILES_SHARE
+		set FILESID = #{filesid,jdbcType=VARCHAR},
+		SHAREUSERID =
+		#{shareuserid,jdbcType=VARCHAR},
+		SHAREDATE =
+		#{sharedate,jdbcType=TIMESTAMP}
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

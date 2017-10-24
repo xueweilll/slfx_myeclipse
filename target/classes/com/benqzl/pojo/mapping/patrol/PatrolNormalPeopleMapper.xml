@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.patrol.PatrolNormalPeopleMapper" >
+  <resultMap id="BaseResultMap" type="com.benqzl.pojo.patrol.PatrolNormalPeople" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+    <result column="HANDLER" property="handler" jdbcType="VARCHAR" />
+    <result column="HANDLERTIME" property="handlertime" jdbcType="DATE" />
+    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+  </resultMap>
+   <resultMap id="BaseResultMap1" type="com.benqzl.pojo.patrol.PatrolNormalPeople" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="PATROLID" property="patrolid" jdbcType="VARCHAR" />
+    <result column="HANDLER" property="handler" jdbcType="VARCHAR" />
+    <result column="HANDLERTIME" property="handlertime" jdbcType="DATE" />
+    <result column="TYPE" property="type" jdbcType="DECIMAL" />
+    <association property="user" javaType="com.benqzl.pojo.system.User">
+    <id property="id" column="USERID"/>
+    <result property="employeeid" column="EMPLOYEEID"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, PATROLID, HANDLER, HANDLERTIME, TYPE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PL_NORMAL_PEOPLE
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PL_NORMAL_PEOPLE
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByPatrolId" parameterType="java.lang.String">
+   delete from pl_normal_people
+   where patrolid=#{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.benqzl.pojo.patrol.PatrolNormalPeople" >
+    insert into PL_NORMAL_PEOPLE (ID, PATROLID, HANDLER, 
+      HANDLERTIME, TYPE)
+    values (#{id,jdbcType=VARCHAR}, #{patrolid,jdbcType=VARCHAR}, #{handler,jdbcType=VARCHAR}, 
+      #{handlertime,jdbcType=DATE}, #{type,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.benqzl.pojo.patrol.PatrolNormalPeople" >
+    insert into PL_NORMAL_PEOPLE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="patrolid != null" >
+        PATROLID,
+      </if>
+      <if test="handler != null" >
+        HANDLER,
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME,
+      </if>
+      <if test="type != null" >
+        TYPE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="patrolid != null" >
+        #{patrolid,jdbcType=VARCHAR},
+      </if>
+      <if test="handler != null" >
+        #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        #{handlertime,jdbcType=DATE},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.benqzl.pojo.patrol.PatrolNormalPeople" >
+    update PL_NORMAL_PEOPLE
+    <set >
+      <if test="patrolid != null" >
+        PATROLID = #{patrolid,jdbcType=VARCHAR},
+      </if>
+      <if test="handler != null" >
+        HANDLER = #{handler,jdbcType=VARCHAR},
+      </if>
+      <if test="handlertime != null" >
+        HANDLERTIME = #{handlertime,jdbcType=DATE},
+      </if>
+      <if test="type != null" >
+        TYPE = #{type,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.benqzl.pojo.patrol.PatrolNormalPeople" >
+    update PL_NORMAL_PEOPLE
+    set PATROLID = #{patrolid,jdbcType=VARCHAR},
+      HANDLER = #{handler,jdbcType=VARCHAR},
+      HANDLERTIME = #{handlertime,jdbcType=DATE},
+      TYPE = #{type,jdbcType=DECIMAL}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <insert id="inseinsertPatrolNormalPeople" parameterType="com.benqzl.pojo.patrol.PatrolNormalPeople">
+       		 insert into PL_NORMAL_PEOPLE(id,PatrolID,Handler)
+  		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select #{item.id,jdbcType=VARCHAR}, 
+			#{item.patrolid,jdbcType=VARCHAR},
+			#{item.handler,jdbcType=VARCHAR}
+			 from dual)
+		</foreach>
+  </insert>
+  <select id="getfindUser" resultType="com.benqzl.pojo.patrol.PatrolNormalPeople" parameterType="java.lang.String" >
+      select u.employeeid  as EMPLOYEEID ,p.handler as HANDLER from
+      PL_NORMAL_PEOPLE p
+      left join 
+      sys_user u on p.handler =u.userid
+      where p.PatrolID=#{id,jdbcType=VARCHAR}
+  </select>
+</mapper>

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.benqzl.dao.water.PumprunItemsMapper">
+	<resultMap id="BaseResultMap" type="com.benqzl.pojo.water.PumprunItems">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PID" property="pid" jdbcType="VARCHAR" />
+		<result column="STARTTIME" property="starttime" jdbcType="TIMESTAMP" />
+		<result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<resultMap type="com.benqzl.pojo.system.Station" id="BaseResultMap_Station">
+		<id column="SSID" property="id" jdbcType="VARCHAR" />
+		<result column="SSNAME" property="name" jdbcType="VARCHAR" />
+		<collection property="units" ofType="com.benqzl.pojo.system.Unit">
+			<id column="UUID" property="id" jdbcType="VARCHAR" />
+			<result column="UUNAME" property="name" jdbcType="VARCHAR" />
+			<result column="DESIGNDISCHARGE" property="designdischarge"
+				jdbcType="DECIMAL" />
+			<collection property="items" ofType="com.benqzl.pojo.water.PumprunItems">
+				<id column="IID" property="id" jdbcType="VARCHAR" />
+				<result column="PID" property="pid" jdbcType="VARCHAR" />
+				<result column="STARTTIME" property="starttime" jdbcType="TIMESTAMP" />
+				<result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+			</collection>
+		</collection>
+	</resultMap>
+	<resultMap type="com.benqzl.pojo.system.Unit" id="BaseResultMap_Unit">
+		<id column="UUID" property="id" jdbcType="VARCHAR" />
+		<result column="UUNAME" property="name" jdbcType="VARCHAR" />
+		<result column="DESIGNDISCHARGE" property="designdischarge"
+			jdbcType="DECIMAL" />
+		<collection property="items" ofType="com.benqzl.pojo.water.PumprunItems">
+			<id column="IID" property="id" jdbcType="VARCHAR" />
+			<result column="PID" property="pid" jdbcType="VARCHAR" />
+			<result column="STARTTIME" property="starttime" jdbcType="TIMESTAMP" />
+			<result column="ENDTIME" property="endtime" jdbcType="TIMESTAMP" />
+		</collection>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, PID, STARTTIME, ENDTIME
+	</sql>
+	<sql id="Base_Column_List_Station">
+		<!-- 枢纽 -->
+		ss.ID as SSID,ss.NAME as SSNAME,
+		<!-- 机组 -->
+		u.ID as UUID,u.NAME as UUNAME ,u.DESIGNDISCHARGE as DESIGNDISCHARGE,
+		<!-- 明细 -->
+		s.ID as IID, s.PID as PID, s.STARTTIME as STARTTIME, s.ENDTIME as
+		ENDTIME
+	</sql>
+	<sql id="Base_Column_List_Unit">
+		<!-- 机组 -->
+		u.ID as UUID,u.NAME as UUNAME ,u.DESIGNDISCHARGE as DESIGNDISCHARGE,
+		<!-- 明细 -->
+		s.ID as IID, s.PID as PID, s.STARTTIME as STARTTIME, s.ENDTIME as
+		ENDTIME
+	</sql>
+	<select id="findAllByTime" resultMap="BaseResultMap_Station"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List_Station" />
+		from (select * from sys_station where isdel=0
+		<if test="sids !=null">
+			and id in(
+			<foreach collection="sids" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>)
+		</if>
+		) ss
+		join (select * from sys_unit where isdel=0
+		<if test="uids !=null">
+			and id in
+			(<foreach collection="uids" item="item" index="index"
+				separator="union all">
+				(select #{item,jdbcType=VARCHAR} from dual)
+			</foreach>)
+		</if>
+		) u on ss.id = u.sid
+		left join
+		(select * from PUMPRUN_ITEMS
+		<if test="starttime !=null and endtime !=null">
+			where
+			<!-- 开机不在，停机在 -->
+			(endtime &lt;#{endtime,jdbcType=TIMESTAMP} and endtime
+			&gt;#{starttime,jdbcType=TIMESTAMP} and starttime
+			&lt;#{starttime,jdbcType=TIMESTAMP}) or
+			<!-- 开机在，停机不在 -->
+			(endtime &gt;#{endtime,jdbcType=TIMESTAMP} and starttime
+			&gt;#{starttime,jdbcType=TIMESTAMP} and starttime
+			&lt;#{endtime,jdbcType=TIMESTAMP}) or
+			<!-- 开机小于开始时间，停机大于结束时间 -->
+			(starttime &lt;#{starttime,jdbcType=TIMESTAMP} and endtime
+			&gt;#{endtime,jdbcType=TIMESTAMP}) or
+			<!-- 开机在，停机也在 -->
+			(starttime &gt;#{starttime,jdbcType=TIMESTAMP} and starttime
+			&lt;#{endtime,jdbcType=TIMESTAMP} and
+			endtime
+			&gt;#{starttime,jdbcType=TIMESTAMP} and endtime
+			&lt;#{endtime,jdbcType=TIMESTAMP})
+		</if>
+		)
+		s on u.id = s.pid
+		order by ss.levels ,u.code asc
+	</select>
+	<select id="findByUnit" resultMap="BaseResultMap_Unit"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List_Unit" />
+		from (select * from sys_unit where isdel=0
+		<if test="uid !=null">
+		and id=#{uid,jdbcType=VARCHAR} </if>
+		) u  left  join
+		(select * from PUMPRUN_ITEMS
+		<if test="starttime !=null and endtime !=null">
+			where
+			<!-- 开机不在，停机在 -->
+			(endtime &lt;#{endtime,jdbcType=TIMESTAMP} and endtime
+			&gt;#{starttime,jdbcType=TIMESTAMP} and starttime
+			&lt;#{starttime,jdbcType=TIMESTAMP}) or
+			<!-- 开机在，停机不在 -->
+			(endtime &gt;#{endtime,jdbcType=TIMESTAMP} and starttime
+			&gt;#{starttime,jdbcType=TIMESTAMP} and starttime
+			&lt;#{endtime,jdbcType=TIMESTAMP} )or
+			<!-- 开机小于开始时间，停机大于结束时间 -->
+			(starttime &lt;#{starttime,jdbcType=TIMESTAMP} and endtime
+			&gt;#{endtime,jdbcType=TIMESTAMP}) or
+			<!-- 开机在，停机也在 -->
+			(starttime &gt;#{starttime,jdbcType=TIMESTAMP} and starttime
+			&lt;#{endtime,jdbcType=TIMESTAMP} and
+			endtime
+			&gt;#{starttime,jdbcType=TIMESTAMP} and endtime
+			&lt;#{endtime,jdbcType=TIMESTAMP})
+		</if>
+		)
+		s on u.id = s.pid
+	</select>
+
+	<insert id="insert" parameterType="java.util.List">
+		insert into PUMPRUN_ITEMS (ID, PID, STARTTIME,ENDTIME)
+		<foreach collection="list" item="item" index="index"
+			separator="union all">
+			(select
+			#{item.id,jdbcType=VARCHAR},#{item.pid,jdbcType=VARCHAR},
+			#{item.starttime,jdbcType=TIMESTAMP},#{item.endtime,jdbcType=TIMESTAMP} from dual)
+		</foreach>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="java.util.Map">
+		update
+		PUMPRUN_ITEMS
+		set
+		ENDTIME =
+		#{endtime,jdbcType=TIMESTAMP}
+		where id
+		in(
+		<foreach collection="ids" item="item" index="index" separator="union all">
+			select s.id
+			from (select id
+			from PUMPRUN_ITEMS
+			where pid = (select
+			#{item,jdbcType=VARCHAR} from dual)
+			order by starttime desc) s
+			where rownum
+			=1
+		</foreach>
+		)
+	</update>
+</mapper>

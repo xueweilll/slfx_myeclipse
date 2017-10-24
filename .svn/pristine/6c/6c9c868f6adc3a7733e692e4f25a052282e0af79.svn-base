@@ -1,0 +1,49 @@
+#log4j.rootLogger = DEBUG,stdout,file,errorfile
+####### \u63A7\u5236\u53F0\u8F93\u51FA stdout ########
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p %c{1}:%L - %m%n
+
+#\u7CFB\u7EDF\u65E5\u5FD7
+log4j.appender.file=org.apache.log4j.DailyRollingFileAppender 
+log4j.appender.file.File=${catalina.home}/logs/slfx/slfx-info.log
+log4j.appender.file.DatePattern=_yyyy-MM-dd
+log4j.appender.file.Append = false 
+log4j.appender.file.Threshold = INFO
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p %c{1}:%L - %m%n
+
+#\u7CFB\u7EDF\u9519\u8BEF\u65E5\u5FD7
+log4j.appender.errorfile=org.apache.log4j.DailyRollingFileAppender  
+log4j.appender.errorfile.File=${catalina.home}/logs/slfx/slfx-error.log
+log4j.appender.errorfile.Append = true 
+log4j.appender.errorfile.DatePattern=_yyyy-MM-dd
+log4j.appender.errorfile.Threshold = ERROR 
+log4j.appender.errorfile.layout=org.apache.log4j.PatternLayout
+log4j.appender.errorfile.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p %c{1}:%L - %m%n
+
+#\u7EBF\u7A0B\u65E5\u5FD7\u4E00\u822C\u8BB0\u5165\u5230\u53E6\u4E00\u4E2A\u6587\u4EF6\uFF0C\u7EBF\u7A0B\u65E5\u5FD7\u4E0E\u4E3B\u7EBF\u7A0B\u65E5\u5FD7\u57FA\u672C\u4E0A\u6CA1\u6709\u4EC0\u4E48\u903B\u8F91\u5173\u7CFB
+#\u7EBF\u7A0B\u65E5\u5FD7
+log4j.logger.threadlogger=DEBUG,THREADLOGER
+log4j.additivity.threadlogger=true
+log4j.appender.THREADLOGER=org.apache.log4j.RollingFileAppender
+log4j.appender.THREADLOGER.encoding=UTF-8
+log4j.appender.THREADLOGER.File=${catalina.home}/logs/whsl/threadLog.log
+#log4j.appender.THREADLOGER.MaxFileSize=2000KB
+log4j.appender.THREADLOGER.MaxBackupIndex=10
+log4j.appender.THREADLOGER.layout=org.apache.log4j.PatternLayout
+log4j.appender.THREADLOGER.layout.ConversionPattern=[%d{yyy-MM-dd HH:mm:ss.SSS}] [%p] [%t] [%c] [%l] - [%m]%n
+
+
+##\u63A7\u5236\u53F0\u65E5\u5FD7\u8F93\u51FA
+#log4j.logger.outputInfo=INFO,stdout
+##\u7CFB\u7EDF\u65E5\u5FD7\u8F93\u51FA
+#log4j.logger.sysInfo=INFO,stdout
+##\u7CFB\u7EDF\u9519\u8BEF\u65E5\u5FD7\u8F93\u51FA
+#log4j.logger.sysError=ERROR,stdout
+
+#log4j.logger.com.test.controller=DEBUG,stdout
+#log4j.logger.com.test.service=DEBUG,stdout
+log4j.logger.com.benqzl.dao=DEBUG,stdout,file
+log4j.appender.logfile.encoding=UTF-8
